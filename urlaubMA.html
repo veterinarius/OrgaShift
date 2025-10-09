@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urlaubs- und Krankenliste</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007AFF;
+            text-decoration: none; 
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1d1d1f;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #007AFF;
+        }
+
+                .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .login-btn {
+            color: #1d1d1f;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+        }
+
+        .signup-btn {
+            background: #007AFF;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .signup-btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-section {
+            margin-bottom: 20px;
+        }
+
+        .control-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.3em;
+        }
+
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        input[type="text"], input[type="date"], select {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
+        }
+
+        .employee-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .employee-name {
+            font-size: 1.5em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .month-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 4px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .month-days {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 5px;
+            min-height: 120px;
+            position: relative;
+        }
+
+        .day-slot {
+            width: 100%;
+            height: 20px;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .day-slot:hover {
+            transform: scale(1.05);
+        }
+
+        .vacation {
+            background: linear-gradient(135deg, #4ecdc4 0%, #26d0ce 100%);
+            color: white;
+        }
+
+        .sick {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 15px;
+            border-radius: 5px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 8px 15px;
+            border-radius: 10px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .data-management {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .data-management h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .data-management .form-group {
+            justify-content: center;
+        }
+
+        .storage-info {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 5px;
+            }
+
+            .month-header {
+                font-size: 0.75em;
+                padding: 6px 2px;
+            }
+
+            .month-days {
+                min-height: 100px;
+            }
+
+            .day-slot {
+                height: 15px;
+                font-size: 0.6em;
+            }
+
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .employee-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats, .legend {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .controls, .employee-card, .data-management {
+                padding: 15px;
+            }
+        }
+
+        .no-employees {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+
+     <!-- Navigation -->
+    <nav>
+        <div class="nav-container">         
+             <a href="welcome.html" class="logo">OrgaShift</a>
+            <ul class="nav-links">
+                <li><a href="#products">Produkte</a></li>
+                <li><a href="#explore">Erkunden</a></li>
+                <li><a href="#help">Hilfe</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+                <li><a href="pricing.html">Preise</a></li>
+            </ul>
+             <div class="nav-buttons">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="welcome.html" class="signup-btn">Kostenlos starten</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>📅 Urlaubs- & Krankenliste</h1>
+            <p class="subtitle">Mitarbeiterverwaltung für das Jahr 2025</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-section">
+                <h3>👤 Mitarbeiter hinzufügen</h3>
+                <div class="form-group">
+                    <input type="text" id="employeeName" placeholder="Name des Mitarbeiters" />
+                    <button onclick="addEmployee()">Hinzufügen</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>📋 Urlaub/Krankheit eintragen</h3>
+                <div class="form-group">
+                    <select id="employeeSelect">
+                        <option value="">Mitarbeiter wählen...</option>
+                    </select>
+                    <input type="date" id="startDate" />
+                    <input type="date" id="endDate" />
+                    <select id="entryType">
+                        <option value="vacation">Urlaub</option>
+                        <option value="sick">Krankheit</option>
+                    </select>
+                    <button onclick="addEntry()" class="btn-secondary">Eintragen</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-management">
+            <h3>💾 Datenverwaltung</h3>
+            <div class="form-group">
+                <button onclick="exportData()" class="btn-secondary">Daten exportieren</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                <button onclick="document.getElementById('importFile').click()" class="btn-secondary">Daten importieren</button>
+                <button onclick="clearAllData()" class="btn-danger">Alle Daten löschen</button>
+            </div>
+            <div class="storage-info">
+                💡 Alle Daten werden automatisch in Ihrem Browser gespeichert und bleiben auch nach dem Neuladen erhalten.
+            </div>
+        </div>
+
+        <div id="employeeList">
+            <div class="no-employees">
+                Noch keine Mitarbeiter hinzugefügt. Fügen Sie oben einen Mitarbeiter hinzu, um zu beginnen.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const months = [
+            'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+        ];
+
+        const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; // 2025 ist kein Schaltjahr, aber wir lassen 29 für Februar
+        
+        let employees = [];
+        let entries = {};
+
+        // Lokale Speicherfunktionen
+        function saveToLocalStorage() {
+            const data = {
+                employees: employees,
+                entries: entries,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('vacationTracker', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('vacationTracker');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    employees = data.employees || [];
+                    entries = data.entries || {};
+                    return true;
+                } catch (e) {
+                    console.error('Fehler beim Laden der Daten:', e);
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        function addEmployee() {
+            const name = document.getElementById('employeeName').value.trim();
+            if (!name) {
+                alert('Bitte geben Sie einen Namen ein.');
+                return;
+            }
+            
+            if (employees.includes(name)) {
+                alert('Dieser Mitarbeiter existiert bereits.');
+                return;
+            }
+
+            employees.push(name);
+            entries[name] = [];
+            document.getElementById('employeeName').value = '';
+            
+            saveToLocalStorage();
+            updateEmployeeSelect();
+            renderEmployees();
+        }
+
+        function updateEmployeeSelect() {
+            const select = document.getElementById('employeeSelect');
+            select.innerHTML = '<option value="">Mitarbeiter wählen...</option>';
+            
+            employees.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = employee;
+                option.textContent = employee;
+                select.appendChild(option);
+            });
+        }
+
+        function addEntry() {
+            const employee = document.getElementById('employeeSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const type = document.getElementById('entryType').value;
+
+            if (!employee || !startDate || !endDate) {
+                alert('Bitte füllen Sie alle Felder aus.');
+                return;
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (start > end) {
+                alert('Das Startdatum muss vor dem Enddatum liegen.');
+                return;
+            }
+
+            entries[employee].push({ start: startDate, end: endDate, type });
+            
+            // Felder zurücksetzen
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            
+            saveToLocalStorage();
+            renderEmployees();
+        }
+
+        function removeEmployee(name) {
+            if (confirm(`Möchten Sie ${name} wirklich entfernen?`)) {
+                employees = employees.filter(emp => emp !== name);
+                delete entries[name];
+                saveToLocalStorage();
+                updateEmployeeSelect();
+                renderEmployees();
+            }
+        }
+
+        function exportData() {
+            const data = {
+                employees: employees,
+                entries: entries,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `urlaubs-krankenliste-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.employees && data.entries) {
+                        if (confirm('Möchten Sie die vorhandenen Daten durch die importierten Daten ersetzen?')) {
+                            employees = data.employees;
+                            entries = data.entries;
+                            saveToLocalStorage();
+                            updateEmployeeSelect();
+                            renderEmployees();
+                            alert('Daten erfolgreich importiert!');
+                        }
+                    } else {
+                        alert('Ungültiges Dateiformat!');
+                    }
+                } catch (error) {
+                    alert('Fehler beim Importieren der Daten: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        function clearAllData() {
+            if (confirm('Möchten Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+                if (confirm('Sind Sie sicher? Alle Mitarbeiter und Einträge werden gelöscht.')) {
+                    employees = [];
+                    entries = {};
+                    localStorage.removeItem('vacationTracker');
+                    updateEmployeeSelect();
+                    renderEmployees();
+                    alert('Alle Daten wurden gelöscht.');
+                }
+            }
+        }
+
+        function isDateInRange(date, start, end) {
+            const checkDate = new Date(date);
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            return checkDate >= startDate && checkDate <= endDate;
+        }
+
+        function getEntryForDate(employee, month, day) {
+            const date = `2025-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            for (let entry of entries[employee]) {
+                if (isDateInRange(date, entry.start, entry.end)) {
+                    return entry.type;
+                }
+            }
+            return null;
+        }
+
+        function calculateStats(employee) {
+            let vacationDays = 0;
+            let sickDays = 0;
+
+            entries[employee].forEach(entry => {
+                const start = new Date(entry.start);
+                const end = new Date(entry.end);
+                const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                
+                if (entry.type === 'vacation') {
+                    vacationDays += days;
+                } else {
+                    sickDays += days;
+                }
+            });
+
+            return { vacationDays, sickDays };
+        }
+
+        function renderEmployees() {
+            const container = document.getElementById('employeeList');
+            
+            if (employees.length === 0) {
+                container.innerHTML = `
+                    <div class="no-employees">
+                        Noch keine Mitarbeiter hinzugefügt. Fügen Sie oben einen Mitarbeiter hinzu, um zu beginnen.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = employees.map(employee => {
+                const stats = calculateStats(employee);
+                
+                return `
+                    <div class="employee-card">
+                        <div class="employee-header">
+                            <div class="employee-name">${employee}</div>
+                            <button onclick="removeEmployee('${employee}')" class="btn-danger">
+                                Entfernen
+                            </button>
+                        </div>
+                        
+                        <div class="calendar-grid">
+                            ${months.map((month, monthIndex) => `
+                                <div class="month-header">${month}</div>
+                            `).join('')}
+                            
+                            ${months.map((month, monthIndex) => `
+                                <div class="month-days">
+                                    ${Array.from({length: daysInMonth[monthIndex]}, (_, day) => {
+                                        const currentDate = `2025-${String(monthIndex + 1).padStart(2, '0')}-${String(day + 1).padStart(2, '0')}`;
+                                        const entryType = getEntryForDate(employee, monthIndex, day + 1);
+                                        const className = entryType ? entryType : '';
+                                        const displayText = entryType ? (entryType === 'vacation' ? 'U' : 'K') : (day + 1);
+                                        
+                                        if (entryType) {
+                                            return `<div class="day-slot ${className}"
+                                                        onclick="deleteEntryForDate('${employee}', '${currentDate}')"
+                                                        style="cursor: pointer;">${displayText}</div>`;
+                                        } else {
+                                            return `<div class="day-slot">${displayText}</div>`;
+                                        }
+                                    }).join('')}
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color vacation"></div>
+                                <span>Urlaub (U)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color sick"></div>
+                                <span>Krankheit (K)</span>
+                            </div>
+                        </div>
+
+                        <div class="stats">
+                            <div class="stat-item">📅 Urlaubstage: ${stats.vacationDays}</div>
+                            <div class="stat-item">🏥 Krankheitstage: ${stats.sickDays}</div>
+                            <div class="stat-item">📊 Gesamt: ${stats.vacationDays + stats.sickDays}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Nach der isDateInRange-Funktion einfügen:
+        function deleteEntryForDate(employee, date) {
+            const entries_copy = entries[employee].slice();
+            let modified = false;
+
+            for (let i = 0; i < entries_copy.length; i++) {
+                const entry = entries_copy[i];
+                const start = new Date(entry.start);
+                const end = new Date(entry.end);
+                const checkDate = new Date(date);
+
+                if (isDateInRange(date, entry.start, entry.end)) {
+                    // Wenn der Tag genau der Start- oder Endtag ist
+                    if (start.getTime() === checkDate.getTime() && end.getTime() === checkDate.getTime()) {
+                        entries[employee].splice(i, 1);
+                        modified = true;
+                        break;
+                    }
+                    
+                    // Wenn der Tag am Anfang liegt
+                    if (start.getTime() === checkDate.getTime()) {
+                        entries[employee][i].start = new Date(checkDate.getTime() + 86400000).toISOString().split('T')[0];
+                        modified = true;
+                        break;
+                    }
+                    
+                    // Wenn der Tag am Ende liegt
+                    if (end.getTime() === checkDate.getTime()) {
+                        entries[employee][i].end = new Date(checkDate.getTime() - 86400000).toISOString().split('T')[0];
+                        modified = true;
+                        break;
+                    }
+                    
+                    // Wenn der Tag in der Mitte liegt, teile den Eintrag in zwei
+                    const newEntry1 = {
+                        start: entry.start,
+                        end: new Date(checkDate.getTime() - 86400000).toISOString().split('T')[0],
+                        type: entry.type
+                    };
+                    
+                    const newEntry2 = {
+                        start: new Date(checkDate.getTime() + 86400000).toISOString().split('T')[0],
+                        end: entry.end,
+                        type: entry.type
+                    };
+                    
+                    entries[employee].splice(i, 1, newEntry1, newEntry2);
+                    modified = true;
+                    break;
+                }
+            }
+
+            if (modified) {
+                // Entferne leere Einträge
+                entries[employee] = entries[employee].filter(entry => {
+                    const start = new Date(entry.start);
+                    const end = new Date(entry.end);
+                    return start <= end;
+                });
+                
+                saveToLocalStorage();
+                renderEmployees();
+            }
+        }
+
+        // Beispieldaten hinzufügen (zum Testen)
+        function addSampleData() {
+            employees = ['Anna Müller', 'Max Mustermann', 'Lisa Schmidt'];
+            entries = {
+                'Anna Müller': [
+                    { start: '2025-03-15', end: '2025-03-22', type: 'vacation' },
+                    { start: '2025-07-01', end: '2025-07-14', type: 'vacation' },
+                    { start: '2025-11-05', end: '2025-11-06', type: 'sick' }
+                ],
+                'Max Mustermann': [
+                    { start: '2025-06-20', end: '2025-07-05', type: 'vacation' },
+                    { start: '2025-02-10', end: '2025-02-12', type: 'sick' }
+                ],
+                'Lisa Schmidt': [
+                    { start: '2025-08-10', end: '2025-08-25', type: 'vacation' }
+                ]
+            };
+            saveToLocalStorage();
+            updateEmployeeSelect();
+            renderEmployees();
+        }
+
+        // Initialisierung
+        if (loadFromLocalStorage()) {
+            console.log('Daten aus lokalem Speicher geladen');
+        }
+        updateEmployeeSelect();
+        renderEmployees();
+        
+        // Enter-Taste für Mitarbeiter hinzufügen
+        document.getElementById('employeeName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addEmployee();
+            }
+        });
+        
+        // Uncomment the next line to add sample data for testing:
+        // addSampleData();
+    </script>
+</body>
+</html>

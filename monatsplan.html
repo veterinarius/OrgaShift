@@ -1,0 +1,2320 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monatsplan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #1d1d1f;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #86868b;
+            font-size: 1.1rem;
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+    .input-container input {
+    flex: 2;
+    min-width: 220px;
+    max-width: 600px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #d1d5db;
+    font-size: 1.08rem;
+    background: #fbfbfd;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.07);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    outline: none;
+    font-family: inherit;
+        }
+
+    .input-container select {
+    flex: 2;
+    min-width: 180px;
+    max-width: 400px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #d1d5db;
+    font-size: 1.08rem;
+    background: #fbfbfd;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.07);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    outline: none;
+    font-family: inherit;
+        }
+
+        .input-container select:focus {
+    outline: none;
+    border-color: #007aff;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.13);
+        }
+
+        .input-container input:focus {
+    outline: none;
+    border-color: #007aff;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.13);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #d1d5db;
+    font-size: 1.08rem;
+    background: #fbfbfd;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.07);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    outline: none;
+    font-family: inherit;
+    min-width: 180px;
+    max-width: 400px;
+        }
+
+        .btn-primary {
+            background: #34c759;
+            color: white;
+            outline: none;
+            border-color: #34c759;
+            box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.13);
+        }
+
+        .btn-primary:hover {
+            background: #28a745;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+
+        .btn-secondary {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #e65100;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
+
+        .export-button {
+            margin-left: auto;
+            background: #34c759;
+            color: white;
+        }
+
+        .export-button:hover {
+            background: #28a745;
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+
+        .btn-print {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #e65100;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
+
+        .btn-settings {
+            background: #8e44ad;
+            color: white;
+        }
+
+        .btn-settings:hover {
+            background: #6c3483;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3);
+        }
+
+        .employee-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .employee-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #f2f2f7;
+            padding: 8px 16px;
+            border-radius: 20px;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e5e5ea;
+            transition: all 0.3s ease;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .employee-tag:active {
+            cursor: grabbing;
+        }
+
+        .employee-tag.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            z-index: 1000;
+        }
+
+        .employee-tag.drag-over {
+            background: #007aff;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .employee-tag button {
+            background: none;
+            border: none;
+            color: #86868b;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .employee-tag button:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #1d1d1f;
+        }
+
+        .date-selection {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .date-group label {
+            font-weight: 600;
+            color: #1d1d1f;
+            font-size: 14px;
+        }
+
+        .date-group input[type="date"] {
+            padding: 12px 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #fbfbfd;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .date-group input[type="date"]:focus {
+            outline: none;
+            border-color: #007aff;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .date-info {
+            margin-left: auto;
+            font-size: 14px;
+            color: #86868b;
+            background: #f2f2f7;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #e5e5ea;
+        }
+
+        .schedule-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        .table-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
+            color: #1d1d1f;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table-title:nth-child(3n+1) {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 4px solid #2196f3;
+        }
+
+        .table-title:nth-child(3n+2) {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            border-left: 4px solid #4caf50;
+        }
+
+        .table-title:nth-child(3n+3) {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%);
+            border-left: 4px solid #ff9800;
+        }
+
+        .table-title:first-child {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        th {
+            background: #f2f2f7;
+            padding: 16px 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #1d1d1f;
+            border-bottom: 1px solid #e5e5ea;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #f2f2f7;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        td[contenteditable="true"] {
+            cursor: text;
+            min-width: 80px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        td[contenteditable="true"]:hover {
+            background: #f8f9fa;
+        }
+
+        td[contenteditable="true"]:focus {
+            outline: none;
+            background: white;
+            box-shadow: inset 0 0 0 2px #007aff;
+            border-radius: 8px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .row-number {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #86868b;
+            min-width: 60px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .modal-table th,
+        .modal-table td {
+            border: 1px solid #e5e5ea;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .modal-table th {
+            background: #f2f2f7;
+            font-weight: 600;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e5e5ea;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #f2f2f7;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #007aff;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007AFF;
+            text-decoration: none; 
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1d1d1f;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #007AFF;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .login-btn {
+            color: #1d1d1f;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+        }
+
+        .signup-btn {
+            background: #007AFF;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .signup-btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .input-container {
+                flex-direction: column;
+                align-items: stretch;
+        }
+
+            .date-selection {
+                flex-direction: column;
+                align-items: stretch;
+        }
+
+        .date-info {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+
+            .schedule-container {
+                padding: 1rem;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 4px;
+        }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                color: #000 !important;
+                font-size: 9pt !important;
+                line-height: 1.1 !important;
+            }
+            .container, .input-section, .date-selection, .employee-list, .employee-tag, .input-container, .btn, .export-button, #extra-preferences-section {
+                box-shadow: none !important;
+                background: none !important;
+                border: none !important;
+            }
+            .input-section, .date-selection, .employee-list, #extra-preferences-section, .header, .input-container, .btn, .export-button {
+                display: none !important;
+            }
+            #print-header {
+                display: block !important;
+                margin-bottom: 0.1rem;
+                text-align: center;
+                font-size: 1rem !important;
+                font-weight: bold;
+            }
+            #schedule-container {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .table-title {
+                font-size: 0.9rem !important;
+                margin: 0.1rem 0 0.05rem 0 !important;
+                padding: 0 !important;
+                border-bottom: 1px solid #ccc !important;
+            }
+            table {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                width: 100% !important;
+                font-size: 7pt !important;
+                margin-bottom: 0.1rem !important;
+            }
+            th, td {
+                padding: 1px 2px !important;
+                line-height: 1.05 !important;
+            }
+            .row-number {
+                min-width: 15px !important;
+            }
+            .remarks-container {
+                display: block !important;
+                margin-top: 0.2rem !important;
+                page-break-before: auto !important;
+                break-before: auto !important;
+            }
+            .remarks-container h2 {
+                font-size: 0.9rem !important;
+                margin-bottom: 0.2rem !important;
+                font-weight: bold !important;
+            }
+            .remarks-textarea {
+                border: 1px solid #ccc !important;
+                background: white !important;
+                font-size: 7pt !important;
+                padding: 0.2rem !important;
+                min-height: auto !important;
+                height: auto !important;
+                resize: none !important;
+            }
+            td[contenteditable="true"] {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* Farbhinterlegung für Druck (Graustufen als Fallback) */
+            td[style*="background-color: #ffe082"] { background: #e0e0e0 !important; }
+            td[style*="background-color: #b2dfdb"] { background: #cccccc !important; }
+            td[style*="background-color: #c5e1a5"] { background: #bdbdbd !important; }
+            td[style*="background-color: #ffab91"] { background: #b0b0b0 !important; }
+            td[style*="background-color: #b39ddb"] { background: #a0a0a0 !important; }
+            td[style*="background-color: #90caf9"] { background: #d0d0d0 !important; }
+            td[style*="background-color: #ef9a9a"] { background: #888888 !important; }
+            td[style*="background-color: #e3f2fd"] { background: #eaeaea !important; }
+            td[style*="background-color: #e8f5e8"] { background: #f5f5f5 !important; }
+            td[style*="background-color: #ffffff"] { background: #fff !important; }
+            @page {
+                size: A4 landscape;
+                margin: 0.2cm;
+            }
+        }
+        #print-header {
+            display: none;
+        }
+
+        .color-option[data-color="#ffffff"] {
+            border-color: #e5e5ea;
+        }
+
+        .remarks-container h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .remarks-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #fbfbfd;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .remarks-textarea:focus {
+            outline: none;
+            border-color: #007aff;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        #custom-alert {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 3000;
+            background: rgba(0,0,0,0.18);
+            justify-content: center;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        #custom-alert.show {
+            display: flex !important;
+        }
+        #custom-alert-box {
+            background: #fff;
+            padding: 2.2rem 2.7rem;
+            border-radius: 22px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #1d1d1f;
+            min-width: 280px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(.4,1.4,.6,1);
+        }
+        #custom-alert.show #custom-alert-box {
+            opacity: 1;
+            transform: scale(1);
+        }
+        @media (max-width: 600px) {
+            #custom-alert-box {
+                padding: 1.2rem 0.5rem;
+                min-width: 0;
+                font-size: 1rem;
+            }
+        }
+
+        .btn-monatsplan {
+            background: #009688;
+            color: white;
+        }
+        .btn-monatsplan:hover {
+            background: #00695c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 150, 136, 0.3);
+        }
+
+        /* Drag & Drop Styles für Zellen */
+        td.dragging-cell {
+            opacity: 0.5;
+            border: 2px dashed #007aff;
+        }
+        td.drag-over-cell {
+            background: #e3f2fd !important;
+            outline: 2px solid #007aff;
+        }
+    </style>
+</head>
+<body>
+
+        <!-- Navigation -->
+    <nav>
+        <div class="nav-container">         
+            <a href="welcome.html" class="logo">OrgaShift</a>
+            <ul class="nav-links">
+                <li><a href="#products">Produkte</a></li>
+                <li><a href="#explore">Erkunden</a></li>
+                <li><a href="#help">Hilfe</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+                <li><a href="pricing.html">Preise</a></li>
+            </ul>
+             <div class="nav-buttons">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="register.html" class="signup-btn">Kostenlos starten</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1 id="main-title">Monatsplan</h1>
+            <div id="wochenplan-datum" style="font-weight:bold;margin-bottom:0.5rem;"></div>
+            <p>Erstellen Sie Ihren Dienstplan einfach und effizient</p>
+        </div>
+        <div id="print-header"></div>
+
+        <div class="input-section">
+            <div class="input-container">
+                <input type="text" id="employeeName" placeholder="Name des Mitarbeiters eingeben">
+                <button class="btn btn-primary" onclick="addEmployee()">
+                    <span>👤</span>
+                    Mitarbeiter hinzufügen
+                </button>
+                <button class="btn export-button" onclick="exportToExcel()">
+                    <span>📊</span>
+                    Excel Export
+                </button>
+                <button class="btn export-button" style="background:#4285F4;" onclick="exportToGoogleSheets()">
+                    <span>🟦</span>
+                    Google Sheets Export
+                </button>
+                <button class="btn btn-print" onclick="printSchedule()">
+                    <span>🖨️</span>
+                    Drucken
+                </button>
+                <button class="btn btn-settings" onclick="openSettingsModal()" style="margin-left:0.5rem;">
+                    <span>⚙️</span> Einstellungen
+                </button>
+                <button class="btn btn-secondary" onclick="shareCustomHintOnWhatsApp()" style="margin-left:0.5rem;">
+                    <span>📲</span> Hinweistext teilen
+                </button>
+                <input type="text" id="whatsappHint" placeholder="Hinweistext für WhatsApp" style="margin-left:1rem;flex:2;min-width:200px;">
+                
+            </div>
+            <div id="employeeList" class="employee-list"></div>
+            <!-- Zusatzpräferenzen als Unterbereich -->
+            <div id="extra-preferences-section" style="margin-top:2rem; padding:1.5rem; background:rgba(245,247,250,0.7); border-radius:16px; border:1px solid #e5e5ea;">
+                <div style="font-weight:600; font-size:1.1rem; margin-bottom:1rem; color:#1d1d1f;">Zusatzpräferenzen (Urlaub/Krank)</div>
+                <div class="input-container" style="gap:0.5rem; margin-bottom:1rem;">
+                    <select id="extraPrefEmployeeSelect">
+                        <option value="">Mitarbeiter auswählen</option>
+                    </select>
+                    <select id="extraPrefType">
+                        <option value="">Präferenz wählen</option>
+                        <option value="Urlaub">Urlaub</option>
+                        <option value="Krank">Krank</option>
+                    </select>
+                    <input type="date" id="extraPrefStart" placeholder="Startdatum">
+                    <input type="date" id="extraPrefEnd" placeholder="Enddatum">
+                    <button class="btn btn-secondary" onclick="addExtraPreference()">Hinzufügen</button>
+                </div>
+                <div id="extraPrefList"></div>
+            </div>
+        </div>
+        
+        <div class="date-selection">
+            <div class="date-group">
+                <label for="monthSelect">Monat</label>
+                <input type="month" id="monthSelect" onchange="updateMonthInfo()">
+            </div>
+            <button class="btn btn-primary" onclick="generateSchedule()">
+                <span>📅</span>
+                Monatsplan generieren
+            </button>
+            <div class="date-info" id="dateInfo"></div>
+        </div>
+        
+        <div class="schedule-container" id="schedule-container">
+            <h2 class="table-title" id="table-title">Dienstplan</h2>
+            <div class="table-wrapper">
+                <table id="schedule-table">
+                    <thead id="schedule-head"></thead>
+                    <tbody id="schedule-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="input-section remarks-container">
+            <h2>Bemerkungen</h2>
+            <textarea id="remarks-input" class="remarks-textarea" placeholder="Hier können Sie allgemeine Bemerkungen oder Notizen zum Dienstplan eintragen..." oninput="saveRemarks()"></textarea>
+        </div>
+
+    </div>
+
+    <div id="context-menu" class="context-menu" style="display: none; position: absolute; z-index: 2000; background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); padding: 8px;">
+        <div style="display: flex; gap: 6px;">
+            <div class="color-swatch" data-color="#ffffff" title="Keine Farbe" style="width: 22px; height: 22px; border-radius: 4px; border: 1px solid #ccc; background: #fff; cursor: pointer;"></div>
+            <div class="color-swatch" data-color="#ffe082" title="Gelb" style="width: 22px; height: 22px; border-radius: 4px; background: #ffe082; cursor: pointer;"></div>
+            <div class="color-swatch" data-color="#b2dfdb" title="Türkis" style="width: 22px; height: 22px; border-radius: 4px; background: #b2dfdb; cursor: pointer;"></div>
+            <div class="color-swatch" data-color="#c5e1a5" title="Grün" style="width: 22px; height: 22px; border-radius: 4px; background: #c5e1a5; cursor: pointer;"></div>
+            <div class="color-swatch" data-color="#ffab91" title="Orange" style="width: 22px; height: 22px; border-radius: 4px; background: #ffab91; cursor: pointer;"></div>
+            <div class="color-swatch" data-color="#b39ddb" title="Lila" style="width: 22px; height: 22px; border-radius: 4px; background: #b39ddb; cursor: pointer;"></div>
+            <div class="color-swatch" data-color="#90caf9" title="Blau" style="width: 22px; height: 22px; border-radius: 4px; background: #90caf9; cursor: pointer;"></div>
+            <div class="color-swatch" data-color="#ef9a9a" title="Rot" style="width: 22px; height: 22px; border-radius: 4px; background: #ef9a9a; cursor: pointer;"></div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width:600px;">
+            <h2>Dienstplan-Einstellungen</h2>
+            <form id="settingsForm" onsubmit="saveSettings(event)">
+                <div style="margin-bottom:1.5rem;">
+                    <label for="mainTitleInput" style="font-weight:600;display:block;margin-bottom:0.5rem;">Überschrift:</label>
+                    <input type="text" id="mainTitleInput" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #ccc;margin-bottom:1rem;" placeholder="Überschrift eingeben">
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <div style="font-weight:600;">Tabellen (z.B. Bereiche):</div>
+                    <div id="shiftNamesContainer"></div>
+                    <button type="button" class="btn btn-secondary" onclick="addShiftInput()" style="margin-top:0.5rem;">+ Tabelle hinzufügen</button>
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <div style="font-weight:600;">Tage:</div>
+                    <div id="dayNamesContainer"></div>
+                    <button type="button" class="btn btn-secondary" onclick="addDayInput()" style="margin-top:0.5rem;">+ Tag hinzufügen</button>
+                </div>
+                <div style="text-align:right;">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Abbrechen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:3000;background:rgba(0,0,0,0.18);justify-content:center;align-items:center;">
+      <div id="custom-alert-box" style="background:#fff;padding:2.2rem 2.7rem;border-radius:22px;box-shadow:0 12px 40px rgba(0,0,0,0.22);font-size:1.25rem;font-weight:500;color:#1d1d1f;min-width:280px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem;transform:scale(0.95);opacity:0;transition:all 0.25s cubic-bezier(.4,1.4,.6,1);">
+        <div style="font-size:2.2rem;color:#34c759;line-height:1;">✔️</div>
+        <span id="custom-alert-message"></span>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        // Globale Variablen
+        let employees = [];
+        let constraints = {};
+        let schedule = {};
+        let preferences = {}; // Neue Variable für Präferenzen
+        let selectedMonth = null;
+        let selectedYear = null;
+        let dayNames = [];
+        const shifts = ['Frühschicht', 'Spätschicht', 'Werk II', 'TrUS Früh', 'TrUS Spät'];
+
+        // --- Zellen farbig markieren (Kontextmenü) ---
+        let currentCell = null;
+        const singleCellColorKey = 'monatsplan_single_cell_color';
+        const employeeCellColorKey = 'monatsplan_employee_cell_colors';
+        // Struktur: { key: 'table_row_col', color: '#xxxxxx' }
+
+        function getCellKey(cell) {
+            // Eindeutiger Key: tbody-ID + Zeile + Spalte
+            let tbody = cell.closest('tbody');
+            const tbodyId = tbody && tbody.id ? tbody.id : '';
+            const row = cell.parentElement ? Array.from(cell.parentElement.parentElement.children).indexOf(cell.parentElement) : 0;
+            const col = Array.from(cell.parentElement.children).indexOf(cell);
+            return `${tbodyId}_${row}_${col}`;
+        }
+
+        function showContextMenu(e, cell) {
+            e.preventDefault();
+            currentCell = cell;
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+        }
+
+        function hideContextMenu() {
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'none';
+            currentCell = null;
+        }
+
+        function setCellColor(cell, color) {
+            // Prüfe, ob es eine Mitarbeiterzelle ist (nicht erste Spalte)
+            const isEmployeeCell = cell.cellIndex > 0;
+            
+            if (isEmployeeCell) {
+                // Für Mitarbeiterzellen: Speichere in employeeCellColorKey
+                if (color !== '#ffffff') {
+                    const key = getCellKey(cell);
+                    let employeeColors = {};
+                    try {
+                        employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey) || '{}');
+                    } catch (e) { employeeColors = {}; }
+                    employeeColors[key] = color;
+                    localStorage.setItem(employeeCellColorKey, JSON.stringify(employeeColors));
+                    cell.style.backgroundColor = color;
+                } else {
+                    // Farbe entfernen
+                    const key = getCellKey(cell);
+                    let employeeColors = {};
+                    try {
+                        employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey) || '{}');
+                    } catch (e) { employeeColors = {}; }
+                    delete employeeColors[key];
+                    localStorage.setItem(employeeCellColorKey, JSON.stringify(employeeColors));
+                    cell.style.backgroundColor = '';
+                }
+            } else {
+                // Für erste Spalte: Verwende das alte System
+                if (color !== '#ffffff') {
+                    cell.style.backgroundColor = color;
+                    const key = getCellKey(cell);
+                    localStorage.setItem(singleCellColorKey, JSON.stringify({ key, color }));
+                } else {
+                    localStorage.removeItem(singleCellColorKey);
+                }
+            }
+        }
+
+        function applyCellColors() {
+            // Alle Zellen zurücksetzen
+            document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                cell.style.backgroundColor = '';
+            });
+            
+            // Mitarbeiterzellen-Farben anwenden
+            let employeeColors = {};
+            try {
+                employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey) || '{}');
+            } catch (e) { employeeColors = {}; }
+            
+            Object.keys(employeeColors).forEach(key => {
+                document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                    if (getCellKey(cell) === key && cell.cellIndex > 0) {
+                        cell.style.backgroundColor = employeeColors[key];
+                    }
+                });
+            });
+            
+            // Einzelne Zellen-Farbe anwenden (erste Spalte)
+            let data = null;
+            try {
+                data = JSON.parse(localStorage.getItem(singleCellColorKey) || 'null');
+            } catch (e) { data = null; }
+            if (data && data.key && data.color) {
+                document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                    if (getCellKey(cell) === data.key && cell.cellIndex === 0) {
+                        cell.style.backgroundColor = data.color;
+                    }
+                });
+            }
+        }
+
+        function addCellColorListeners() {
+            document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                cell.addEventListener('contextmenu', function(e) {
+                    showContextMenu(e, cell);
+                });
+            });
+        }
+
+        // Datums-Funktionen
+        function updateMonthInfo() {
+            const monthInput = document.getElementById('monthSelect');
+            const dateInfo = document.getElementById('dateInfo');
+            if (monthInput.value) {
+                const [year, month] = monthInput.value.split('-').map(Number);
+                selectedMonth = month;
+                selectedYear = year;
+                // Erzeuge dayNames für den Monat im Format TT.MM.
+                const daysInMonth = new Date(year, month, 0).getDate();
+                dayNames = [];
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dateObj = new Date(year, month - 1, d);
+                    const weekday = dateObj.toLocaleDateString('de-DE', { weekday: 'short' });
+                    const tag = d.toString().padStart(2, '0');
+                    const monat = month.toString().padStart(2, '0');
+                    dayNames.push(`${weekday} ${tag}.${monat}.`);
+                }
+                dateInfo.innerHTML = `<strong>Monat:</strong> ${monthInput.value}`;
+            } else {
+                dateInfo.innerHTML = '';
+                dayNames = [];
+            }
+        }
+
+        // --- Dienstplan generieren (dynamisch) ---
+        function generateSchedule() {
+            if (!selectedMonth || !selectedYear) {
+                showCustomAlert('Bitte wählen Sie einen Monat aus.');
+                return;
+            }
+            if (employees.length === 0) {
+                showCustomAlert('Bitte fügen Sie mindestens einen Mitarbeiter hinzu.');
+                return;
+            }
+            // Mitarbeiter sortieren: Alle mit 'Dr.' zuerst, jeweils alphabetisch
+            const sortedEmployees = [...employees].sort((a, b) => {
+                const aDr = a.toLowerCase().includes('dr.');
+                const bDr = b.toLowerCase().includes('dr.');
+                if (aDr && !bDr) return -1;
+                if (!aDr && bDr) return 1;
+                // Innerhalb der Gruppen alphabetisch sortieren
+                return a.localeCompare(b, 'de', { sensitivity: 'base' });
+            });
+            const generatedSchedule = {};
+            shiftNames.forEach((shift, sIdx) => {
+                generatedSchedule[shift] = [];
+                for (let row = 0; row < (rowCounts[sIdx] || 7); row++) {
+                    const weekSchedule = [];
+                    dayNames.forEach(() => weekSchedule.push(''));
+                    generatedSchedule[shift].push(weekSchedule);
+                }
+            });
+            sortedEmployees.forEach(employee => {
+                const employeePrefs = preferences[employee] || {};
+                const shiftPreferences = {};
+                shiftNames.forEach(shift => shiftPreferences[shift] = []);
+                Object.keys(employeePrefs).forEach(day => {
+                    if (day === 'extra') return; // Zusatzpräferenzen nicht als Tag behandeln
+                    const dayPrefs = employeePrefs[day] || [];
+                    dayPrefs.forEach(shift => {
+                        if (shiftPreferences[shift]) {
+                            shiftPreferences[shift].push(day);
+                        }
+                    });
+                });
+                Object.keys(shiftPreferences).forEach(shift => {
+                    const preferredDays = shiftPreferences[shift];
+                    if (preferredDays.length > 0) {
+                        preferredDays.forEach(day => {
+                            const dayIndex = dayNames.indexOf(day);
+                            if (dayIndex !== -1) {
+                                // Prüfe Zusatzpräferenzen (Urlaub/Krank)
+                                let skip = false;
+                                if (employeePrefs.extra && Array.isArray(employeePrefs.extra)) {
+                                    // Errechne das Datum dieses Tages
+                                    const dateOfDay = new Date(selectedYear, selectedMonth - 1, parseInt(day));
+                                    employeePrefs.extra.forEach(extra => {
+                                        if ((extra.type === 'Urlaub' || extra.type === 'Krank') && extra.start && extra.end) {
+                                            const start = new Date(extra.start);
+                                            const end = new Date(extra.end);
+                                            if (dateOfDay >= start && dateOfDay <= end) {
+                                                skip = true;
+                                            }
+                                        }
+                                    });
+                                }
+                                if (skip) return; // Mitarbeiter an diesem Tag überspringen
+                                for (let i = 0; i < generatedSchedule[shift].length; i++) {
+                                    if (!generatedSchedule[shift][i][dayIndex]) {
+                                        generatedSchedule[shift][i][dayIndex] = employee;
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            displayGeneratedScheduleUniversal(generatedSchedule);
+            schedule = generatedSchedule;
+            saveDataToLocalStorage();
+            // Event-Listener für Farbauswahl nach dem Generieren hinzufügen
+            setTimeout(() => {
+                addCellColorListeners();
+                applyCellColors();
+                addCellDragDropListeners();
+            }, 100);
+            showCustomAlert('Dienstplan wurde erfolgreich generiert!');
+        }
+        // --- Anzeige für generierten Plan (dynamisch) ---
+        function displayGeneratedScheduleUniversal(generatedSchedule) {
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = '';
+            // Monatsname bestimmen
+            let monthName = '';
+            if (selectedMonth && selectedYear) {
+                const date = new Date(selectedYear, selectedMonth - 1, 1);
+                monthName = date.toLocaleString('de-DE', { month: 'long', year: 'numeric' });
+                monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1); // Großschreibung
+            }
+            Object.keys(generatedSchedule).forEach((shift, sIdx) => {
+                const shiftTitle = document.createElement('div');
+                shiftTitle.className = 'table-title';
+                shiftTitle.textContent = shift;
+                container.appendChild(shiftTitle);
+                const table = document.createElement('table');
+                let tableHTML = '';
+                // Monatsangabe als erste Zeile
+                if (monthName) {
+                    tableHTML += `<tr><th colspan='${dayNames.length + 1}' style='font-size:1.1em;font-weight:bold;text-align:center;background:#f2f2f7;'>${monthName}</th></tr>`;
+                }
+                tableHTML += `
+                    <thead>
+                        <tr>
+                            <th>lfd. Nr. / Zeit</th>
+                            ${dayNames.map(day => `<th>${day}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody id="shiftBody_${sIdx}">
+                `;
+                generatedSchedule[shift].forEach((rowArr, index) => {
+                    tableHTML += `
+                        <tr>
+                            <td class="row-number" contenteditable="true">${index + 1}</td>
+                            ${rowArr.map(employee => `<td contenteditable="true" style="white-space: pre-wrap; word-wrap: break-word;">${employee}</td>`).join('')}
+                        </tr>
+                    `;
+                });
+                tableHTML += '</tbody>';
+                table.innerHTML = tableHTML;
+                container.appendChild(table);
+            });
+        }
+
+        // Hauptfunktionen
+        function addEmployee() {
+            const input = document.getElementById('employeeName');
+            const name = input.value.trim();
+            if (name) {
+                employees.push(name);
+                // Initialisiere Präferenzen für neuen Mitarbeiter (nur wenn tatsächlich gesetzt)
+                preferences[name] = {};
+                input.value = '';
+                updateEmployeeList();
+                displaySchedule();
+                saveDataToLocalStorage();
+            }
+        }
+
+        function removeEmployee(employeeName) {
+            employees = employees.filter(emp => emp !== employeeName);
+            delete preferences[employeeName]; // Lösche auch Präferenzen
+            updateEmployeeList();
+            displaySchedule();
+            saveDataToLocalStorage();
+        }
+
+        function showPreferences(employeeName) {
+            const preferenceModal = document.createElement('div');
+            preferenceModal.id = 'preferenceModal';
+            preferenceModal.className = 'modal-overlay';
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            let modalHTML = `
+                <h2>Präferenzen für ${employeeName}</h2>
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Präferierte Schichten</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            dayNames.forEach(day => {
+                const currentPrefs = preferences[employeeName]?.[day] || [];
+                modalHTML += `
+                    <tr>
+                        <td style="font-weight: 600;">${day}</td>
+                        <td>
+                            <div class="checkbox-group">
+                            ${shiftNames.map(shift => `
+                                    <div class="checkbox-item">
+                                    <input type="checkbox" 
+                                               id="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day.replace(/[^a-zA-Z0-9]/g, '_')}-${shift.replace(/[^a-zA-Z0-9]/g, '_')}"
+                                           value="${shift}" 
+                                           ${currentPrefs.includes(shift) ? 'checked' : ''}
+                                           onchange="updatePreference('${employeeName}', '${day}', '${shift}', this.checked)">
+                                        <label for="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day.replace(/[^a-zA-Z0-9]/g, '_')}-${shift.replace(/[^a-zA-Z0-9]/g, '_')}">${shift}</label>
+                                    </div>
+                            `).join('')}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            modalHTML += `
+                    </tbody>
+                </table>
+                <div style="margin-top: 2rem; text-align: center;">
+                    <button class="btn btn-primary" onclick="closePreferenceModal()">
+                        <span>✓</span>
+                        Schließen
+                    </button>
+                </div>
+            `;
+
+            modalContent.innerHTML = modalHTML;
+            preferenceModal.appendChild(modalContent);
+            document.body.appendChild(preferenceModal);
+        }
+
+        function closePreferenceModal() {
+            const modal = document.getElementById('preferenceModal');
+            if (modal) {
+                modal.remove();
+            }
+            // Aktualisiere die Mitarbeiterliste um die neue Anzahl der Präferenzen anzuzeigen
+            updateEmployeeList();
+        }
+
+        function updatePreference(employee, day, shift, isChecked) {
+            // Initialisiere Präferenzen für Mitarbeiter falls nicht vorhanden
+            if (!preferences[employee]) {
+                preferences[employee] = {};
+            }
+            if (!preferences[employee][day]) {
+                preferences[employee][day] = [];
+            }
+            
+            if (isChecked) {
+                // Füge Schicht zu Präferenzen hinzu, falls nicht bereits vorhanden
+                if (!preferences[employee][day].includes(shift)) {
+                    preferences[employee][day].push(shift);
+                }
+            } else {
+                // Entferne Schicht aus Präferenzen
+                preferences[employee][day] = preferences[employee][day].filter(s => s !== shift);
+            }
+            
+            saveDataToLocalStorage();
+        }
+
+        // Dienstplan anzeigen
+        function displaySchedule() {
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = '';
+            shiftNames.forEach((shift, sIdx) => {
+                const shiftTitle = document.createElement('div');
+                shiftTitle.className = 'table-title';
+                shiftTitle.textContent = shift;
+                container.appendChild(shiftTitle);
+                const table = document.createElement('table');
+                let tableHTML = `
+                    <thead>
+                        <tr>
+                            <th>lfd. Nr. / Zeit</th>
+                            ${dayNames.map(day => `<th>${day}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody id="shiftBody_${sIdx}">
+                        ${Array(rowCounts[sIdx] || 7).fill('').map((_, index) => `
+                            <tr>
+                                <td class="row-number" contenteditable="true">${index + 1}</td>
+                                ${dayNames.map(() => `<td contenteditable="true" style="white-space: pre-wrap; word-wrap: break-word;"></td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                table.innerHTML = tableHTML;
+                container.appendChild(table);
+            });
+            // Event-Listener für Farbauswahl nach dem Anzeigen hinzufügen
+            setTimeout(() => {
+                addCellColorListeners();
+                applyCellColors();
+                addCellDragDropListeners();
+            }, 100);
+        }
+
+        function exportToExcel() {
+            const workbook = XLSX.utils.book_new();
+            // Überschrift für das Tabellenblatt
+            let start = '';
+            let end = '';
+            if (selectedMonth && selectedYear) start = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('de-DE');
+            if (selectedMonth && selectedYear) end = new Date(selectedYear, selectedMonth, 0).toLocaleDateString('de-DE');
+            const title = `Wochenplan vom: ${start} bis ${end}`;
+            // Tabellen-Daten sammeln
+            const allData = [];
+            allData.push([title]);
+            allData.push(['']); // Leerzeile
+            // Sammle Daten für alle Schichten
+            shiftNames.forEach((shift, sIdx) => {
+                allData.push([shift]); // Schichtname als Überschrift
+                allData.push(['lfd. Nr. / Zeit', ...dayNames]); // Spaltenüberschriften
+                // Hole Daten für diese Schicht
+                const shiftData = getTableData(`shiftBody_${sIdx}`);
+                if (shiftData.length > 0) {
+                    allData.push(...shiftData);
+                } else {
+                    // Fallback: Leere Zeilen erstellen
+                    const rowCount = rowCounts[sIdx] || 7;
+                    for (let i = 0; i < rowCount; i++) {
+                        const row = [i + 1]; // Nummer/Zeit
+                        dayNames.forEach(() => row.push('')); // Leere Zellen für jeden Tag
+                        allData.push(row);
+                    }
+                }
+                allData.push(['']); // Leerzeile zwischen Schichten
+            });
+            // Bemerkungen hinzufügen (analog Google Sheets Export)
+            const remarksInput = document.getElementById('remarks-input');
+            if (remarksInput && remarksInput.value.trim()) {
+                allData.push(['Bemerkungen:']);
+                allData.push([remarksInput.value.trim()]);
+            }
+            // Sheet erzeugen
+            const sheet = XLSX.utils.aoa_to_sheet(allData);
+            // Professionelle Formatierung anwenden
+            applyProfessionalFormatting(sheet, allData);
+            // Farben hinzufügen
+            addColorsToSheet(sheet, allData);
+            XLSX.utils.book_append_sheet(workbook, sheet, 'Dienstplan');
+            // Dateiname
+            let fileName = 'Dienstplan';
+            if (selectedMonth && selectedYear) {
+                const startStr = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('de-DE').replace(/\./g, '-');
+                const endStr = new Date(selectedYear, selectedMonth, 0).toLocaleDateString('de-DE').replace(/\./g, '-');
+                fileName = `Dienstplan_${startStr}_bis_${endStr}.xlsx`;
+            } else {
+                fileName = `Dienstplan_${new Date().toISOString().split('T')[0]}.xlsx`;
+            }
+            // Querformat für das Sheet
+            if (!sheet['!pageSetup']) sheet['!pageSetup'] = {};
+            sheet['!pageSetup'].orientation = 'landscape';
+            sheet['!pageSetup'].fitToWidth = 1;
+            sheet['!pageSetup'].fitToHeight = 0;
+            sheet['!pageSetup'].margins = {
+                top: 0.5,
+                bottom: 0.5,
+                left: 0.5,
+                right: 0.5,
+                header: 0.3,
+                footer: 0.3
+            };
+            XLSX.writeFile(workbook, fileName);
+        }
+        
+        function applyProfessionalFormatting(sheet, allData) {
+            try {
+                // Spaltenbreiten wie im Druck
+                if (!sheet['!cols']) sheet['!cols'] = [];
+                const totalCols = dayNames.length + 1;
+                for (let i = 0; i < totalCols; i++) {
+                    if (i === 0) {
+                        sheet['!cols'][i] = { wch: 5 };
+                    } else {
+                        sheet['!cols'][i] = { wch: 12 };
+                    }
+                }
+
+                // Sehr niedrige Zeilenhöhen wie im Druck
+                if (!sheet['!rows']) sheet['!rows'] = [];
+                for (let i = 0; i < allData.length; i++) {
+                    if (i === 0) {
+                        sheet['!rows'][i] = { hpt: 14 };
+                    } else {
+                        sheet['!rows'][i] = { hpt: 11 };
+                    }
+                }
+
+                // Stile für jede Zelle explizit setzen
+                for (let r = 0; r < allData.length; r++) {
+                    for (let c = 0; c < allData[r].length; c++) {
+                        const cellRef = XLSX.utils.encode_cell({ r, c });
+                        if (!sheet[cellRef]) continue;
+                        let style = {
+                            font: { name: 'Arial', sz: 7 },
+                            alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                            border: {
+                                top:    { style: 'hair', color: { rgb: 'FFCCCCCC' } },
+                                bottom: { style: 'hair', color: { rgb: 'FFCCCCCC' } },
+                                left:   { style: 'hair', color: { rgb: 'FFCCCCCC' } },
+                                right:  { style: 'hair', color: { rgb: 'FFCCCCCC' } }
+                            }
+                        };
+                        // Titelzeile
+                        if (r === 0) {
+                            style.font = { name: 'Arial', sz: 9, bold: true };
+                            style.alignment = { horizontal: 'center', vertical: 'center' };
+                        }
+                        // Schichtüberschrift
+                        if (r > 1 && allData[r][0] && c === 0 && allData[r][0] === shiftNames.find(s => s === allData[r][0])) {
+                            style.font = { name: 'Arial', sz: 8, bold: true };
+                            style.alignment = { horizontal: 'left', vertical: 'center' };
+                            style.fill = { patternType: 'solid', fgColor: { rgb: 'FFF8F9FA' } };
+                        }
+                        // Spaltenüberschriften
+                        if (r > 1 && allData[r][0] === 'lfd. Nr. / Zeit') {
+                            style.font = { name: 'Arial', sz: 7, bold: true };
+                            style.alignment = { horizontal: 'center', vertical: 'center' };
+                            style.fill = { patternType: 'solid', fgColor: { rgb: 'FFF8F9FA' } };
+                        }
+                        // Erste Spalte (lfd. Nr.)
+                        if (c === 0 && r > 2) {
+                            style.font = { name: 'Arial', sz: 7 };
+                            style.alignment = { horizontal: 'center', vertical: 'center' };
+                            style.fill = { patternType: 'solid', fgColor: { rgb: 'FFF8F9FA' } };
+                        }
+                        sheet[cellRef].s = style;
+                    }
+                }
+            } catch (error) {
+                console.error('Fehler bei der Formatierung:', error);
+                if (!sheet['!cols']) sheet['!cols'] = [];
+                for (let i = 0; i < (dayNames.length + 1); i++) {
+                    sheet['!cols'][i] = { wch: 12 };
+                }
+            }
+        }
+
+        function getTableData(tableBodyId) {
+            const tableBody = document.getElementById(tableBodyId);
+            if (!tableBody) return [];
+            
+            const rows = tableBody.querySelectorAll('tr');
+            const data = [];
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [];
+                cells.forEach(cell => {
+                    rowData.push(cell.textContent || '');
+                });
+                data.push(rowData);
+            });
+            
+            return data;
+        }
+
+        function saveDataToLocalStorage() {
+            localStorage.setItem('monatsplan_employees', JSON.stringify(employees));
+            localStorage.setItem('monatsplan_constraints', JSON.stringify(constraints));
+            localStorage.setItem('monatsplan_schedule', JSON.stringify(schedule));
+            localStorage.setItem('monatsplan_preferences', JSON.stringify(preferences));
+            localStorage.setItem('monatsplan_startDate', selectedMonth ? new Date(selectedYear, selectedMonth - 1, 1).toISOString() : '');
+            localStorage.setItem('monatsplan_endDate', selectedMonth ? new Date(selectedYear, selectedMonth, 0).toISOString() : '');
+            
+            // Speichere Tabellendaten
+            const tableData = {};
+            shiftNames.forEach((shift, sIdx) => {
+                const tbody = document.getElementById(`shiftBody_${sIdx}`);
+                if (tbody) {
+                    const rows = tbody.querySelectorAll('tr');
+                    tableData[shift] = [];
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        const rowData = [];
+                        cells.forEach(cell => {
+                            rowData.push(cell.textContent || '');
+                        });
+                        tableData[shift].push(rowData);
+                    });
+                }
+            });
+            localStorage.setItem('monatsplan_tableData', JSON.stringify(tableData));
+        }
+
+        function saveRemarks() {
+            const remarksInput = document.getElementById('remarks-input');
+            if (remarksInput) {
+                localStorage.setItem('monatsplan_remarks', remarksInput.value);
+            }
+        }
+
+        function loadDataFromLocalStorage() {
+            const savedEmployees = localStorage.getItem('monatsplan_employees');
+            if (savedEmployees) {
+                employees = JSON.parse(savedEmployees);
+            }
+            const savedPreferences = localStorage.getItem('monatsplan_preferences');
+            if (savedPreferences) {
+                preferences = JSON.parse(savedPreferences);
+            }
+            const savedSchedule = localStorage.getItem('monatsplan_schedule');
+            if (savedSchedule) {
+                schedule = JSON.parse(savedSchedule);
+            }
+            const savedStartDate = localStorage.getItem('monatsplan_startDate');
+            if (savedStartDate) {
+                selectedMonth = new Date(savedStartDate).getMonth() + 1;
+                selectedYear = new Date(savedStartDate).getFullYear();
+                document.getElementById('monthSelect').value = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`;
+            }
+            const savedEndDate = localStorage.getItem('monatsplan_endDate');
+            if (savedEndDate) {
+                selectedMonth = new Date(savedEndDate).getMonth() + 1;
+                selectedYear = new Date(savedEndDate).getFullYear();
+                document.getElementById('monthSelect').value = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`;
+            }
+
+            const savedRemarks = localStorage.getItem('monatsplan_remarks');
+            const remarksInput = document.getElementById('remarks-input');
+            if (savedRemarks && remarksInput) {
+                remarksInput.value = savedRemarks;
+            }
+
+            updateMonthInfo();
+        }
+        
+        function loadTableData() {
+            const savedTableData = localStorage.getItem('monatsplan_tableData');
+            if (savedTableData) {
+                console.log('Lade gespeicherte Tabellendaten:', savedTableData);
+                const tableData = JSON.parse(savedTableData);
+                Object.keys(tableData).forEach((shift, sIdx) => {
+                    const tbody = document.getElementById(`shiftBody_${sIdx}`);
+                    console.log(`Suche Tabelle shiftBody_${sIdx}:`, tbody);
+                    if (tbody) {
+                        const rows = tbody.querySelectorAll('tr');
+                        const shiftData = tableData[shift];
+                        rows.forEach((row, rowIndex) => {
+                            if (shiftData[rowIndex]) {
+                                const cells = row.querySelectorAll('td');
+                                cells.forEach((cell, cellIndex) => {
+                                    if (shiftData[rowIndex][cellIndex]) {
+                                        cell.textContent = shiftData[rowIndex][cellIndex];
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                console.log('Keine gespeicherten Tabellendaten gefunden');
+            }
+        }
+        
+        function addTableDataListeners() {
+            // Event-Listener für alle editierbaren Zellen
+            document.addEventListener('input', function(e) {
+                if (e.target.hasAttribute('contenteditable')) {
+                    // Verzögerte Speicherung um Performance zu verbessern
+                    clearTimeout(window.saveTimeout);
+                    window.saveTimeout = setTimeout(() => {
+                        saveDataToLocalStorage();
+                    }, 500);
+                }
+            });
+        }
+
+        // Beim ersten Laden: Einstellungen abfragen, falls nicht vorhanden
+        document.addEventListener('DOMContentLoaded', function() {
+            let savedShifts = localStorage.getItem('monatsplan_shiftNames');
+            let savedDays = localStorage.getItem('monatsplan_dayNames');
+            let savedRowCounts = localStorage.getItem('monatsplan_rowCounts');
+            if (savedShifts && savedDays) {
+                shiftNames = JSON.parse(savedShifts);
+                dayNames = JSON.parse(savedDays);
+                rowCounts = savedRowCounts ? JSON.parse(savedRowCounts) : shiftNames.map(() => 7);
+                if (rowCounts.length < shiftNames.length) {
+                    for (let i = rowCounts.length; i < shiftNames.length; i++) rowCounts.push(7);
+                }
+            } else {
+                shiftNames = ['Schicht 1', 'Schicht 2'];
+                dayNames = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5'];
+                rowCounts = [7, 7];
+            }
+            
+            loadDataFromLocalStorage();
+            updateEmployeeList();
+            
+            // Prüfe, ob Schicht- und Tagesnamen geladen sind
+            if (shiftNames && shiftNames.length > 0 && dayNames && dayNames.length > 0) {
+                // Zeige Tabellen an
+                displaySchedule();
+                
+                // Lade gespeicherte Tabellendaten NACH der Erstellung der Tabellen
+                setTimeout(() => {
+                    loadTableData();
+                    addTableDataListeners();
+                }, 200);
+
+                // Einzelne Markierung aus localStorage laden
+                setTimeout(() => {
+                    applyCellColors();
+                    addCellColorListeners();
+                }, 300);
+            } else {
+                // Falls keine Einstellungen vorhanden sind, öffne das Modal
+                openSettingsModal();
+            }
+            setMainTitleFromStorage();
+            updateMonatsplanDatum();
+        });
+
+        // Clear localStorage for testing
+        // localStorage.clear();
+
+        function updateEmployeeList() {
+            const container = document.getElementById('employeeList');
+            container.innerHTML = '';
+            // Mitarbeiter sortieren: Alle mit 'Dr.' zuerst
+            const sortedEmployees = [...employees].sort((a, b) => {
+                const aDr = a.toLowerCase().includes('dr.');
+                const bDr = b.toLowerCase().includes('dr.');
+                if (aDr && !bDr) return -1;
+                if (!aDr && bDr) return 1;
+                return 0;
+            });
+            sortedEmployees.forEach(employee => {
+                const tag = document.createElement('div');
+                tag.className = 'employee-tag';
+                tag.draggable = true;
+                tag.dataset.employee = employee;
+                // Hintergrundfarbe basierend auf Dr.-Status
+                if (employee.includes('Dr.')) {
+                    tag.style.backgroundColor = '#e3f2fd'; // Hellblau für Dr.-Mitarbeiter
+                    tag.style.borderColor = '#2196f3';
+                } else {
+                    tag.style.backgroundColor = '#e8f5e8'; // Hellgrün für normale Mitarbeiter
+                    tag.style.borderColor = '#4caf50';
+                }
+                // Zähle nur tatsächlich gesetzte Präferenzen für diesen Mitarbeiter
+                const prefs = preferences[employee] || {};
+                let prefCount = 0;
+                Object.values(prefs).forEach(dayPrefs => {
+                    if (Array.isArray(dayPrefs) && dayPrefs.length > 0) {
+                        prefCount += dayPrefs.length;
+                    }
+                });
+                // Bearbeiten-Button
+                const editButton = `<button onclick="editEmployeeName('${employee}')" title="Mitarbeitername bearbeiten">✏️</button>`;
+                // Zeige Präferenzen-Button nur an, wenn tatsächlich Präferenzen vorhanden sind
+                const prefButton = prefCount > 0 ? 
+                    `<button onclick="showPreferences('${employee}')" title="Präferenzen bearbeiten">
+                        ⚙️ (${prefCount})
+                    </button>` :
+                    `<button onclick="showPreferences('${employee}')" title="Präferenzen bearbeiten">
+                        ⚙️
+                    </button>`;
+                tag.innerHTML = `
+                    <span class="employee-name-span">${employee}</span>
+                    ${editButton}
+                    ${prefButton}
+                    <button onclick="removeEmployee('${employee}')" title="Mitarbeiter entfernen">
+                        ✕
+                    </button>
+                `;
+                // Drag & Drop Event Listeners
+                tag.addEventListener('dragstart', handleDragStart);
+                tag.addEventListener('dragend', handleDragEnd);
+                tag.addEventListener('dragover', handleDragOver);
+                tag.addEventListener('drop', handleDrop);
+                tag.addEventListener('dragenter', handleDragEnter);
+                tag.addEventListener('dragleave', handleDragLeave);
+                container.appendChild(tag);
+            });
+            updateExtraPrefEmployeeSelect();
+            displayExtraPreferences();
+        }
+        // --- Mitarbeitername bearbeiten ---
+        function editEmployeeName(oldName) {
+            const container = document.getElementById('employeeList');
+            const tag = Array.from(container.children).find(div => div.dataset.employee === oldName);
+            if (!tag) return;
+            const span = tag.querySelector('.employee-name-span');
+            if (!span) return;
+            // Ersetze Name durch Input-Feld
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = oldName;
+            input.style.minWidth = '120px';
+            input.style.fontSize = '14px';
+            input.style.borderRadius = '8px';
+            input.style.padding = '4px 8px';
+            input.style.marginRight = '8px';
+            span.replaceWith(input);
+            input.focus();
+            input.select();
+            // Speichern bei Enter oder Blur
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    input.blur();
+                }
+            });
+            input.addEventListener('blur', function() {
+                const newName = input.value.trim();
+                if (!newName || newName === oldName) {
+                    updateEmployeeList();
+                    return;
+                }
+                // Überall alten Namen ersetzen
+                // 1. Im employees-Array
+                const idx = employees.indexOf(oldName);
+                if (idx !== -1) employees[idx] = newName;
+                // 2. In Präferenzen
+                if (preferences[oldName]) {
+                    preferences[newName] = preferences[oldName];
+                    delete preferences[oldName];
+                }
+                // 3. In Zusatzpräferenzen anderer Mitarbeiter (falls irgendwo referenziert)
+                Object.keys(preferences).forEach(emp => {
+                    if (preferences[emp] && preferences[emp].extra) {
+                        preferences[emp].extra.forEach(e => {
+                            if (e.employee === oldName) e.employee = newName;
+                        });
+                    }
+                });
+                // 4. In der Tabelle (alle Zellen)
+                document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                    if (cell.textContent.trim() === oldName) {
+                        cell.textContent = newName;
+                    }
+                });
+                saveDataToLocalStorage();
+                updateEmployeeList();
+            });
+        }
+
+        // Drag & Drop Funktionen
+        function handleDragStart(e) {
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', e.target.dataset.employee);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.employee-tag').forEach(tag => {
+                tag.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const draggedEmployee = e.dataTransfer.getData('text/plain');
+            const targetEmployee = e.target.closest('.employee-tag')?.dataset.employee;
+            
+            if (draggedEmployee && targetEmployee && draggedEmployee !== targetEmployee) {
+                // Tausche die Positionen der Mitarbeiter im Array
+                const draggedIndex = employees.indexOf(draggedEmployee);
+                const targetIndex = employees.indexOf(targetEmployee);
+                
+                if (draggedIndex !== -1 && targetIndex !== -1) {
+                    // Tausche die Mitarbeiter
+                    [employees[draggedIndex], employees[targetIndex]] = [employees[targetIndex], employees[draggedIndex]];
+                    
+                    // Aktualisiere die Anzeige
+                    updateEmployeeList();
+                    saveDataToLocalStorage();
+                }
+            }
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.target.closest('.employee-tag')?.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.target.closest('.employee-tag')?.classList.remove('drag-over');
+        }
+
+        // --- Zusatzpräferenzen (Urlaub/Krank) ---
+        function updateExtraPrefEmployeeSelect() {
+            const select = document.getElementById('extraPrefEmployeeSelect');
+            if (!select) return;
+            select.innerHTML = '<option value="">Mitarbeiter auswählen</option>' +
+                employees.map(emp => `<option value="${emp}">${emp}</option>`).join('');
+        }
+
+        function addExtraPreference() {
+            const employee = document.getElementById('extraPrefEmployeeSelect').value;
+            const type = document.getElementById('extraPrefType').value;
+            const start = document.getElementById('extraPrefStart').value;
+            const end = document.getElementById('extraPrefEnd').value;
+            if (!employee || !type || !start || !end) {
+                alert('Bitte alle Felder ausfüllen!');
+                return;
+            }
+            if (!preferences[employee]) preferences[employee] = {};
+            if (!preferences[employee].extra) preferences[employee].extra = [];
+            preferences[employee].extra.push({ type, start, end });
+            saveDataToLocalStorage();
+            displayExtraPreferences();
+        }
+
+        function displayExtraPreferences() {
+            const container = document.getElementById('extraPrefList');
+            if (!container) return;
+            let html = '';
+            employees.forEach(emp => {
+                const extras = preferences[emp]?.extra || [];
+                if (extras.length > 0) {
+                    html += `<div style='margin-bottom:8px;'><strong>${emp}:</strong> `;
+                    html += extras.map((e, idx) => {
+                        const start = new Date(e.start);
+                        const end = new Date(e.end);
+                        const startStr = start.toLocaleDateString('de-DE');
+                        const endStr = end.toLocaleDateString('de-DE');
+                        return `${e.type} (${startStr} bis ${endStr}) <button onclick=\"removeExtraPreference('${emp}',${idx})\" title=\"Löschen\" style=\"margin-left:4px;color:#c00;background:none;border:none;cursor:pointer;font-size:1em;\">✕</button>`;
+                    }).join(', ');
+                    html += '</div>';
+                }
+            });
+            container.innerHTML = html || '<span style="color:#86868b">Keine Zusatzpräferenzen eingetragen.</span>';
+        }
+
+        function removeExtraPreference(employee, idx) {
+            if (!preferences[employee] || !preferences[employee].extra) return;
+            if (!window.confirm('Möchten Sie diesen Eintrag wirklich löschen?')) return;
+            preferences[employee].extra.splice(idx, 1);
+            saveDataToLocalStorage();
+            displayExtraPreferences();
+        }
+
+        function printSchedule() {
+            // Hole Start- und Enddatum
+            let start = '';
+            let end = '';
+            if (selectedMonth && selectedYear) start = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('de-DE');
+            if (selectedMonth && selectedYear) end = new Date(selectedYear, selectedMonth, 0).toLocaleDateString('de-DE');
+            const header = document.getElementById('print-header');
+            // Stadt aus Überschrift extrahieren
+            let mainTitle = document.getElementById('main-title').textContent || 'Dienstplan Bocholt';
+            // Fallback: Wenn "Dienstplan" im Titel, dann alles anzeigen, sonst "Dienstplan " + Titel
+            let headerTitle = mainTitle.includes('Dienstplan') ? mainTitle : `${mainTitle}`;
+            let dateLine = (start && end) ? `<div style='font-weight:bold;'>Wochenplan vom ${start} bis ${end}</div>` : '';
+            header.innerHTML = `${headerTitle}${dateLine ? '<br>' + dateLine : ''}`;
+            header.style.display = 'block';
+            window.print();
+            setTimeout(() => { header.style.display = 'none'; }, 500);
+        }
+
+        function shareCustomHintOnWhatsApp() {
+            let start = selectedMonth && selectedYear ? new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('de-DE') : '';
+            let end = selectedMonth && selectedYear ? new Date(selectedYear, selectedMonth, 0).toLocaleDateString('de-DE') : '';
+            const userHint = document.getElementById('whatsappHint').value.trim();
+            const text = userHint ? userHint : `Neuer Wochenplan vom ${start} bis ${end} ist jetzt verfügbar!`;
+            const message = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${message}`, '_blank');
+        }
+
+        // Kontextmenü-Interaktion
+        document.getElementById('context-menu').addEventListener('click', function(e) {
+            const swatch = e.target.closest('.color-swatch');
+            if (swatch && currentCell) {
+                setCellColor(currentCell, swatch.dataset.color);
+                hideContextMenu();
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#context-menu')) {
+                hideContextMenu();
+            }
+        });
+        window.addEventListener('scroll', hideContextMenu);
+        window.addEventListener('resize', hideContextMenu);
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') hideContextMenu();
+        });
+
+        // --- Google Sheets Export ---
+        function exportToGoogleSheets() {
+            // Schritt-für-Schritt-Anleitung als Modal anzeigen
+            const modal = document.createElement('div');
+            modal.id = 'gsheets-export-modal';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.background = 'rgba(0,0,0,0.18)';
+            modal.style.zIndex = '4000';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+
+            const box = document.createElement('div');
+            box.style.background = '#fff';
+            box.style.padding = '2.2rem 2.7rem';
+            box.style.borderRadius = '22px';
+            box.style.boxShadow = '0 12px 40px rgba(0,0,0,0.22)';
+            box.style.fontSize = '1.1rem';
+            box.style.fontWeight = '500';
+            box.style.color = '#1d1d1f';
+            box.style.minWidth = '320px';
+            box.style.maxWidth = '90vw';
+            box.style.maxHeight = '80vh';
+            box.style.overflowY = 'auto';
+            box.style.textAlign = 'left';
+            box.innerHTML = `
+                <div style="font-size:1.3rem;font-weight:bold;margin-bottom:1rem;">Schritt-für-Schritt-Anleitung: Export nach Google Sheets</div>
+                <ol style="margin-bottom:1.2rem;padding-left:1.2em;">
+                  <li>Klicke auf den blauen Button „Google Sheets Export" (oben in der Anwendung).</li>
+                  <li>CSV-Datei wird heruntergeladen (z.B. Dienstplan_GoogleSheets.csv).</li>
+                  <li>Google Sheets Import-Seite öffnet sich automatisch (<a href='https://docs.google.com/spreadsheets/u/0/import?format=csv' target='_blank'>Import-Link</a>).</li>
+                  <li>Ignoriere eine eventuelle Fehlermeldung („Datei kann derzeit nicht geöffnet werden" ist normal).</li>
+                  <li>Klicke auf „Datei auswählen" und wähle die heruntergeladene Datei aus.</li>
+                  <li>Importiere die Datei ("Neues Tabellenblatt erstellen" → „Importieren").</li>
+                  <li>Fertig! Dein Dienstplan ist jetzt als Tabelle in Google Sheets verfügbar.</li>
+                </ol>
+                <div style="margin-bottom:1.2rem;">
+                  <b>Hinweise:</b><br>
+                  - Google Sheets übernimmt nur die Textdaten, keine Farben oder Formatierungen aus dem Browser (das ist eine technische Begrenzung von Google Sheets und CSV).<br>
+                  - Für ein identisches Layout nutze den PDF-Export (über Drucken).
+                </div>
+                <button id="gsheets-export-close" style="margin-top:0.5rem;padding:0.7em 2em;font-size:1.1em;border-radius:12px;border:none;background:#007aff;color:#fff;cursor:pointer;">Schließen & Export starten</button>
+            `;
+            modal.appendChild(box);
+            document.body.appendChild(modal);
+            document.getElementById('gsheets-export-close').onclick = function() {
+                document.body.removeChild(modal);
+                // --- Export wie gehabt ---
+                let start = '';
+                let end = '';
+                if (selectedMonth && selectedYear) start = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('de-DE');
+                if (selectedMonth && selectedYear) end = new Date(selectedYear, selectedMonth, 0).toLocaleDateString('de-DE');
+                const title = `Wochenplan vom: ${start} bis ${end}`;
+                const allData = [];
+                allData.push([title]);
+                allData.push(['']);
+                shiftNames.forEach((shift, sIdx) => {
+                    allData.push([shift]);
+                    allData.push(['lfd. Nr. / Zeit', ...dayNames]);
+                    const tbody = document.getElementById(`shiftBody_${sIdx}`);
+                    if (tbody) {
+                        const rows = tbody.querySelectorAll('tr');
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            const rowData = [];
+                            cells.forEach(cell => {
+                                rowData.push(cell.textContent || '');
+                            });
+                            allData.push(rowData);
+                        });
+                    } else {
+                        const rowCount = rowCounts[sIdx] || 7;
+                        for (let i = 0; i < rowCount; i++) {
+                            const row = [i + 1];
+                            dayNames.forEach(() => row.push(''));
+                            allData.push(row);
+                        }
+                    }
+                    allData.push(['']);
+                });
+                const remarksInput = document.getElementById('remarks-input');
+                if (remarksInput && remarksInput.value.trim()) {
+                    allData.push(['Bemerkungen:']);
+                    allData.push([remarksInput.value.trim()]);
+                }
+                let csv = '';
+                allData.forEach(row => {
+                    csv += row.map(cell => '"' + (cell ? String(cell).replace(/"/g, '""') : '') + '"').join(',') + '\n';
+                });
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                window.open('https://docs.google.com/spreadsheets/u/0/import?format=csv', '_blank');
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Dienstplan_GoogleSheets.csv';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            };
+        }
+
+        // Dynamische Schichten und Tage
+        let shiftNames = [];
+        let rowCounts = [];
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'flex';
+            renderShiftInputs();
+            renderDayInputs();
+            // Titel-Feld befüllen
+            const savedTitle = localStorage.getItem('monatsplan_mainTitle') || document.getElementById('main-title').textContent;
+            document.getElementById('mainTitleInput').value = savedTitle;
+        }
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+        function addShiftInput(value = '') {
+            shiftNames.push(value || `Schicht ${shiftNames.length + 1}`);
+            renderShiftInputs();
+        }
+        function removeShiftInput(index) {
+            shiftNames.splice(index, 1);
+            renderShiftInputs();
+        }
+        function renderShiftInputs() {
+            const container = document.getElementById('shiftNamesContainer');
+            container.innerHTML = '';
+            shiftNames.forEach((name, i) => {
+                const rowVal = Array.isArray(rowCounts) && rowCounts[i] ? rowCounts[i] : 7;
+                container.innerHTML += `<div style='display:flex;align-items:center;margin-bottom:4px;'>
+                    <input type='text' value='${name}' onchange='updateShiftName(${i}, this.value)' style='flex:1;padding:6px 10px;border-radius:8px;border:1px solid #ccc;margin-right:8px;'>
+                    <span style='margin-right:6px;'>Zeilen:</span>
+                    <input type='number' min='1' max='50' value='${rowVal}' onchange='updateRowCount(${i}, this.value)' style='width:60px;padding:6px 10px;border-radius:8px;border:1px solid #ccc;margin-right:8px;'>
+                    <button type='button' onclick='removeShiftInput(${i})' style='color:#c00;background:none;border:none;font-size:1.2em;cursor:pointer;'>✕</button>
+                </div>`;
+            });
+        }
+        function updateShiftName(index, value) {
+            shiftNames[index] = value;
+        }
+        function updateRowCount(index, value) {
+            rowCounts[index] = parseInt(value);
+        }
+        function addDayInput(value = '') {
+            dayNames.push(value || `Tag ${dayNames.length + 1}`);
+            renderDayInputs();
+        }
+        function removeDayInput(index) {
+            dayNames.splice(index, 1);
+            renderDayInputs();
+        }
+        function renderDayInputs() {
+            const container = document.getElementById('dayNamesContainer');
+            container.innerHTML = '';
+            dayNames.forEach((name, i) => {
+                container.innerHTML += `<div style='display:flex;align-items:center;margin-bottom:4px;'>
+                    <input type='text' value='${name}' onchange='updateDayName(${i}, this.value)' style='flex:1;padding:6px 10px;border-radius:8px;border:1px solid #ccc;margin-right:8px;'>
+                    <button type='button' onclick='removeDayInput(${i})' style='color:#c00;background:none;border:none;font-size:1.2em;cursor:pointer;'>✕</button>
+                </div>`;
+            });
+        }
+        function updateDayName(index, value) {
+            dayNames[index] = value;
+        }
+        function saveSettings(e) {
+            e.preventDefault();
+            localStorage.setItem('monatsplan_shiftNames', JSON.stringify(shiftNames));
+            localStorage.setItem('monatsplan_dayNames', JSON.stringify(dayNames));
+            localStorage.setItem('monatsplan_rowCounts', JSON.stringify(rowCounts));
+            // Titel speichern
+            const newTitle = document.getElementById('mainTitleInput').value.trim();
+            if (newTitle) {
+                localStorage.setItem('monatsplan_mainTitle', newTitle);
+            }
+            closeSettingsModal();
+            location.reload();
+        }
+
+        // Kompakte Formatierung für Excel-Sheet
+        function setSheetCompactFormat(sheet, rows, cols) {
+            // Spaltenbreiten klein
+            if (!sheet['!cols']) sheet['!cols'] = [];
+            for (let i = 0; i < cols; i++) {
+                sheet['!cols'][i] = { wch: 12 };
+            }
+            // Zeilenhöhe größer für bessere Lesbarkeit
+            sheet['!rows'] = Array(rows).fill({ hpt: 18 });
+        }
+
+        function addColorsToSheet(sheet, allData) {
+            try {
+                // Lade gespeicherte Farben
+                let employeeColors = {};
+                try {
+                    employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey) || '{}');
+                    console.log('Geladene Mitarbeiter-Farben:', employeeColors);
+                } catch (e) { 
+                    employeeColors = {};
+                    console.error('Fehler beim Laden der Mitarbeiter-Farben:', e);
+                }
+                
+                let singleCellColor = null;
+                try {
+                    singleCellColor = JSON.parse(localStorage.getItem(singleCellColorKey) || 'null');
+                    console.log('Geladene Einzelzellen-Farbe:', singleCellColor);
+                } catch (e) { 
+                    singleCellColor = null;
+                    console.error('Fehler beim Laden der Einzelzellen-Farbe:', e);
+                }
+                
+                // Farb-Mapping für Excel (vereinfacht)
+                const colorMap = {
+                    '#ffe082': 'FFFFD54F', // Gelb
+                    '#b2dfdb': 'FFB2DFDB', // Türkis
+                    '#c5e1a5': 'FFC5E1A5', // Grün
+                    '#ffab91': 'FFFFAB91', // Orange
+                    '#b39ddb': 'FFB39DDB', // Lila
+                    '#90caf9': 'FF90CAF9', // Blau
+                    '#ef9a9a': 'FFEF9A9A', // Rot
+                    '#e3f2fd': 'FFE3F2FD', // Hellblau
+                    '#e8f5e8': 'FFE8F5E8'  // Hellgrün
+                };
+                
+                // Alternative Methode: Direkt alle farbigen Zellen finden
+                const coloredCells = document.querySelectorAll('td[contenteditable="true"][style*="background-color"]');
+                console.log('Gefundene farbige Zellen:', coloredCells.length);
+                
+                // Wende Farben auf Zellen an
+                let currentRow = 2; // Start nach Titel und Leerzeile
+                let coloredCellsCount = 0;
+                
+                shiftNames.forEach((shift, sIdx) => {
+                    currentRow += 1; // Schichtname
+                    currentRow += 1; // Spaltenüberschriften
+                    
+                    // Hole die tatsächlichen Tabellendaten für diese Schicht
+                    const tbody = document.getElementById(`shiftBody_${sIdx}`);
+                    console.log(`Prüfe Tabelle shiftBody_${sIdx}:`, tbody);
+                    
+                    if (tbody) {
+                        const rows = tbody.querySelectorAll('tr');
+                        console.log(`Anzahl Zeilen in shiftBody_${sIdx}:`, rows.length);
+                        
+                        rows.forEach((row, rowIndex) => {
+                            const cells = row.querySelectorAll('td');
+                            cells.forEach((cell, cellIndex) => {
+                                const excelRow = currentRow + rowIndex;
+                                const excelCol = cellIndex;
+                                const cellKey = `${tbody.id}_${rowIndex}_${cellIndex}`;
+                                
+                                // Prüfe, ob diese Zelle eine Farbe hat (mehrere Methoden)
+                                let cellColor = null;
+                                
+                                // Methode 1: Über localStorage
+                                if (cellIndex === 0 && singleCellColor && singleCellColor.key === cellKey) {
+                                    cellColor = singleCellColor.color;
+                                    console.log(`Einzelzellen-Farbe gefunden für ${cellKey}:`, cellColor);
+                                } else if (cellIndex > 0 && employeeColors[cellKey]) {
+                                    cellColor = employeeColors[cellKey];
+                                    console.log(`Mitarbeiter-Farbe gefunden für ${cellKey}:`, cellColor);
+                                }
+                                
+                                // Methode 2: Direkt aus dem style-Attribut
+                                if (!cellColor && cell.style.backgroundColor) {
+                                    cellColor = cell.style.backgroundColor;
+                                    console.log(`Farbe aus style gefunden für ${cellKey}:`, cellColor);
+                                }
+                                
+                                // Wende Farbe an, falls vorhanden
+                                if (cellColor && colorMap[cellColor]) {
+                                    const cellRef = XLSX.utils.encode_cell({ r: excelRow, c: excelCol });
+                                    
+                                    // Stelle sicher, dass die Zelle existiert
+                                    if (!sheet[cellRef]) {
+                                        sheet[cellRef] = { v: allData[excelRow] ? allData[excelRow][excelCol] : '' };
+                                    }
+                                    
+                                    // Wende Farbe direkt an
+                                    sheet[cellRef].s = {
+                                        fill: {
+                                            patternType: 'solid',
+                                            fgColor: { rgb: colorMap[cellColor] }
+                                        }
+                                    };
+                                    
+                                    coloredCellsCount++;
+                                    console.log(`Farbe angewendet auf ${cellRef}:`, cellColor);
+                                }
+                            });
+                        });
+                    }
+                    
+                    currentRow += tbody ? tbody.querySelectorAll('tr').length : (rowCounts[sIdx] || 7);
+                    currentRow += 1; // Leerzeile zwischen Schichten
+                });
+                
+                console.log(`Insgesamt ${coloredCellsCount} Zellen mit Farben exportiert`);
+            } catch (error) {
+                console.error('Fehler beim Hinzufügen der Farben:', error);
+            }
+        }
+
+        // Titel beim Laden setzen
+        function setMainTitleFromStorage() {
+            const savedTitle = localStorage.getItem('monatsplan_mainTitle');
+            if (savedTitle) {
+                document.getElementById('main-title').textContent = savedTitle;
+            } else {
+                document.getElementById('main-title').textContent = 'Monatsplan';
+            }
+            updateMonatsplanDatum();
+        }
+        function updateMonatsplanDatum() {
+            const monthInput = document.getElementById('monthSelect');
+            const wochenplanDatum = document.getElementById('wochenplan-datum');
+            if (monthInput && monthInput.value) {
+                const [year, month] = monthInput.value.split('-');
+                wochenplanDatum.textContent = `Monatsplan für ${month}.${year}`;
+            } else {
+                wochenplanDatum.textContent = '';
+            }
+        }
+        document.getElementById('monthSelect').addEventListener('change', updateMonatsplanDatum);
+
+        function showCustomAlert(message) {
+            const alertBox = document.getElementById('custom-alert');
+            const alertMsg = document.getElementById('custom-alert-message');
+            const alertInner = document.getElementById('custom-alert-box');
+            alertMsg.textContent = message;
+            alertBox.classList.add('show');
+            setTimeout(() => {
+                alertInner.style.opacity = '1';
+                alertInner.style.transform = 'scale(1)';
+            }, 10);
+            setTimeout(() => {
+                alertInner.style.opacity = '0';
+                alertInner.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    alertBox.classList.remove('show');
+                }, 250);
+            }, 2000);
+        }
+
+
+    </script>
+</body>
+</html>
+

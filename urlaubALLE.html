@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jahresplaner - Urlaubs- und Krankentage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007AFF;
+            text-decoration: none; 
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1d1d1f;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #007AFF;
+        }
+
+                .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .login-btn {
+            color: #1d1d1f;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+        }
+
+        .signup-btn {
+            background: #007AFF;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .signup-btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .container {
+            max-width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 80px 20px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], input[type="date"], select {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .planner-table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.85em;
+        }
+
+        .planner-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 4px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            min-width: 25px;
+        }
+
+        .planner-table th:first-child {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            min-width: 120px;
+            text-align: left;
+            padding: 8px 12px;
+        }
+
+        .planner-table td {
+            padding: 4px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-width: 25px;
+            height: 35px;
+        }
+
+        .planner-table td:first-child {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: left;
+            padding: 8px 12px;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            min-width: 120px;
+            cursor: default;
+        }
+
+        .planner-table td:hover:not(:first-child) {
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.1);
+        }
+
+        .vacation {
+            background: linear-gradient(135deg, #4ecdc4 0%, #26d0ce 100%) !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .sick {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .weekend {
+            background: #f1f3f4;
+            color: #6c757d;
+        }
+
+        .month-header {
+            color: white !important;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .month-0 { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important; }
+        .month-1 { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%) !important; }
+        .month-2 { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%) !important; }
+        .month-3 { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important; }
+        .month-4 { background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%) !important; }
+        .month-5 { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important; }
+        .month-6 { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%) !important; }
+        .month-7 { background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%) !important; }
+        .month-8 { background: linear-gradient(135deg, #ff5722 0%, #d84315 100%) !important; }
+        .month-9 { background: linear-gradient(135deg, #795548 0%, #5d4037 100%) !important; }
+        .month-10 { background: linear-gradient(135deg, #607d8b 0%, #455a64 100%) !important; }
+        .month-11 { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important; }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-color {
+            width: 25px;
+            height: 20px;
+            border-radius: 5px;
+            border: 2px solid white;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .no-employees {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 50px;
+            background: rgba(240, 240, 240, 0.5);
+            border-radius: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .save-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .save-status.show {
+            opacity: 1;
+        }
+
+        /* Mobile Anpassungen */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                justify-content: center;
+            }
+
+            .planner-table {
+                font-size: 0.75em;
+            }
+
+            .planner-table th,
+            .planner-table td {
+                padding: 2px;
+                min-width: 20px;
+            }
+
+            .planner-table th:first-child,
+            .planner-table td:first-child {
+                min-width: 80px;
+                font-size: 0.9em;
+            }
+
+            .legend {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .planner-table th:first-child,
+            .planner-table td:first-child {
+                min-width: 60px;
+                padding: 4px 6px;
+            }
+
+            .planner-table {
+                font-size: 0.7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="save-status" id="saveStatus">Automatisch gespeichert!</div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">         
+             <a href="welcome.html" class="logo">OrgaShift</a>
+            <ul class="nav-links">
+                <li><a href="#products">Produkte</a></li>
+                <li><a href="#explore">Erkunden</a></li>
+                <li><a href="#help">Hilfe</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+                <li><a href="pricing.html">Preise</a></li>
+            </ul>
+             <div class="nav-buttons">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="welcome.html" class="signup-btn">Kostenlos starten</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>📅 Jahresplaner 2025</h1>
+            <p class="subtitle">Urlaubs- und Krankentage Übersicht</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>👤 Mitarbeiter:</label>
+                <input type="text" id="employeeName" placeholder="Name eingeben" />
+                <button onclick="addEmployee()">Hinzufügen</button>
+            </div>
+
+            <div class="control-group">
+                <label>📋 Eintrag:</label>
+                <select id="employeeSelect">
+                    <option value="">Mitarbeiter wählen...</option>
+                </select>
+                <input type="date" id="startDate" />
+                <input type="date" id="endDate" />
+                <select id="entryType">
+                    <option value="vacation">Urlaub</option>
+                    <option value="sick">Krankheit</option>
+                    <option value="clear">Löschen</option>
+                </select>
+                <button onclick="addEntry()" class="btn-secondary">Eintragen</button>
+            </div>
+
+            <div class="control-group">
+                <button onclick="exportData()" class="btn-export">Daten exportieren</button>
+                <input type="file" id="fileInput" class="file-input" accept=".json" onchange="importData(this)" />
+                <button onclick="document.getElementById('fileInput').click()" class="btn-export">Daten importieren</button>
+            </div>
+
+            <div class="control-group">
+                <button onclick="clearAllData()" class="btn-danger">Alle Daten löschen</button>
+                <!--<button onclick="addSampleData()">Beispieldaten</button>-->
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color vacation"></div>
+                <span>Urlaub (U)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color sick"></div>
+                <span>Krankheit (K)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color weekend"></div>
+                <span>Wochenende</span>
+            </div>
+            <div class="legend-item">
+                <span>Klicken zum Löschen einzelner Tage</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="planner-table" id="plannerTable">
+                <!-- Tabelle wird durch JavaScript generiert -->
+            </table>
+        </div>
+
+        <div class="stats-container" id="statsContainer">
+            <!-- Statistiken werden durch JavaScript generiert -->
+        </div>
+    </div>
+
+    <script>
+        const months = [
+            'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+        ];
+
+        const monthsShort = [
+            'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+        ];
+
+        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        
+        let employees = [];
+        let entries = {};
+
+        // Schaltjahr 2025 prüfen (2025 ist kein Schaltjahr)
+        const currentYear = 2025;
+
+        // Lokale Speicherung
+        function saveData() {
+            const data = {
+                employees: employees,
+                entries: entries,
+                lastUpdated: new Date().toISOString()
+            };
+            localStorage.setItem('jahresplaner_data', JSON.stringify(data));
+            showSaveStatus();
+        }
+
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem('jahresplaner_data');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    employees = data.employees || [];
+                    entries = data.entries || {};
+                    updateEmployeeSelect();
+                    generateTable();
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Daten:', error);
+            }
+        }
+
+        function showSaveStatus() {
+            const status = document.getElementById('saveStatus');
+            status.classList.add('show');
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 2000);
+        }
+
+        // Export/Import Funktionen
+        function exportData() {
+            const data = {
+                employees: employees,
+                entries: entries,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `jahresplaner_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('Möchten Sie die importierten Daten mit den aktuellen Daten zusammenführen oder alle aktuellen Daten ersetzen?\n\nOK = Ersetzen\nAbbrechen = Zusammenführen')) {
+                        // Ersetzen
+                        employees = data.employees || [];
+                        entries = data.entries || {};
+                    } else {
+                        // Zusammenführen
+                        const importedEmployees = data.employees || [];
+                        const importedEntries = data.entries || {};
+                        
+                        // Mitarbeiter zusammenführen
+                        importedEmployees.forEach(emp => {
+                            if (!employees.includes(emp)) {
+                                employees.push(emp);
+                            }
+                        });
+                        
+                        // Einträge zusammenführen
+                        Object.keys(importedEntries).forEach(emp => {
+                            if (!entries[emp]) {
+                                entries[emp] = [];
+                            }
+                            entries[emp] = [...entries[emp], ...importedEntries[emp]];
+                        });
+                    }
+                    
+                    employees.sort();
+                    updateEmployeeSelect();
+                    generateTable();
+                    saveData();
+                    alert('Daten wurden erfolgreich importiert!');
+                    
+                } catch (error) {
+                    alert('Fehler beim Importieren der Datei. Bitte überprüfen Sie das Dateiformat.');
+                    console.error('Import error:', error);
+                }
+            };
+            reader.readAsText(file);
+            input.value = ''; // Reset file input
+        }
+
+        function isWeekend(date) {
+            const day = date.getDay();
+            return day === 0 || day === 6; // Sonntag = 0, Samstag = 6
+        }
+
+        function addEmployee() {
+            const name = document.getElementById('employeeName').value.trim();
+            if (!name) {
+                alert('Bitte geben Sie einen Namen ein.');
+                return;
+            }
+            
+            if (employees.includes(name)) {
+                alert('Dieser Mitarbeiter existiert bereits.');
+                return;
+            }
+
+            employees.push(name);
+            employees.sort(); // Alphabetisch sortieren
+            entries[name] = [];
+            document.getElementById('employeeName').value = '';
+            
+            updateEmployeeSelect();
+            generateTable();
+            saveData();
+        }
+
+        function updateEmployeeSelect() {
+            const select = document.getElementById('employeeSelect');
+            select.innerHTML = '<option value="">Mitarbeiter wählen...</option>';
+            
+            // Sortierte Liste für das Dropdown-Menü
+            const sortedEmployees = [...employees].sort();
+            sortedEmployees.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = employee;
+                option.textContent = employee;
+                select.appendChild(option);
+            });
+        }
+
+        function addEntry() {
+            const employee = document.getElementById('employeeSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const type = document.getElementById('entryType').value;
+
+            if (!employee || !startDate || !endDate) {
+                alert('Bitte füllen Sie alle Felder aus.');
+                return;
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (start > end) {
+                alert('Das Startdatum muss vor dem Enddatum liegen.');
+                return;
+            }
+
+            if (type === 'clear') {
+                // Einträge in diesem Zeitraum löschen
+                entries[employee] = entries[employee].filter(entry => {
+                    const entryStart = new Date(entry.start);
+                    const entryEnd = new Date(entry.end);
+                    return !(entryStart <= end && entryEnd >= start);
+                });
+            } else {
+                entries[employee].push({ start: startDate, end: endDate, type });
+            }
+            
+            // Felder zurücksetzen
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            
+            generateTable();
+            saveData();
+        }
+
+        function isDateInRange(date, start, end) {
+            const checkDate = new Date(date);
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            return checkDate >= startDate && checkDate <= endDate;
+        }
+
+        function getEntryForDate(employee, dateStr) {
+            if (!entries[employee]) return null;
+            
+            for (let entry of entries[employee]) {
+                if (isDateInRange(dateStr, entry.start, entry.end)) {
+                    return entry.type;
+                }
+            }
+            return null;
+        }
+
+        function generateTable() {
+            const table = document.getElementById('plannerTable');
+            
+            if (employees.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="100%" class="no-employees">
+                            Noch keine Mitarbeiter hinzugefügt. Fügen Sie oben einen Mitarbeiter hinzu, um zu beginnen.
+                        </td>
+                    </tr>
+                `;
+                updateStats();
+                return;
+            }
+
+            let html = '<thead><tr><th>Mitarbeiter</th>';
+            
+            // Header für alle Tage des Jahres generieren
+            for (let month = 0; month < 12; month++) {
+                // Monatsheader mit verschiedenen Farben
+                html += `<th class="month-header month-${month}" colspan="${daysInMonth[month]}">${monthsShort[month]}</th>`;
+            }
+            html += '</tr><tr><th></th>';
+            
+            // Tage-Header
+            for (let month = 0; month < 12; month++) {
+                for (let day = 1; day <= daysInMonth[month]; day++) {
+                    html += `<th>${day}</th>`;
+                }
+            }
+            html += '</tr></thead><tbody>';
+
+            // Zeilen für jeden Mitarbeiter (alphabetisch sortiert)
+            const sortedEmployees = [...employees].sort();
+            sortedEmployees.forEach(employee => {
+                html += `<tr><td>${employee}</td>`;
+                
+                for (let month = 0; month < 12; month++) {
+                    for (let day = 1; day <= daysInMonth[month]; day++) {
+                        const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        const date = new Date(currentYear, month, day);
+                        const entryType = getEntryForDate(employee, dateStr);
+                        
+                        let className = '';
+                        let content = '';
+                        
+                        if (entryType === 'vacation') {
+                            className = 'vacation';
+                            content = 'U';
+                        } else if (entryType === 'sick') {
+                            className = 'sick';
+                            content = 'K';
+                        } else if (isWeekend(date)) {
+                            className = 'weekend';
+                            content = '·';
+                        } else {
+                            content = '';
+                        }
+                        
+                        html += `<td class="${className}" data-employee="${employee}" data-date="${dateStr}">${content}</td>`;
+                    }
+                }
+                html += '</tr>';
+            });
+
+            html += '</tbody>';
+            table.innerHTML = html;
+            
+            // Event-Listener für Klicks auf Tabellenzellen
+            const cells = table.querySelectorAll('td:not(:first-child)');
+            cells.forEach(cell => {
+                cell.addEventListener('click', function(e) {
+                    const employee = this.dataset.employee;
+                    const date = this.dataset.date;
+                    if (this.textContent && !this.classList.contains('weekend')) {
+                        deleteSingleDay(employee, date);
+                    }
+                });
+            });
+            
+            updateStats();
+        }
+
+        function deleteSingleDay(employee, dateStr) {
+            if (!entries[employee]) return;
+            
+            const clickedDate = new Date(dateStr);
+            
+            entries[employee] = entries[employee].filter(entry => {
+                const start = new Date(entry.start);
+                const end = new Date(entry.end);
+                
+                // Wenn der angeklickte Tag innerhalb eines Eintrags liegt
+                if (clickedDate >= start && clickedDate <= end) {
+                    // Wenn es ein einzelner Tag ist, lösche den Eintrag
+                    if (start.getTime() === end.getTime() && start.getTime() === clickedDate.getTime()) {
+                        return false;
+                    }
+                    
+                    // Teile den Eintrag in zwei Teile, aber lasse den angeklickten Tag aus
+                    if (start.getTime() !== clickedDate.getTime()) {
+                        entries[employee].push({
+                            start: entry.start,
+                            end: new Date(clickedDate.getTime() - 86400000).toISOString().split('T')[0],
+                            type: entry.type
+                        });
+                    }
+                    
+                    if (end.getTime() !== clickedDate.getTime()) {
+                        entries[employee].push({
+                            start: new Date(clickedDate.getTime() + 86400000).toISOString().split('T')[0],
+                            end: entry.end,
+                            type: entry.type
+                        });
+                    }
+                    
+                    return false;
+                }
+                return true;
+            });
+            
+            generateTable();
+            saveData();
+        }
+
+        function updateStats() {
+            const statsContainer = document.getElementById('statsContainer');
+            
+            if (employees.length === 0) {
+                statsContainer.innerHTML = '';
+                return;
+            }
+
+            let totalVacation = 0;
+            let totalSick = 0;
+
+            // Mitarbeiter alphabetisch sortiert für Statistiken
+            const sortedEmployees = [...employees].sort();
+            const statsHtml = sortedEmployees.map(employee => {
+                let vacationDays = 0;
+                let sickDays = 0;
+
+                if (entries[employee]) {
+                    entries[employee].forEach(entry => {
+                        const start = new Date(entry.start);
+                        const end = new Date(entry.end);
+                        const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                        
+                        if (entry.type === 'vacation') {
+                            vacationDays += days;
+                        } else if (entry.type === 'sick') {
+                            sickDays += days;
+                        }
+                    });
+                }
+
+                totalVacation += vacationDays;
+                totalSick += sickDays;
+
+                return `
+                    <div class="stat-card">
+                        <h4>${employee}</h4>
+                        <div>Urlaub: <span class="stat-value">${vacationDays}</span> Tage</div>
+                        <div>Krank: <span class="stat-value">${sickDays}</span> Tage</div>
+                    </div>
+                `;
+            }).join('');
+
+            const totalStats = `
+                <div class="stat-card">
+                    <h4>📊 Gesamt</h4>
+                    <div>Urlaub: <span class="stat-value">${totalVacation}</span> Tage</div>
+                    <div>Krank: <span class="stat-value">${totalSick}</span> Tage</div>
+                </div>
+            `;
+
+            statsContainer.innerHTML = statsHtml + totalStats;
+        }
+
+        function clearAllData() {
+            if (confirm('Möchten Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+                employees = [];
+                entries = {};
+                localStorage.removeItem('jahresplaner_data');
+                updateEmployeeSelect();
+                generateTable();
+            }
+        }
+
+        /*function addSampleData() {
+            employees = ['Anna Müller', 'Max Mustermann', 'Lisa Schmidt', 'Tom Weber', 'Sarah Klein'];
+            entries = {
+                'Anna Müller': [
+                    { start: '2025-03-15', end: '2025-03-22', type: 'vacation' },
+                    { start: '2025-07-01', end: '2025-07-14', type: 'vacation' },
+                    { start: '2025-11-05', end: '2025-11-06', type: 'sick' }
+                ],
+                'Max Mustermann': [
+                    { start: '2025-06-20', end: '2025-07-05', type: 'vacation' },
+                    { start: '2025-02-10', end: '2025-02-12', type: 'sick' },
+                    { start: '2025-12-23', end: '2025-12-31', type: 'vacation' }
+                ],
+                'Lisa Schmidt': [
+                    { start: '2025-08-10', end: '2025-08-25', type: 'vacation' },
+                    { start: '2025-04-01', end: '2025-04-02', type: 'sick' }
+                ],
+                'Tom Weber': [
+                    { start: '2025-05-15', end: '2025-05-30', type: 'vacation' },
+                    { start: '2025-09-01', end: '2025-09-03', type: 'sick' }
+                ],
+                'Sarah Klein': [
+                    { start: '2025-01-02', end: '2025-01-04', type: 'sick' },
+                    { start: '2025-06-01', end: '2025-06-14', type: 'vacation' }
+                ]
+            };
+            updateEmployeeSelect();
+            generateTable();
+            saveData();
+        }*/
+
+        // Initialisierung
+        window.addEventListener('load', function() {
+            loadData();
+            if (employees.length === 0) {
+                generateTable();
+            }
+        });
+
+        // Automatische Speicherung bei Änderungen
+        window.addEventListener('beforeunload', function() {
+            if (employees.length > 0) {
+                saveData();
+            }
+        });
+    </script>
+</body>
+</html>

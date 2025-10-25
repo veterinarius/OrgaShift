@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dienstplan</title>
+    <title>Wochenplan</title>
     <link rel="stylesheet" href="css/styles.css">
 
     <style>
@@ -97,6 +97,29 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
+
+        .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
     </style>
 
 </head>
@@ -122,7 +145,7 @@
 
     <div class="container">
         <div class="header">
-            <h1 id="main-title">Dienstplan Bocholt</h1>
+            <h1 id="main-title">Dienstplan</h1>
             <div id="wochenplan-datum" style="font-weight:bold;margin-bottom:0.5rem;"></div>
             <p>Erstellen Sie Ihren Dienstplan einfach und effizient</p>
         </div>
@@ -309,13 +332,14 @@
 
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>-->
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="js/employees.js"></script>
     <script>
 
         // Globale Variablen
         let employees = [];
         let constraints = {};
         let schedule = {};
-        let preferences = {}; // Neue Variable für Präferenzen
+        let preferences = {};
         let startDate = null;
         let endDate = null;
         const days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -464,62 +488,86 @@
                 showCustomAlert('Bitte fügen Sie mindestens einen Mitarbeiter hinzu.');
                 return;
             }
-            // Mitarbeiter sortieren: Alle mit 'Dr.' zuerst
-            const sortedEmployees = [...employees].sort((a, b) => {
-                const aDr = a.toLowerCase().includes('dr.');
-                const bDr = b.toLowerCase().includes('dr.');
-                if (aDr && !bDr) return -1;
-                if (!aDr && bDr) return 1;
-                return 0;
-            });
-            const generatedSchedule = {};
-            shiftNames.forEach((shift, sIdx) => {
-                generatedSchedule[shift] = [];
-                for (let row = 0; row < (rowCounts[sIdx] || 7); row++) {
-                    const weekSchedule = [];
-                    dayNames.forEach(() => weekSchedule.push(''));
-                    generatedSchedule[shift].push(weekSchedule);
-                }
-            });
-            sortedEmployees.forEach(employee => {
-                const employeePrefs = preferences[employee] || {};
-                const shiftPreferences = {};
-                shiftNames.forEach(shift => shiftPreferences[shift] = []);
-                Object.keys(employeePrefs).forEach(day => {
-                    const dayPrefs = employeePrefs[day] || [];
-                    dayPrefs.forEach(shift => {
-                        if (shiftPreferences[shift]) {
-                            shiftPreferences[shift].push(day);
-                        }
-                    });
-                });
-                Object.keys(shiftPreferences).forEach(shift => {
-                    const preferredDays = shiftPreferences[shift];
-                    if (preferredDays.length > 0) {
-                        preferredDays.forEach(day => {
-                            const dayIndex = dayNames.indexOf(day);
-                            if (dayIndex !== -1) {
-                                for (let i = 0; i < generatedSchedule[shift].length; i++) {
-                                    if (!generatedSchedule[shift][i][dayIndex]) {
-                                        generatedSchedule[shift][i][dayIndex] = employee;
-                                        break;
-                                    }
+
+    // Mitarbeiter sortieren: Alle mit 'Dr.' zuerst
+    const sortedEmployees = [...employees].sort((a, b) => {
+        const aDr = a.toLowerCase().includes('dr.');
+        const bDr = b.toLowerCase().includes('dr.');
+        if (aDr && !bDr) return -1;
+        if (!aDr && bDr) return 1;
+        return 0;
+    });
+
+    const generatedSchedule = {};
+    shiftNames.forEach((shift, sIdx) => {
+        generatedSchedule[shift] = [];
+        for (let row = 0; row < (rowCounts[sIdx] || 7); row++) {
+            const weekSchedule = [];
+            dayNames.forEach(() => weekSchedule.push(''));
+            generatedSchedule[shift].push(weekSchedule);
+        }
+    });
+
+    // Für jeden Mitarbeiter
+    sortedEmployees.forEach(employee => {
+        const employeePrefs = preferences[employee] || {};
+        
+        // Tag/Schicht Präferenzen verarbeiten
+        Object.keys(employeePrefs.dayShiftPrefs || {}).forEach(day => {
+            const dayPrefs = employeePrefs.dayShiftPrefs[day] || [];
+            const dayIndex = dayNames.indexOf(day);
+            
+            if (dayIndex !== -1) {
+                dayPrefs.forEach(shift => {
+                    if (generatedSchedule[shift]) {
+                        // Berücksichtige Zeilenpräferenzen
+                        const rowPrefs = employeePrefs.rowPrefs?.[shift] || [];
+                        let placed = false;
+
+                        // Versuche zuerst präferierte Zeilen
+                        if (rowPrefs.length > 0) {
+                            for (const rowNum of rowPrefs) {
+                                if (!generatedSchedule[shift][rowNum-1][dayIndex]) {
+                                    generatedSchedule[shift][rowNum-1][dayIndex] = employee;
+                                    placed = true;
+                                    break;
                                 }
                             }
-                        });
+                        }
+
+                        // Wenn keine präferierte Zeile verfügbar, nimm die erste freie
+                        if (!placed) {
+                            for (let i = 0; i < generatedSchedule[shift].length; i++) {
+                                if (!generatedSchedule[shift][i][dayIndex]) {
+                                    generatedSchedule[shift][i][dayIndex] = employee;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 });
-            });
-            displayGeneratedScheduleUniversal(generatedSchedule);
-            schedule = generatedSchedule;
-            saveDataToLocalStorage();
-            // Event-Listener für Farbauswahl nach dem Generieren hinzufügen
-            setTimeout(() => {
-                addCellColorListeners();
-                applyCellColors();
-            }, 100);
-            showCustomAlert('Dienstplan wurde erfolgreich generiert!');
+            }
+        });
+    });
+
+    displayGeneratedScheduleUniversal(generatedSchedule);
+    schedule = generatedSchedule;
+    saveDataToLocalStorage();
+    
+    setTimeout(() => {
+        addCellColorListeners();
+        applyCellColors();
+        // Drag & Drop und Speicherung für die neu erzeugten Zellen initialisieren
+        if (typeof addCellDragDropListeners === 'function') {
+            addCellDragDropListeners();
         }
+        if (typeof addTableDataListeners === 'function') {
+            addTableDataListeners();
+        }
+    }, 100);
+    
+    showCustomAlert('Dienstplan wurde erfolgreich generiert!');
+}
         // --- Anzeige für generierten Plan (dynamisch) ---
         function displayGeneratedScheduleUniversal(generatedSchedule) {
             const container = document.getElementById('schedule-container');
@@ -559,12 +607,18 @@
             const name = input.value.trim();
             if (name) {
                 employees.push(name);
-                // Initialisiere Präferenzen für neuen Mitarbeiter (nur wenn tatsächlich gesetzt)
-                preferences[name] = {};
+                // Initialisiere Präferenzen für neuen Mitarbeiter
+                preferences[name] = {
+                    dayShiftPrefs: {},
+                    rowPrefs: {}
+                };
                 input.value = '';
                 updateEmployeeList();
-                displaySchedule();
                 saveDataToLocalStorage();
+                //displaySchedule();
+                showCustomAlert('Mitarbeiter erfolgreich hinzugefügt!');
+            } else {
+                showCustomAlert('Bitte geben Sie einen Namen ein.');
             }
         }
 
@@ -586,53 +640,67 @@
 
             let modalHTML = `
                 <h2>Präferenzen für ${employeeName}</h2>
-                <table class="modal-table">
-                    <thead>
-                        <tr>
-                            <th>Tag</th>
-                            <th>Präferierte Schichten</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+                
+                <!-- Tag/Schicht Präferenzen -->
+                <div class="preference-section">
+                    <h3>Tag/Schicht Präferenzen</h3>
+                    <table class="modal-table">
+                        <thead>
+                            <tr>
+                                <th>Tag</th>
+                                <th>Präferierte Schichten</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${dayNames.map(day => {
+                                const currentPrefs = preferences[employeeName]?.dayShiftPrefs?.[day] || [];
+                                return `
+                                    <tr>
+                                        <td style="font-weight: 600;">${day}</td>
+                                        <td>
+                                            <div class="checkbox-group">
+                                                ${shiftNames.map(shift => `
+                                                    <div class="checkbox-item">
+                                                        <input type="checkbox" 
+                                                            id="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day}-${shift}"
+                                                            value="${shift}" 
+                                                            ${currentPrefs.includes(shift) ? 'checked' : ''}
+                                                            onchange="updatePreference('${employeeName}', '${day}', '${shift}', this.checked, 'dayShift')">
+                                                        <label for="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day}-${shift}">${shift}</label>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
 
-            dayNames.forEach(day => {
-                const currentPrefs = preferences[employeeName]?.[day] || [];
-                modalHTML += `
-                    <tr>
-                        <td style="font-weight: 600;">${day}</td>
-                        <td>
-                            <div class="checkbox-group">
-                            ${shiftNames.map(shift => `
-                                    <div class="checkbox-item">
-                                    <input type="checkbox" 
-                                               id="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day.replace(/[^a-zA-Z0-9]/g, '_')}-${shift.replace(/[^a-zA-Z0-9]/g, '_')}"
-                                           value="${shift}" 
-                                           ${currentPrefs.includes(shift) ? 'checked' : ''}
-                                           onchange="updatePreference('${employeeName}', '${day}', '${shift}', this.checked)">
-                                        <label for="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day.replace(/[^a-zA-Z0-9]/g, '_')}-${shift.replace(/[^a-zA-Z0-9]/g, '_')}">${shift}</label>
-                                    </div>
-                            `).join('')}
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            modalHTML += `
-                    </tbody>
-                </table>
-                <div style="margin-top: 2rem; text-align: center;">
-                    <button class="btn btn-primary" onclick="closePreferenceModal()">
-                        <span>✓</span>
-                        Schließen
-                    </button>
+                <div style="margin-top: 2rem; text-align: right;">
+                    <button class="btn btn-primary" onclick="closePreferenceModal()">Speichern</button>
                 </div>
             `;
 
             modalContent.innerHTML = modalHTML;
             preferenceModal.appendChild(modalContent);
             document.body.appendChild(preferenceModal);
+
+            preferenceModal.addEventListener('click', function(e) {
+                if (e.target === preferenceModal) {
+                    closePreferenceModal();
+                }
+            });
+
+            // Event-Listener für ESC-Taste
+            const escListener = function(e) {
+                if (e.key === 'Escape') {
+                    closePreferenceModal();
+                    document.removeEventListener('keydown', escListener);
+                }
+            };
+            document.addEventListener('keydown', escListener);
         }
 
         function closePreferenceModal() {
@@ -640,30 +708,46 @@
             if (modal) {
                 modal.remove();
             }
-            // Aktualisiere die Mitarbeiterliste um die neue Anzahl der Präferenzen anzuzeigen
-            updateEmployeeList();
         }
 
-        function updatePreference(employee, day, shift, isChecked) {
-            // Initialisiere Präferenzen für Mitarbeiter falls nicht vorhanden
+        // Erweiterte Update-Funktion für Präferenzen
+        function updatePreference(employee, key, value, isChecked, type) {
+            // Initialisiere die Grundstruktur für den Mitarbeiter
             if (!preferences[employee]) {
-                preferences[employee] = {};
+                preferences[employee] = {
+                    dayShiftPrefs: {},
+                    rowPrefs: {}
+                };
             }
-            if (!preferences[employee][day]) {
-                preferences[employee][day] = [];
+
+            // Initialisiere die entsprechenden Unterobjekte falls noch nicht vorhanden
+            if (type === 'dayShift' && !preferences[employee].dayShiftPrefs[key]) {
+                preferences[employee].dayShiftPrefs[key] = [];
             }
-            
-            if (isChecked) {
-                // Füge Schicht zu Präferenzen hinzu, falls nicht bereits vorhanden
-                if (!preferences[employee][day].includes(shift)) {
-                    preferences[employee][day].push(shift);
+            if (type === 'row' && !preferences[employee].rowPrefs[key]) {
+                preferences[employee].rowPrefs[key] = [];
+            }
+
+            // Update der Präferenzen
+            if (type === 'dayShift') {
+                if (isChecked && !preferences[employee].dayShiftPrefs[key].includes(value)) {
+                    preferences[employee].dayShiftPrefs[key].push(value);
+                } else if (!isChecked) {
+                    preferences[employee].dayShiftPrefs[key] = preferences[employee].dayShiftPrefs[key].filter(v => v !== value);
                 }
-            } else {
-                // Entferne Schicht aus Präferenzen
-                preferences[employee][day] = preferences[employee][day].filter(s => s !== shift);
+            } else if (type === 'row') {
+                if (isChecked && !preferences[employee].rowPrefs[key].includes(value)) {
+                    preferences[employee].rowPrefs[key].push(value);
+                } else if (!isChecked) {
+                    preferences[employee].rowPrefs[key] = preferences[employee].rowPrefs[key].filter(v => v !== value);
+                }
             }
-            
-            saveDataToLocalStorage();
+
+            // Debug-Ausgabe
+            console.log('Updated preferences for', employee, ':', preferences[employee]);
+
+            // Speichern in localStorage
+            localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences));
         }
 
         // Dienstplan anzeigen
@@ -699,6 +783,13 @@
             setTimeout(() => {
                 addCellColorListeners();
                 applyCellColors();
+                // Drag & Drop und Speicherung für die neu erzeugten Zellen initialisieren
+                if (typeof addCellDragDropListeners === 'function') {
+                    addCellDragDropListeners();
+                }
+                if (typeof addTableDataListeners === 'function') {
+                    addTableDataListeners();
+                }
             }, 100);
         }
 
@@ -903,9 +994,18 @@
             if (savedEmployees) {
                 employees = JSON.parse(savedEmployees);
             }
-            const savedPreferences = localStorage.getItem('dienstplan_preferences');
-            if (savedPreferences) {
-                preferences = JSON.parse(savedPreferences);
+            // Präferenzen laden
+            try {
+                const savedPreferences = localStorage.getItem('dienstplan_preferences');
+                if (savedPreferences) {
+                    preferences = JSON.parse(savedPreferences);
+                    console.log('Loaded preferences:', preferences);
+                } else {
+                    preferences = {};
+                }
+            } catch (e) {
+                console.error('Error loading preferences:', e);
+                preferences = {};
             }
             const savedSchedule = localStorage.getItem('dienstplan_schedule');
             if (savedSchedule) {
@@ -1175,10 +1275,7 @@
             e.target.closest('.employee-tag')?.classList.add('drag-over');
         }
 
-        function handleDragLeave(e) {
-            e.target.closest('.employee-tag')?.classList.remove('drag-over');
-        }
-
+       
         // --- Zusatzpräferenzen (Urlaub/Krank) ---
         function updateExtraPrefEmployeeSelect() {
             const select = document.getElementById('extraPrefEmployeeSelect');
@@ -1279,7 +1376,12 @@
         window.addEventListener('scroll', hideContextMenu);
         window.addEventListener('resize', hideContextMenu);
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') hideContextMenu();
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('preferenceModal');
+                if (modal) {
+                    closePreferenceModal();
+                }
+            }
         });
 
         // --- Google Sheets Export ---
@@ -1551,7 +1653,7 @@
                 console.log('Gefundene farbige Zellen:', coloredCells.length);
                 
                 // Wende Farben auf Zellen an
-                let currentRow = 2; // Start nach Titel und Leerzeile
+                let currentRow =   2; // Start nach Titel und Leerzeile
                 let coloredCellsCount = 0;
                 
                 shiftNames.forEach((shift, sIdx) => {
@@ -1570,6 +1672,7 @@
                             const cells = row.querySelectorAll('td');
                             cells.forEach((cell, cellIndex) => {
                                 const excelRow = currentRow + rowIndex;
+                               
                                 const excelCol = cellIndex;
                                 const cellKey = `${tbody.id}_${rowIndex}_${cellIndex}`;
                                 
@@ -1672,6 +1775,98 @@
         }
 
 
+    </script>
+
+    <script>
+
+        function addTableDataListeners() {
+            // Event-Listener für alle editierbaren Zellen
+            document.addEventListener('input', function(e) {
+                if (e.target.hasAttribute('contenteditable')) {
+                    // Verzögerte Speicherung um Performance zu verbessern
+                    clearTimeout(window.saveTimeout);
+                    window.saveTimeout = setTimeout(() => {
+                        saveDataToLocalStorage();
+                    }, 500);
+                }
+            });
+            
+            // Drag & Drop für Tabellenzellen
+            addCellDragDropListeners();
+        }
+        
+        // Drag & Drop für Tabellenzellen
+        function addCellDragDropListeners() {
+            document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                // Nur Zellen mit Inhalt oder Mitarbeiter-Zellen (nicht erste Spalte) draggable machen
+                if (cell.cellIndex > 0) {
+                    cell.setAttribute('draggable', 'true');
+                    
+                    cell.addEventListener('dragstart', function(e) {
+                        // Nur wenn Zelle Inhalt hat
+                        if (this.textContent.trim()) {
+                            this.classList.add('cell-dragging');
+                            e.dataTransfer.effectAllowed = 'move';
+                            e.dataTransfer.setData('text/plain', this.textContent.trim());
+                            e.dataTransfer.setData('cell-drag', 'true');
+                        } else {
+                            e.preventDefault();
+                        }
+                    });
+                    
+                    cell.addEventListener('dragend', function(e) {
+                        this.classList.remove('cell-dragging');
+                        document.querySelectorAll('.cell-drag-over').forEach(el => {
+                            el.classList.remove('cell-drag-over');
+                        });
+                    });
+                    
+                    cell.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                    });
+                    
+                    cell.addEventListener('dragenter', function(e) {
+                        e.preventDefault();
+                        if (this.cellIndex > 0) {
+                            this.classList.add('cell-drag-over');
+                        }
+                    });
+                    
+                    cell.addEventListener('dragleave', function(e) {
+                        this.classList.remove('cell-drag-over');
+                    });
+                    
+                    cell.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('cell-drag-over');
+                        
+                        if (this.cellIndex > 0) {
+                            const draggedText = e.dataTransfer.getData('text/plain');
+                            const isCellDrag = e.dataTransfer.getData('cell-drag');
+                            
+                            if (draggedText) {
+                                // Swap-Funktion: Tausche Inhalte
+                                const targetText = this.textContent.trim();
+                                const draggedCell = document.querySelector('.cell-dragging');
+                                
+                                if (isCellDrag && draggedCell) {
+                                    // Zelle-zu-Zelle: Tausche Inhalte
+                                    this.textContent = draggedText;
+                                    draggedCell.textContent = targetText;
+                                } else {
+                                    // Mitarbeiter-zu-Zelle: Setze Name
+                                    this.textContent = draggedText;
+                                }
+                                
+                                saveDataToLocalStorage();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+         
     </script>
 
     <script>
@@ -2103,46 +2298,19 @@ window.fallbackCopyMethod = function(text) {
     document.body.removeChild(textArea);
 };
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Mobile share script loaded and initialized');
-});
-
-// Also make sure functions are available immediately
-(function() {
-    console.log('Mobile share functions initialized');
-})();
-
 // Update-Zeit
-    document.getElementById('last-update').textContent = data.lastUpdate || new Date().toLocaleString('de-DE');
-    
-</script>
-
-        <script>
-        // Funktion zum Laden und Aktualisieren der Schedule-Daten
-            function loadScheduleData() {
-                // Hier können Sie Ihre Logik zum Laden der Daten einfügen
-                // Beispiel: Fetch von einem API-Endpoint oder anderen Datenquellen
-                
-                // Simuliere das Laden von Daten mit einem lastUpdate-Wert
-                const data = {
-                    lastUpdate: new Date().toLocaleString('de-DE')
-                };
-                
-                // Aktualisiere das last-update Element
-                const lastUpdateElement = document.getElementById('last-update');
-                if (lastUpdateElement) {
-                    lastUpdateElement.textContent = data.lastUpdate;
-                }
-                
-                console.log('Schedule-Daten aktualisiert:', data.lastUpdate);
+(function(){
+        const el = document.getElementById('last-update');
+        if (!el) return;
+        // Falls eine externe Variable `data` vorhanden und gültig ist, nutze deren Wert,
+        // ansonsten aktuelle lokale Zeit verwenden
+        try {
+            if (typeof data !== 'undefined' && data && data.lastUpdate) {
+                el.textContent = data.lastUpdate;
+            } else {
+                el.textContent = new Date().toLocaleString('de-DE');
             }
-
-            // Initialisierung beim Laden der Seite
-            document.addEventListener('DOMContentLoaded', function() {
-                loadScheduleData();
-            });
-            </script>
-
-</body>
-</html>
+        } catch (e) {
+            el.textContent = new Date().toLocaleString('de-DE');
+        }
+    })();

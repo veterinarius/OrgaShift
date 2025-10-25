@@ -471,7 +471,6 @@
                 <select id="entryType">
                     <option value="vacation">Urlaub</option>
                     <option value="sick">Krankheit</option>
-                    <option value="clear">Löschen</option>
                 </select>
                 <button onclick="addEntry()" class="btn-secondary">Eintragen</button>
             </div>
@@ -822,43 +821,74 @@
         function deleteSingleDay(employee, dateStr) {
             if (!entries[employee]) return;
             
-            const clickedDate = new Date(dateStr);
+            const newEntries = [];
+            let dayDeleted = false;
             
-            entries[employee] = entries[employee].filter(entry => {
-                const start = new Date(entry.start);
-                const end = new Date(entry.end);
-                
-                // Wenn der angeklickte Tag innerhalb eines Eintrags liegt
-                if (clickedDate >= start && clickedDate <= end) {
-                    // Wenn es ein einzelner Tag ist, lösche den Eintrag
-                    if (start.getTime() === end.getTime() && start.getTime() === clickedDate.getTime()) {
-                        return false;
+            entries[employee].forEach(entry => {
+                // Arbeite direkt mit Datumsstrings im Format YYYY-MM-DD
+                if (isDateInRange(dateStr, entry.start, entry.end)) {
+                    dayDeleted = true;
+                    
+                    // Wenn der Eintrag nur aus einem Tag besteht, komplett löschen
+                    if (entry.start === entry.end) {
+                        return; // Eintrag wird nicht zu newEntries hinzugefügt
                     }
                     
-                    // Teile den Eintrag in zwei Teile, aber lasse den angeklickten Tag aus
-                    if (start.getTime() !== clickedDate.getTime()) {
-                        entries[employee].push({
-                            start: entry.start,
-                            end: new Date(clickedDate.getTime() - 86400000).toISOString().split('T')[0],
-                            type: entry.type
-                        });
-                    }
-                    
-                    if (end.getTime() !== clickedDate.getTime()) {
-                        entries[employee].push({
-                            start: new Date(clickedDate.getTime() + 86400000).toISOString().split('T')[0],
+                    // Wenn der angeklickte Tag am Anfang liegt
+                    if (dateStr === entry.start) {
+                        const nextDay = addDays(dateStr, 1);
+                        newEntries.push({
+                            start: nextDay,
                             end: entry.end,
                             type: entry.type
                         });
                     }
-                    
-                    return false;
+                    // Wenn der angeklickte Tag am Ende liegt
+                    else if (dateStr === entry.end) {
+                        const prevDay = addDays(dateStr, -1);
+                        newEntries.push({
+                            start: entry.start,
+                            end: prevDay,
+                            type: entry.type
+                        });
+                    }
+                    // Wenn der angeklickte Tag in der Mitte liegt, Eintrag teilen
+                    else {
+                        // Teil vor dem gelöschten Tag
+                        const dayBefore = addDays(dateStr, -1);
+                        newEntries.push({
+                            start: entry.start,
+                            end: dayBefore,
+                            type: entry.type
+                        });
+                        
+                        // Teil nach dem gelöschten Tag
+                        const dayAfter = addDays(dateStr, 1);
+                        newEntries.push({
+                            start: dayAfter,
+                            end: entry.end,
+                            type: entry.type
+                        });
+                    }
+                } else {
+                    // Eintrag ist nicht betroffen, beibehalten
+                    newEntries.push(entry);
                 }
-                return true;
             });
             
-            generateTable();
-            saveData();
+            entries[employee] = newEntries;
+            
+            if (dayDeleted) {
+                generateTable();
+                saveData();
+            }
+        }
+        
+        // Hilfsfunktion um Tage zu einem Datum hinzuzufügen
+        function addDays(dateStr, days) {
+            const date = new Date(dateStr + 'T12:00:00'); // Mittags um Zeitzonenprobleme zu vermeiden
+            date.setDate(date.getDate() + days);
+            return date.toISOString().split('T')[0];
         }
 
         function updateStats() {

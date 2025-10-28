@@ -2285,10 +2285,19 @@ window.shareViaWhatsApp = function() {
     const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank');
     
-    // Show QR code automatically after WhatsApp share
-    setTimeout(() => {
-        generateQRCode();
-    }, 500);
+    // Sicherer Aufruf von generateQRCode (nur wenn definiert)
+    if (typeof generateQRCode === 'function') {
+        setTimeout(() => {
+            try {
+                generateQRCode();
+            } catch (err) {
+                console.error('generateQRCode() failed:', err);
+            }
+        }, 500);
+    } else {
+        // optional: nur Debug-Info, kein Fehler werfen
+        console.info('generateQRCode() ist nicht definiert — QR-Code wird nicht automatisch angezeigt.');
+    }
 };
 
 // Copy mobile link to clipboard

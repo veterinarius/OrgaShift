@@ -1866,9 +1866,7 @@
                     
                     cell.addEventListener('dragenter', function(e) {
                         e.preventDefault();
-                        if (this.cellIndex > 0) {
-                            this.classList.add('cell-drag-over');
-                        }
+                        this.classList.add('cell-drag-over');
                     });
                     
                     cell.addEventListener('dragleave', function(e) {

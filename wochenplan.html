@@ -12,7 +12,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 80px 20px 40px;
+            padding: 70px 20px 40px;
         }
 
          /* Navigation */
@@ -61,7 +61,7 @@
             color: #007AFF;
         }
 
-                .nav-buttons {
+        .nav-buttons {
             display: flex;
             gap: 15px;
             align-items: center;
@@ -120,6 +120,18 @@
     overflow-y: auto;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
+
+/* Platz für fixiertes Nav-Element: oberen Mitarbeiter-Container etwas nach unten schieben */
+#left-employee-panel {
+            margin-top: 80px; /* passt Abstand unterhalb der fixierten Navigation an */
+        }
+
+        /* Kleineres Gerät: etwas mehr Abstand, damit nichts verdeckt wird */
+        @media (max-width: 600px) {
+            #left-employee-panel {
+                margin-top: 100px;
+            }
+        }
     </style>
 
 </head>
@@ -142,6 +154,48 @@
             </div>
         </div>
     </nav>
+
+     <!-- Mitarbeitende links -->
+
+    <div id="left-employee-panel" class="input-section" style="display: flex; gap: 2rem;">
+            <!-- Linker Container für Mitarbeiterliste -->
+            <div style="flex: 0 0 300px; min-width: 300px;">
+                <h3 style="margin-top: 0; margin-bottom: 1rem; color: #1d1d1f;">Mitarbeiter</h3>
+                <div id="employeeList" class="employee-list" style="max-height: 600px; overflow-y: auto;"></div>
+            </div>
+            
+            <!-- Rechter Container für Eingabe und Buttons -->
+            <div style="flex: 1;">
+                <div class="input-container">
+                    <input type="text" id="employeeName" placeholder="Name des Mitarbeiters eingeben">
+                    <button class="btn btn-primary" onclick="addEmployee()">
+                        <span>👤</span>
+                        Mitarbeiter hinzufügen
+                    </button>
+
+                    <button class="btn btn-mobile-share" onclick="mobileShare()" style="margin-left:0.5rem;">
+                        <span>📱</span> Mobile Share
+                    </button>
+                    <button class="btn export-button" onclick="exportToExcel()">
+                        <span>📊</span>
+                        Excel Export
+                    </button>
+                    <button class="btn btn-google" onclick="exportToGoogleSheets()">
+                        <span>🟦</span>
+                        Google Sheets Export
+                    </button>
+                    <button class="btn btn-print" onclick="printSchedule()">
+                        <span>🖨️</span>
+                        Drucken
+                    </button>
+                    <button class="btn btn-settings" onclick="openSettingsModal()" style="margin-left:0.5rem;">
+                        <span>⚙️</span> Einstellungen
+                    </button>
+                    <button class="btn btn-share" onclick="shareCustomHintOnWhatsApp()" style="margin-left:0.5rem;">
+                        <span>💬</span> Hinweistext teilen
+                    </button>
+                    <input type="text" id="whatsappHint" placeholder="Hinweistext für WhatsApp" style="margin-left:1rem;flex:2;min-width:200px;">
+                </div>
 
     <div class="container">
         <div class="header">

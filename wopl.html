@@ -4,9 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Monatsplan</title>
-	<link rel="stylesheet" href="css/schedule-common.css">
-	
-	<!--<style>
+	<style>
 		* {
 			margin: 0;
 			padding: 0;
@@ -595,8 +593,8 @@
 			font-size: 1.05rem;
 		}
 		.right-panel {
-			flex: 2 1 0;
-			min-width: 800px;
+			flex: 1 1 auto;
+			min-width: 0;
 		}
 
 		/* Kleine Anpassung: Mitarbeiterliste links ausrichten */
@@ -840,7 +838,7 @@
 		.left-panel .export-button {
 			margin-left: 0;
 		}
-	</style>-->
+	</style>
 </head>
 <body>
 
@@ -910,10 +908,10 @@
 				<div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem;">
 					<input type="text" id="whatsappHint" placeholder="Hinweistext für WhatsApp" style="width:100%; padding:8px 10px; border-radius:10px; border:1px solid #d1d5db;">
 					<div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-						<button class="btn btn-settings" onclick="openSettingsModal()">⚙️ Einstellungen</button>
 						<button class="btn export-button" onclick="exportToExcel()">📊 Excel</button>
 						<button class="btn export-button" style="background:#4285F4;" onclick="exportToGoogleSheets()">🟦 Google Sheets</button>
 						<button class="btn btn-print" onclick="printSchedule()">🖨️ Drucken</button>
+						<button class="btn btn-settings" onclick="openSettingsModal()">⚙️ Einstellungen</button>
 						<button class="btn btn-secondary" onclick="shareCustomHintOnWhatsApp()">📲 Hinweis teilen</button>
 					</div>
 				</div>
@@ -925,7 +923,7 @@
 				<div class="date-selection">
 					<div class="date-group">
 						<label for="monthSelect">Monat</label>
-						<input type="month" id="monthSelect">
+						<input type="month" id="monthSelect" onchange="updateMonthInfo()">
 					</div>
 					<button class="btn btn-primary" onclick="generateSchedule()">
 						<span>📅</span>
@@ -2348,11 +2346,7 @@
 				wochenplanDatum.textContent = '';
 			}
 		}
-		document.getElementById('monthSelect').addEventListener('change', function() {
-			updateMonthInfo();
-			generateSchedule();
-			updateMonatsplanDatum();
-		});
+		document.getElementById('monthSelect').addEventListener('change', updateMonatsplanDatum);
 
 		function showCustomAlert(message) {
 			const alertBox = document.getElementById('custom-alert');

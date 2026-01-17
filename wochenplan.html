@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wochenplan</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/schedule-common.css">
 
-    <style>
-
+    <!--<style>
         /* Main Content */
         .container {
             max-width: 1200px;
@@ -206,7 +205,7 @@
         /* Override: In der Sidebar sollen Export-Buttons linksbündig sein (überschreibt globales .export-button margin-left:auto) */
         .left-panel .export-row { justify-content: flex-start; }
         .left-panel .export-button { margin-left: 0; }
-    </style>
+    </style>-->
 
 </head>
 <body>
@@ -264,10 +263,10 @@
             <div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem;">
                 <input type="text" id="whatsappHint" placeholder="Hinweistext für WhatsApp" style="width:100%; padding:8px 10px; border-radius:10px; border:1px solid #d1d5db;">
                 <div class="export-row" style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:flex-start;">
+                    <button class="btn btn-settings" onclick="openSettingsModal()">⚙️ Einstellungen</button>
                     <button class="btn export-button" onclick="exportToExcel()">📊 Excel</button>
                     <button class="btn export-button" style="background:#4285F4;" onclick="exportToGoogleSheets()">🟦 Google Sheets</button>
                     <button class="btn btn-print" onclick="printSchedule()">🖨️ Drucken</button>
-                    <button class="btn btn-settings" onclick="openSettingsModal()">⚙️ Einstellungen</button>
                     <button class="btn btn-secondary" onclick="shareCustomHintOnWhatsApp()">📲 Hinweis teilen</button>
                     <button class="btn btn-mobile-share" onclick="mobileShare()">📱 Mobile Share</button>
                 </div>

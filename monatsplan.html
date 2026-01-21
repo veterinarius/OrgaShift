@@ -865,7 +865,7 @@
 	<div class="container">
 		<div class="header">
 			<h1 id="main-title">Monatsplan</h1>
-			<div id="wochenplan-datum" style="font-weight:bold;margin-bottom:0.5rem;"></div>
+			<div id="wochenplan-datum" style="font-weight:bold;margin-bottom:0.5rem;" contenteditable="true" title="Klicken zum Bearbeiten"></div>
 			<p>Erstellen Sie Ihren Dienstplan einfach und effizient</p>
 		</div>
 		<div id="print-header"></div>
@@ -1704,6 +1704,12 @@
 
 		// Beim ersten Laden: Einstellungen abfragen, falls nicht vorhanden
 		document.addEventListener('DOMContentLoaded', function() {
+			// Korrigierter Key und Variablenname
+			const savedMonth = localStorage.getItem('monatsplan_selectMonth');
+			if (savedMonth) {
+				document.getElementById('monthSelect').value = savedMonth;
+			}
+			updateMonatsplanDatum();
 			let savedShifts = localStorage.getItem('monatsplan_shiftNames');
 			let savedDays = localStorage.getItem('monatsplan_dayNames');
 			let savedRowCounts = localStorage.getItem('monatsplan_rowCounts');
@@ -2341,9 +2347,15 @@
 		function updateMonatsplanDatum() {
 			const monthInput = document.getElementById('monthSelect');
 			const wochenplanDatum = document.getElementById('wochenplan-datum');
-			if (monthInput && monthInput.value) {
+			// Prüfe, ob ein benutzerdefinierter Header gespeichert ist
+			const customHeader = localStorage.getItem('monatsplan_customHeader');
+			if (customHeader) {
+				wochenplanDatum.textContent = customHeader;
+			} else if (monthInput && monthInput.value) {
 				const [year, month] = monthInput.value.split('-');
-				wochenplanDatum.textContent = `Monatsplan für ${month}.${year}`;
+				const date = new Date(year, month - 1, 1);
+				const monthName = date.toLocaleString('de-DE', { month: 'long' });
+				wochenplanDatum.textContent = `Monatsplan für ${monthName} ${year}`;
 			} else {
 				wochenplanDatum.textContent = '';
 			}
@@ -2351,7 +2363,14 @@
 		document.getElementById('monthSelect').addEventListener('change', function() {
 			updateMonthInfo();
 			generateSchedule();
+			// Header zurücksetzen, wenn Monat geändert wird
+			localStorage.removeItem('monatsplan_customHeader');
 			updateMonatsplanDatum();
+			localStorage.setItem('monatsplan_selectMonth', document.getElementById('monthSelect').value);
+		});
+		// Speichern des benutzerdefinierten Headers bei Änderung
+		document.getElementById('wochenplan-datum').addEventListener('blur', function() {
+			localStorage.setItem('monatsplan_customHeader', this.textContent);
 		});
 
 		function showCustomAlert(message) {

@@ -760,7 +760,7 @@
                 </div>
 
                 <div style="margin-top: 2rem; text-align: right;">
-                    <button class="btn btn-primary" onclick="closePreferenceModal()">Speichern</button>
+                    <button class="btn btn-primary" onclick="savePreferences()">Speichern</button>
                 </div>
             `;
 
@@ -784,6 +784,22 @@
             preferenceModal._escListener = escListener;
         }
 
+        function savePreferences() {
+            // Speichere Präferenzen und aktualisiere UI, aber schließe das Modal NICHT
+            try {
+                localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences));
+            } catch (e) {
+                console.error('Fehler beim Speichern der Präferenzen', e);
+            }
+            try {
+                updateEmployeeList();
+                displayExtraPreferences();
+                saveDataToLocalStorage();
+            } catch (e) {
+                console.error('Fehler beim Aktualisieren der Anzeige nach Speichern der Präferenzen', e);
+            }
+        }
+
         function closePreferenceModal() {
             const modal = document.getElementById('preferenceModal');
             if (!modal) return;
@@ -798,21 +814,8 @@
                 console.warn('Fehler beim Entfernen des ESC-Listeners', e);
             }
 
-            // Stelle sicher, dass Präferenzen gespeichert und UI aktualisiert werden
-            try {
-                localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences));
-            } catch (e) {
-                console.error('Fehler beim Speichern der Präferenzen', e);
-            }
-
-            // Aktualisiere die Mitarbeiterliste und Zusatzpräferenzen sichtbar
-            try {
-                updateEmployeeList();
-                displayExtraPreferences();
-                saveDataToLocalStorage();
-            } catch (e) {
-                console.error('Fehler beim Aktualisieren der Anzeige nach Speichern der Präferenzen', e);
-            }
+            // Vor dem Schließen speichern
+            savePreferences();
 
             // Modal entfernen
             modal.remove();

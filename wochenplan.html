@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -163,7 +163,7 @@
         .main-layout {
             display: flex;
             gap: 2rem;
-            align-items: flex-start;
+            align-items: stretch;
             margin-top: 1rem;
         }
         .left-panel {
@@ -230,7 +230,7 @@
 
     <!-- START: Neues zweispaltiges Layout mit linker Sidebar -->
     <div id="left-employee-panel" class="main-layout">
-        <aside class="left-panel" aria-label="Mitarbeiterliste">
+        <aside class="left-panel-wo" aria-label="Mitarbeiterliste">
             <div class="panel-title">Mitarbeiter</div>
             <div class="input-container" style="margin-bottom:0.5rem;">
                 <input type="text" id="employeeName" placeholder="Name des Mitarbeiters eingeben">
@@ -423,8 +423,16 @@
         let preferences = {};
         let startDate = null;
         let endDate = null;
+
         const days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
         const shifts = ['Frühschicht', 'Spätschicht', 'Werk II', 'TrUS Früh', 'TrUS Spät'];
+
+        // Daten beim Laden der Seite aus dem LocalStorage laden
+        window.addEventListener('DOMContentLoaded', function() {
+            if (typeof loadDataFromLocalStorage === 'function') {
+                loadDataFromLocalStorage();
+            }
+        });
 
         // --- Zellen farbig markieren (Kontextmenü) ---
         let currentCell = null;
@@ -760,7 +768,7 @@
                 </div>
 
                 <div style="margin-top: 2rem; text-align: right;">
-                    <button class="btn btn-primary" onclick="closePreferenceModal()">Speichern</button>
+                    <button class="btn btn-primary" onclick="savePreferences(); closePreferenceModal();">Speichern</button>
                 </div>
             `;
 
@@ -784,6 +792,22 @@
             preferenceModal._escListener = escListener;
         }
 
+        function savePreferences() {
+            // Speichere Präferenzen und aktualisiere UI, aber schließe das Modal NICHT
+            try {
+                localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences));
+            } catch (e) {
+                console.error('Fehler beim Speichern der Präferenzen', e);
+            }
+            try {
+                updateEmployeeList();
+                displayExtraPreferences();
+                saveDataToLocalStorage();
+            } catch (e) {
+                console.error('Fehler beim Aktualisieren der Anzeige nach Speichern der Präferenzen', e);
+            }
+        }
+
         function closePreferenceModal() {
             const modal = document.getElementById('preferenceModal');
             if (!modal) return;
@@ -798,21 +822,8 @@
                 console.warn('Fehler beim Entfernen des ESC-Listeners', e);
             }
 
-            // Stelle sicher, dass Präferenzen gespeichert und UI aktualisiert werden
-            try {
-                localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences));
-            } catch (e) {
-                console.error('Fehler beim Speichern der Präferenzen', e);
-            }
-
-            // Aktualisiere die Mitarbeiterliste und Zusatzpräferenzen sichtbar
-            try {
-                updateEmployeeList();
-                displayExtraPreferences();
-                saveDataToLocalStorage();
-            } catch (e) {
-                console.error('Fehler beim Aktualisieren der Anzeige nach Speichern der Präferenzen', e);
-            }
+            // Vor dem Schließen speichern
+            savePreferences();
 
             // Modal entfernen
             modal.remove();

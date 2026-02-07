@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrieren - OrgaShift</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 32px 40px;
+            width: 100%;
+            max-width: 520px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 24px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder,
+        input[type="text"]::placeholder {
+            color: #bdc3c7;
+            opacity: 1;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            color: #34495e;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .google-btn:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider {
+            text-align: center;
+            position: relative;
+            margin: 20px 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e9ecef;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 16px;
+            position: relative;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-top: 2px;
+            accent-color: #667eea;
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #5a6c7d;
+            margin: 0;
+        }
+
+        .checkbox-group a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #e74c3c;
+        }
+
+        .role-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .role-button {
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            color: #5a6c7d;
+        }
+
+        .role-button:hover {
+            border-color: #667eea;
+        }
+
+        .role-button.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(450px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #2c3e50;
+        }
+
+        .toast-description {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .register-container {
+                padding: 24px 20px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+
+            .toast {
+                left: 20px;
+                right: 20px;
+                min-width: auto;
+                transform: translateY(-120px);
+            }
+
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>🌟 OrgaShift</h1>
+        </div>
+        
+        <div class="subtitle">
+            Erstellen Sie Ihr Konto und erleben Sie professionelles<br>
+            Schichtplanmanagement mit höchster Effizienz
+        </div>
+
+        <button type="button" class="google-btn" id="googleButton">
+            <svg class="google-icon" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Mit Google registrieren
+        </button>
+
+        <div class="divider">
+            <span>oder mit E-Mail</span>
+        </div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="fullName">Vollständiger Name *</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Max Mustermann" required>
+                <div class="error-message" id="fullNameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-Mail-Adresse *</label>
+                <input type="email" id="email" name="email" placeholder="ihre@email.de" required>
+                <div class="error-message" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Passwort *</label>
+                <input type="password" id="password" name="password" placeholder="Mindestens 8 Zeichen" required>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Passwort bestätigen *</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Passwort erneut eingeben" required>
+                <div class="error-message" id="confirmPasswordError"></div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="termsConsent" name="termsConsent" required>
+                <label for="termsConsent">
+                    Ich stimme den <a href="#" target="_blank">Nutzungsbedingungen</a> 
+                    und der <a href="#" target="_blank">Datenschutzrichtlinie</a> zu *
+                </label>
+            </div>
+            <div class="error-message" id="termsConsentError"></div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="newsletterConsent" name="newsletterConsent">
+                <label for="newsletterConsent">
+                    Ich möchte E-Mails über Produktneuigkeiten und Updates erhalten
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label>Rolle *</label>
+                <div class="role-buttons">
+                    <button type="button" class="role-button active" data-role="admin">Admin</button>
+                    <button type="button" class="role-button" data-role="user">Benutzer</button>
+                </div>
+            </div>
+
+            <button type="submit" class="register-btn">
+                Konto erstellen
+            </button>
+        </form>
+
+        <div class="login-link">
+            Haben Sie bereits ein Konto? <a href="loginHO.html">Jetzt anmelden</a>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <div class="toast-title" id="toastTitle"></div>
+        <div class="toast-description" id="toastDescription"></div>
+    </div>
+
+    <script>
+        // State
+        let selectedRole = 'admin';
+
+        // Role selection - funktioniert ohne Supabase
+        const roleButtons = document.querySelectorAll('.role-button');
+        roleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                roleButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                selectedRole = button.dataset.role;
+                console.log('Rolle ausgewählt:', selectedRole);
+            });
+        });
+
+        // Toast notification
+        function showToast(title, description) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastDescription').textContent = description;
+            
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Form validation
+        function validate() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const termsConsent = document.getElementById('termsConsent').checked;
+            
+            let isValid = true;
+            
+            // Clear previous errors
+            document.getElementById('fullNameError').textContent = '';
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('confirmPasswordError').textContent = '';
+            document.getElementById('termsConsentError').textContent = '';
+
+            // Full name validation
+            if (!fullName) {
+                document.getElementById('fullNameError').textContent = 'Vollständiger Name ist erforderlich';
+                isValid = false;
+            } else if (fullName.length < 2) {
+                document.getElementById('fullNameError').textContent = 'Name muss mindestens 2 Zeichen lang sein';
+                isValid = false;
+            }
+
+            // Email validation
+            if (!email) {
+                document.getElementById('emailError').textContent = 'E-Mail ist erforderlich';
+                isValid = false;
+            } else if (!/\S+@\S+\.\S+/.test(email)) {
+                document.getElementById('emailError').textContent = 'Ungültige E-Mail-Adresse';
+                isValid = false;
+            }
+
+            // Password validation
+            if (!password) {
+                document.getElementById('passwordError').textContent = 'Passwort ist erforderlich';
+                isValid = false;
+            } else if (password.length < 8) {
+                document.getElementById('passwordError').textContent = 'Passwort muss mindestens 8 Zeichen lang sein';
+                isValid = false;
+            }
+
+            // Confirm password validation
+            if (!confirmPassword) {
+                document.getElementById('confirmPasswordError').textContent = 'Passwortbestätigung ist erforderlich';
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                document.getElementById('confirmPasswordError').textContent = 'Passwörter stimmen nicht überein';
+                isValid = false;
+            }
+
+            // Terms consent validation
+            if (!termsConsent) {
+                document.getElementById('termsConsentError').textContent = 'Sie müssen den Nutzungsbedingungen und der Datenschutzrichtlinie zustimmen';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Google registration
+        document.getElementById('googleButton').addEventListener('click', async () => {
+            showToast('Info', 'Google-Anmeldung erfordert Supabase-Konfiguration');
+        });
+
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validate()) {
+                return;
+            }
+
+            const formData = new FormData(this);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const fullName = formData.get('fullName');
+            const newsletterConsent = formData.get('newsletterConsent') ? true : false;
+            
+            showToast('Info', 'Registrierung erfordert Supabase-Konfiguration. Aktuell im Demo-Modus.');
+            console.log('Registrierungsdaten:', {
+                fullName,
+                email,
+                role: selectedRole,
+                newsletterConsent
+            });
+        });
+
+        // Real-time password validation
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const minLength = 8;
+            
+            if (password.length > 0 && password.length < minLength) {
+                this.style.borderColor = '#e74c3c';
+            } else if (password.length >= minLength) {
+                this.style.borderColor = '#27ae60';
+            } else {
+                this.style.borderColor = '#e9ecef';
+            }
+        });
+
+        // Real-time email validation
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email.length > 0) {
+                if (emailRegex.test(email)) {
+                    this.style.borderColor = '#27ae60';
+                } else {
+                    this.style.borderColor = '#e74c3c';
+                }
+            } else {
+                this.style.borderColor = '#e9ecef';
+            }
+        });
+
+        // Real-time confirm password validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword.length > 0) {
+                if (password === confirmPassword) {
+                    this.style.borderColor = '#27ae60';
+                } else {
+                    this.style.borderColor = '#e74c3c';
+                }
+            } else {
+                this.style.borderColor = '#e9ecef';
+            }
+        });
+    </script>
+</body>
+</html>

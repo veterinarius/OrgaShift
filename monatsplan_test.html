@@ -4,7 +4,9 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Monatsplan</title>
-	<style>
+	<link rel="stylesheet" href="css/schedule-common.css">
+	
+	<!--<style>
 		* {
 			margin: 0;
 			padding: 0;
@@ -412,13 +414,10 @@
 			background: rgba(0,0,0,0.5);
 			display: flex;
 			justify-content: center;
-			align-items: flex-start;
-			padding-top: 4.5rem;
-			z-index: 6000;
+			align-items: flex-start; /* nach oben ausrichten statt zentrieren */
+			padding-top: 4.5rem;     /* Abstand vom oberen Rand (feinjustierbar) */
+			z-index: 6000; /* höher als Navigation */
 			pointer-events: auto;
-		}
-		@media (max-width: 600px) {
-			.modal-overlay { padding-top: 2rem; }
 		}
 
 		.modal-content {
@@ -568,7 +567,7 @@
 
 		/* Neues zweispaltiges Layout: Sidebar links, Inhalt rechts */
 		#left-employee-panel { /* Platz für möglichen fixierten Nav-Header */
-			margin-top: 80px; /* optional, kann angepasst werden */
+			margin-top: 80px; /* passt Abstand unterhalb der fixierten Navigation an */
 			margin-left: 0; /* weiter am linken Rand positioniert */
 		}
 		.main-layout {
@@ -596,8 +595,8 @@
 			font-size: 1.05rem;
 		}
 		.right-panel {
-			flex: 1 1 auto;
-			min-width: 0;
+			flex: 2 1 0;
+			min-width: 800px;
 		}
 
 		/* Kleine Anpassung: Mitarbeiterliste links ausrichten */
@@ -632,8 +631,8 @@
 
 		@media (max-width: 600px) {
 			#left-employee-panel {
-				margin-left: 0; /* auf kleinen Bildschirmen keine Verschiebung */
 				margin-top: 100px;
+				margin-left: 0;
 			}
 		}
 
@@ -841,7 +840,7 @@
 		.left-panel .export-button {
 			margin-left: 0;
 		}
-	</style>
+	</style>-->
 </head>
 <body>
 
@@ -866,7 +865,7 @@
 	<div class="container">
 		<div class="header">
 			<h1 id="main-title">Monatsplan</h1>
-			<div id="wochenplan-datum" style="font-weight:bold;margin-bottom:0.5rem;"></div>
+			<div id="wochenplan-datum" style="font-weight:bold;margin-bottom:0.5rem;" contenteditable="true" title="Klicken zum Bearbeiten"></div>
 			<p>Erstellen Sie Ihren Dienstplan einfach und effizient</p>
 		</div>
 		<div id="print-header"></div>
@@ -911,10 +910,10 @@
 				<div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem;">
 					<input type="text" id="whatsappHint" placeholder="Hinweistext für WhatsApp" style="width:100%; padding:8px 10px; border-radius:10px; border:1px solid #d1d5db;">
 					<div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+						<button class="btn btn-settings" onclick="openSettingsModal()">⚙️ Einstellungen</button>
 						<button class="btn export-button" onclick="exportToExcel()">📊 Excel</button>
 						<button class="btn export-button" style="background:#4285F4;" onclick="exportToGoogleSheets()">🟦 Google Sheets</button>
 						<button class="btn btn-print" onclick="printSchedule()">🖨️ Drucken</button>
-						<button class="btn btn-settings" onclick="openSettingsModal()">⚙️ Einstellungen</button>
 						<button class="btn btn-secondary" onclick="shareCustomHintOnWhatsApp()">📲 Hinweis teilen</button>
 					</div>
 				</div>
@@ -926,7 +925,7 @@
 				<div class="date-selection">
 					<div class="date-group">
 						<label for="monthSelect">Monat</label>
-						<input type="month" id="monthSelect" onchange="updateMonthInfo()">
+						<input type="month" id="monthSelect">
 					</div>
 					<button class="btn btn-primary" onclick="generateSchedule()">
 						<span>📅</span>
@@ -1126,6 +1125,30 @@
 			});
 		}
 
+		function updateExistingTableHeaders() {
+			// Aktualisiere alle Tabellen-Header mit den neuen Tagesnamen
+			const tables = document.querySelectorAll('#schedule-container table');
+			tables.forEach((table, index) => {
+				const thead = table.querySelector('thead tr');
+				if (thead) {
+					// Erhalte die erste Zelle (lfd. Nr. / Zeit)
+					const firstCell = thead.querySelector('th:first-child');
+					// Erstelle neue Header-Zellen
+					let newHeaderHTML = firstCell ? firstCell.outerHTML : '<th>lfd. Nr. / Zeit</th>';
+					newHeaderHTML += dayNames.map(day => `<th>${day}</th>`).join('');
+					thead.innerHTML = newHeaderHTML;
+				}
+				
+				// Aktualisiere auch die Monatszeile falls vorhanden
+				const monthRow = table.querySelector('tr:first-child th[colspan]');
+				if (monthRow && selectedMonth && selectedYear) {
+					const date = new Date(selectedYear, selectedMonth - 1, 1);
+					const monthName = date.toLocaleString('de-DE', { month: 'long', year: 'numeric' });
+					monthRow.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+				}
+			});
+		}
+
 		// Datums-Funktionen
 		function updateMonthInfo() {
 			const monthInput = document.getElementById('monthSelect');
@@ -1157,6 +1180,9 @@
 				showCustomAlert('Bitte wählen Sie einen Monat aus.');
 				return;
 			}
+			// Aktualisiere die dayNames basierend auf dem ausgewählten Monat
+			updateMonthInfo();
+			
 			if (employees.length === 0) {
 				showCustomAlert('Bitte fügen Sie mindestens einen Mitarbeiter hinzu.');
 				return;
@@ -1261,7 +1287,7 @@
 				tableHTML += `
 					<thead>
 						<tr>
-							<th>lfd. Nr. / Zeit</th>
+							<th>lfd. Nr. / Datum</th>
 							${dayNames.map(day => `<th>${day}</th>`).join('')}
 						</tr>
 					</thead>
@@ -1351,9 +1377,9 @@
 					</tbody>
 				</table>
 				<div style="margin-top: 2rem; text-align: center;">
-					<button class="btn btn-primary" onclick="closePreferenceModal()">
+					<button class="btn btn-primary" onclick="saveAndClosePreferenceModal()">
 						<span>✓</span>
-						Schließen
+						Speichern
 					</button>
 				</div>
 			`;
@@ -1363,7 +1389,10 @@
 			document.body.appendChild(preferenceModal);
 		}
 
-		function closePreferenceModal() {
+		function saveAndClosePreferenceModal() {
+			// Speichere Präferenzen (falls nötig, z.B. in localStorage)
+			saveDataToLocalStorage();
+			// Modal schließen
 			const modal = document.getElementById('preferenceModal');
 			if (modal) {
 				modal.remove();
@@ -1407,7 +1436,7 @@
 				let tableHTML = `
 					<thead>
 						<tr>
-							<th>lfd. Nr. / Zeit</th>
+							<th>lfd. Nr. / Datum</th>
 							${dayNames.map(day => `<th>${day}</th>`).join('')}
 						</tr>
 					</thead>
@@ -1705,6 +1734,12 @@
 
 		// Beim ersten Laden: Einstellungen abfragen, falls nicht vorhanden
 		document.addEventListener('DOMContentLoaded', function() {
+			// Korrigierter Key und Variablenname
+			const savedMonth = localStorage.getItem('monatsplan_selectMonth');
+			if (savedMonth) {
+				document.getElementById('monthSelect').value = savedMonth;
+			}
+			updateMonatsplanDatum();
 			let savedShifts = localStorage.getItem('monatsplan_shiftNames');
 			let savedDays = localStorage.getItem('monatsplan_dayNames');
 			let savedRowCounts = localStorage.getItem('monatsplan_rowCounts');
@@ -2342,14 +2377,31 @@
 		function updateMonatsplanDatum() {
 			const monthInput = document.getElementById('monthSelect');
 			const wochenplanDatum = document.getElementById('wochenplan-datum');
-			if (monthInput && monthInput.value) {
+			// Prüfe, ob ein benutzerdefinierter Header gespeichert ist
+			const customHeader = localStorage.getItem('monatsplan_customHeader');
+			if (customHeader) {
+				wochenplanDatum.textContent = customHeader;
+			} else if (monthInput && monthInput.value) {
 				const [year, month] = monthInput.value.split('-');
-				wochenplanDatum.textContent = `Monatsplan für ${month}.${year}`;
+				const date = new Date(year, month - 1, 1);
+				const monthName = date.toLocaleString('de-DE', { month: 'long' });
+				wochenplanDatum.textContent = `Monatsplan für ${monthName} ${year}`;
 			} else {
 				wochenplanDatum.textContent = '';
 			}
 		}
-		document.getElementById('monthSelect').addEventListener('change', updateMonatsplanDatum);
+		document.getElementById('monthSelect').addEventListener('change', function() {
+			updateMonthInfo();
+			updateExistingTableHeaders(); // Aktualisiere bestehende Tabellen-Header
+			// Header zurücksetzen, wenn Monat geändert wird
+			localStorage.removeItem('monatsplan_customHeader');
+			updateMonatsplanDatum();
+			localStorage.setItem('monatsplan_selectMonth', document.getElementById('monthSelect').value);
+		});
+		// Speichern des benutzerdefinierten Headers bei Änderung
+		document.getElementById('wochenplan-datum').addEventListener('blur', function() {
+			localStorage.setItem('monatsplan_customHeader', this.textContent);
+		});
 
 		function showCustomAlert(message) {
 			const alertBox = document.getElementById('custom-alert');

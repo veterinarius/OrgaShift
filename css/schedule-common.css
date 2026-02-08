@@ -15,7 +15,7 @@ body {
 .container {
     max-width: 1600px;
     margin: 0 auto;
-    padding: 70px 20px 40px;
+    padding: 0 20px 40px;
 }
 
 .header {
@@ -559,7 +559,7 @@ nav {
 /* Neues zweispaltiges Layout: Sidebar links, Inhalt rechts */
 
 #left-employee-panel {
-    margin-top: 0;
+    margin-top: 80px;
     margin-left: 0;
 }
 
@@ -567,7 +567,7 @@ nav {
     display: flex;
     gap: 2rem;
     align-items: flex-start;
-    margin-top: 1rem;
+    margin-top: 400px; /* weiter nach unten gesetzt */
 }
 
 .left-panel {
@@ -581,6 +581,38 @@ nav {
     border: 1px solid rgba(0,0,0,0.04);
     box-shadow: 0 8px 24px rgba(0,0,0,0.06);
     height: 100%;
+}
+
+.left-panel-wo {
+    margin-top: 180px;
+    margin-left: 15px;
+    width: 320px;
+    min-width: 240px;
+    flex: 0 0 320px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 1rem;
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    height: 100%;
+}
+
+/* Alle Buttons im linken Panel linksbündig */
+.left-panel-wo .export-row,
+.left-panel-wo .input-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-start !important;
+    align-items: flex-start;
+}
+.left-panel-wo button,
+.left-panel-wo .btn {
+    margin-left: 0 !important;
+    justify-content: flex-start;
+    text-align: left;
 }
 
 .left-panel .panel-title {

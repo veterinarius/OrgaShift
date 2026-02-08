@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1125,6 +1125,30 @@
 			});
 		}
 
+		function updateExistingTableHeaders() {
+			// Aktualisiere alle Tabellen-Header mit den neuen Tagesnamen
+			const tables = document.querySelectorAll('#schedule-container table');
+			tables.forEach((table, index) => {
+				const thead = table.querySelector('thead tr');
+				if (thead) {
+					// Erhalte die erste Zelle (lfd. Nr. / Zeit)
+					const firstCell = thead.querySelector('th:first-child');
+					// Erstelle neue Header-Zellen
+					let newHeaderHTML = firstCell ? firstCell.outerHTML : '<th>lfd. Nr. / Zeit</th>';
+					newHeaderHTML += dayNames.map(day => `<th>${day}</th>`).join('');
+					thead.innerHTML = newHeaderHTML;
+				}
+				
+				// Aktualisiere auch die Monatszeile falls vorhanden
+				const monthRow = table.querySelector('tr:first-child th[colspan]');
+				if (monthRow && selectedMonth && selectedYear) {
+					const date = new Date(selectedYear, selectedMonth - 1, 1);
+					const monthName = date.toLocaleString('de-DE', { month: 'long', year: 'numeric' });
+					monthRow.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+				}
+			});
+		}
+
 		// Datums-Funktionen
 		function updateMonthInfo() {
 			const monthInput = document.getElementById('monthSelect');
@@ -1156,6 +1180,9 @@
 				showCustomAlert('Bitte wählen Sie einen Monat aus.');
 				return;
 			}
+			// Aktualisiere die dayNames basierend auf dem ausgewählten Monat
+			updateMonthInfo();
+			
 			if (employees.length === 0) {
 				showCustomAlert('Bitte fügen Sie mindestens einen Mitarbeiter hinzu.');
 				return;
@@ -1260,7 +1287,7 @@
 				tableHTML += `
 					<thead>
 						<tr>
-							<th>lfd. Nr. / Zeit</th>
+							<th>lfd. Nr. / Datum</th>
 							${dayNames.map(day => `<th>${day}</th>`).join('')}
 						</tr>
 					</thead>
@@ -1350,9 +1377,9 @@
 					</tbody>
 				</table>
 				<div style="margin-top: 2rem; text-align: center;">
-					<button class="btn btn-primary" onclick="closePreferenceModal()">
+					<button class="btn btn-primary" onclick="saveAndClosePreferenceModal()">
 						<span>✓</span>
-						Schließen
+						Speichern
 					</button>
 				</div>
 			`;
@@ -1362,7 +1389,10 @@
 			document.body.appendChild(preferenceModal);
 		}
 
-		function closePreferenceModal() {
+		function saveAndClosePreferenceModal() {
+			// Speichere Präferenzen (falls nötig, z.B. in localStorage)
+			saveDataToLocalStorage();
+			// Modal schließen
 			const modal = document.getElementById('preferenceModal');
 			if (modal) {
 				modal.remove();
@@ -1406,7 +1436,7 @@
 				let tableHTML = `
 					<thead>
 						<tr>
-							<th>lfd. Nr. / Zeit</th>
+							<th>lfd. Nr. / Datum</th>
 							${dayNames.map(day => `<th>${day}</th>`).join('')}
 						</tr>
 					</thead>
@@ -2362,7 +2392,7 @@
 		}
 		document.getElementById('monthSelect').addEventListener('change', function() {
 			updateMonthInfo();
-			generateSchedule();
+			updateExistingTableHeaders(); // Aktualisiere bestehende Tabellen-Header
 			// Header zurücksetzen, wenn Monat geändert wird
 			localStorage.removeItem('monatsplan_customHeader');
 			updateMonatsplanDatum();

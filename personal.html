@@ -177,7 +177,18 @@
             background: white;
         }
 
-        .form-group input:focus {
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            cursor: pointer;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -600,14 +611,23 @@
     <div class="container">
         <div class="page-header">
             <h1>Personalverwaltung</h1>
-            <p>Verwalten Sie Ihre Mitarbeiterdaten zentral und effizient. Fügen Sie neue Mitarbeiter hinzu und behalten Sie alle wichtigen Informationen im Überblick.</p>
+            <p>Verwalten Sie Ihre Mitarbeitendendaten zentral und effizient. Fügen Sie neue Mitarbeitenden hinzu und behalten Sie alle wichtigen Informationen im Überblick.</p>
         </div>
 
         <!-- Add Employee Section -->
         <div class="add-employee-section">
-            <h2 class="section-title">Neuen Mitarbeiter hinzufügen</h2>
+            <h2 class="section-title">Neuen Mitarbeitenden hinzufügen</h2>
             <form id="employeeForm">
                 <div class="form-grid">
+                    <div class="form-group">
+                        <label for="title">Titel (optional)</label>
+                        <select id="title" name="title">
+                            <option value="">kein Titel</option>
+                            <option value="Dr.">Dr. (Doktor)</option>
+                            <option value="TA">TA (Tierarzt)</option>
+                            <option value="TÄ">TÄ (Tierärztin)</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="lastName">Nachname *</label>
                         <input type="text" id="lastName" name="lastName" required>
@@ -633,6 +653,14 @@
                         <input type="text" id="houseNumber" name="houseNumber">
                     </div>
                     <div class="form-group">
+                        <label for="email">E-Mail *</label>
+                        <input type="email" id="email" name="email" required placeholder="beispiel@email.de">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefonnummer</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+49 123 456789">
+                    </div>
+                    <div class="form-group">
                         <label for="birthDate">Geburtsdatum</label>
                         <input type="date" id="birthDate" name="birthDate">
                     </div>
@@ -644,18 +672,18 @@
                 
                 <div class="form-group remarks-group">
                     <label for="remarks">Bemerkungen</label>
-                    <textarea id="remarks" name="remarks" rows="4" placeholder="Optionale Bemerkungen zum Mitarbeiter..."></textarea>
+                    <textarea id="remarks" name="remarks" rows="4" placeholder="Optionale Bemerkungen zum Mitarbeitenden..."></textarea>
                 </div>
-                <button type="submit" class="add-btn">Mitarbeiter hinzufügen</button>
+                <button type="submit" class="add-btn">Mitarbeitenden hinzufügen</button>
             </form>
         </div>
 
         <!-- Employee List Section -->
         <div class="employee-list-section">
-            <h2 class="section-title">Mitarbeiterübersicht</h2>
+            <h2 class="section-title">Mitarbeitendenübersicht</h2>
             
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Nach Mitarbeitern suchen...">
+                <input type="text" id="searchInput" placeholder="Nach Mitarbeitenden suchen...">
             </div>
 
             <div class="filter-section">
@@ -680,7 +708,7 @@
 
             <div class="employee-grid" id="employeeGrid">
                 <div class="no-employees">
-                    Noch keine Mitarbeiter hinzugefügt. Fügen Sie oben Ihren ersten Mitarbeiter hinzu.
+                    Noch keine Mitarbeitenden hinzugefügt. Fügen Sie oben Ihren ersten Mitarbeitenden hinzu.
                 </div>
             </div>
         </div>
@@ -703,8 +731,8 @@
 
         // Load data from memory on page load
         function loadEmployees() {
-            const savedEmployees = JSON.parse(sessionStorage.getItem('orgashift_employees') || '[]');
-            const savedCounter = parseInt(sessionStorage.getItem('orgashift_employee_counter') || '1');
+            const savedEmployees = JSON.parse(localStorage.getItem('orgashift_employees') || '[]');
+            const savedCounter = parseInt(localStorage.getItem('orgashift_employee_counter') || '1');
             
             employees = savedEmployees;
             employeeIdCounter = savedCounter;
@@ -713,8 +741,48 @@
 
         // Save data to memory
         function saveEmployees() {
-            sessionStorage.setItem('orgashift_employees', JSON.stringify(employees));
-            sessionStorage.setItem('orgashift_employee_counter', employeeIdCounter.toString());
+            localStorage.setItem('orgashift_employees', JSON.stringify(employees));
+            localStorage.setItem('orgashift_employee_counter', employeeIdCounter.toString());
+            syncToSchedule();
+        }
+
+        // Formatiert den Anzeigenamen eines Mitarbeiters (wie er im Wochenplan erscheint)
+        function getEmployeeDisplayName(emp) {
+            return (emp.title ? emp.title + ' ' : '') + emp.firstName + ' ' + emp.lastName;
+        }
+
+        // Synchronisiert Mitarbeiternamen in dienstplan_employees, monatsplan_employees und shared_employees
+        function syncToSchedule() {
+            try {
+                const names = employees.map(getEmployeeDisplayName);
+                const keys = ['dienstplan_employees', 'monatsplan_employees', 'shared_employees'];
+
+                keys.forEach(key => {
+                    let stored = JSON.parse(localStorage.getItem(key) || '[]');
+                    names.forEach(name => {
+                        if (!stored.includes(name)) {
+                            stored.push(name);
+                        }
+                    });
+                    localStorage.setItem(key, JSON.stringify(stored));
+                });
+            } catch (e) {
+                console.error('Fehler beim Synchronisieren mit den Dienstplänen:', e);
+            }
+        }
+
+        // Entfernt einen Mitarbeiternamen aus dienstplan_employees, monatsplan_employees und shared_employees
+        function removeFromSchedule(displayName) {
+            try {
+                const keys = ['dienstplan_employees', 'monatsplan_employees', 'shared_employees'];
+                keys.forEach(key => {
+                    let stored = JSON.parse(localStorage.getItem(key) || '[]');
+                    stored = stored.filter(n => n !== displayName);
+                    localStorage.setItem(key, JSON.stringify(stored));
+                });
+            } catch (e) {
+                console.error('Fehler beim Entfernen aus den Dienstplänen:', e);
+            }
         }
 
         // Add employee
@@ -724,6 +792,7 @@
             const formData = new FormData(employeeForm);
             const employee = {
                 id: employeeIdCounter++,
+                title: formData.get('title'),
                 firstName: formData.get('firstName'),
                 lastName: formData.get('lastName'),
                 street: formData.get('street'),
@@ -732,6 +801,8 @@
                 city: formData.get('city'),
                 birthDate: formData.get('birthDate'),
                 startDate: formData.get('startDate'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
                 remarks: formData.get('remarks')
             };
 
@@ -747,15 +818,18 @@
             
             setTimeout(() => {
                 addBtn.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
-                addBtn.textContent = 'Mitarbeiter hinzufügen';
+                addBtn.textContent = 'Mitarbeitenden hinzufügen';
             }, 2000);
         });
 
         // Delete employee
         function deleteEmployee(id) {
-            if (confirm('Möchten Sie diesen Mitarbeiter wirklich löschen?')) {
+            if (confirm('Möchten Sie diesen Mitarbeitenden wirklich löschen?')) {
+                const toDelete = employees.find(emp => emp.id === id);
+                const displayName = toDelete ? getEmployeeDisplayName(toDelete) : null;
                 employees = employees.filter(emp => emp.id !== id);
                 saveEmployees();
+                if (displayName) removeFromSchedule(displayName);
                 renderEmployees();
             }
         }
@@ -771,6 +845,15 @@
 
             detailsDiv.innerHTML = `
                 <div class="detail-item">
+                    <div class="detail-label">Titel</div>
+                    <select class="edit-input" id="edit-title-${id}">
+                        <option value="" ${!employee.title ? 'selected' : ''}>kein Titel</option>
+                        <option value="Dr." ${employee.title === 'Dr.' ? 'selected' : ''}>Dr. (Doktor)</option>
+                        <option value="TA" ${employee.title === 'TA' ? 'selected' : ''}>TA (Tierarzt)</option>
+                        <option value="TÄ" ${employee.title === 'TÄ' ? 'selected' : ''}>TÄ (Tierärztin)</option>
+                    </select>
+                </div>
+                <div class="detail-item">
                     <div class="detail-label">Vorname</div>
                     <input type="text" class="edit-input" id="edit-firstName-${id}" value="${employee.firstName}">
                 </div>
@@ -785,6 +868,14 @@
                 <div class="detail-item">
                     <div class="detail-label">Hausnummer</div>
                     <input type="text" class="edit-input" id="edit-houseNumber-${id}" value="${employee.houseNumber}">
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">E-Mail</div>
+                    <input type="email" class="edit-input" id="edit-email-${id}" value="${employee.email || ''}" required>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Telefonnummer</div>
+                    <input type="tel" class="edit-input" id="edit-phone-${id}" value="${employee.phone || ''}">
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Postleitzahl</div>
@@ -820,7 +911,10 @@
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
 
+            const oldDisplayName = getEmployeeDisplayName(employee);
+
             // Get updated values
+            employee.title = document.getElementById(`edit-title-${id}`).value;
             employee.firstName = document.getElementById(`edit-firstName-${id}`).value;
             employee.lastName = document.getElementById(`edit-lastName-${id}`).value;
             employee.street = document.getElementById(`edit-street-${id}`).value;
@@ -829,12 +923,14 @@
             employee.city = document.getElementById(`edit-city-${id}`).value;
             employee.birthDate = document.getElementById(`edit-birthDate-${id}`).value;
             employee.startDate = document.getElementById(`edit-startDate-${id}`).value;
+            employee.email = document.getElementById(`edit-email-${id}`).value;
+            employee.phone = document.getElementById(`edit-phone-${id}`).value;
             employee.remarks = document.getElementById(`edit-remarks-${id}`).value;
 
             // Validate required fields
             if (!employee.firstName || !employee.lastName || !employee.street || 
                 !employee.houseNumber || !employee.postalCode || !employee.city || 
-                !employee.birthDate || !employee.startDate) {
+                !employee.birthDate || !employee.startDate || !employee.email) {
                 alert('Bitte füllen Sie alle Pflichtfelder aus.');
                 return;
             }
@@ -845,6 +941,17 @@
                 return;
             }
 
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(employee.email)) {
+                alert('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+                return;
+            }
+
+            const newDisplayName = getEmployeeDisplayName(employee);
+            if (oldDisplayName !== newDisplayName) {
+                removeFromSchedule(oldDisplayName);
+            }
             saveEmployees();
             renderEmployees();
         }
@@ -891,14 +998,14 @@
         // Render employees
         function renderEmployees(filteredEmployees = employees) {
             if (filteredEmployees.length === 0) {
-                employeeGrid.innerHTML = '<div class="no-employees">Keine Mitarbeiter gefunden.</div>';
+                employeeGrid.innerHTML = '<div class="no-employees">Keine Mitarbeitenden gefunden.</div>';
                 return;
             }
 
             employeeGrid.innerHTML = filteredEmployees.map(emp => `
                 <div class="employee-card" data-employee-id="${emp.id}">
                     <div class="employee-header">
-                        <div class="employee-name">${emp.firstName} ${emp.lastName}</div>
+                        <div class="employee-name">${emp.title ? emp.title + ' ' : ''}${emp.firstName} ${emp.lastName}</div>
                         <div class="employee-id">ID: ${emp.id}</div>
                     </div>
                     <div class="employee-details">
@@ -914,6 +1021,18 @@
                             <div class="detail-label">Eintrittsdatum</div>
                             <div class="detail-value">${formatDate(emp.startDate)} (${calculateYearsOfService(emp.startDate)} Jahre)</div>
                         </div>
+                        ${emp.email ? `
+                        <div class="detail-item">
+                            <div class="detail-label">E-Mail</div>
+                            <div class="detail-value">${emp.email}</div>
+                        </div>
+                        ` : ''}
+                        ${emp.phone ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Telefonnummer</div>
+                            <div class="detail-value">${emp.phone}</div>
+                        </div>
+                        ` : ''}
                         ${emp.remarks ? `
                         <div class="detail-item">
                             <div class="detail-label">Bemerkungen</div>
@@ -938,6 +1057,8 @@
                 emp.street.toLowerCase().includes(searchTerm) ||
                 emp.city.toLowerCase().includes(searchTerm) ||
                 emp.postalCode.includes(searchTerm) ||
+                (emp.email && emp.email.toLowerCase().includes(searchTerm)) ||
+                (emp.phone && emp.phone.includes(searchTerm)) ||
                 (emp.remarks && emp.remarks.toLowerCase().includes(searchTerm))
             );
             renderEmployees(filteredEmployees);

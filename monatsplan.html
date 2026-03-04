@@ -1775,12 +1775,10 @@
 					applyCellColors();
 					addCellColorListeners();
 				}, 300);
-			} else {
-				// Falls keine Einstellungen vorhanden sind, öffne das Modal
-				openSettingsModal();
 			}
 			setMainTitleFromStorage();
 			updateMonatsplanDatum();
+			restoreMonthSelection();
 		});
 
 		// Clear localStorage for testing
@@ -2374,6 +2372,18 @@
 			}
 			updateMonatsplanDatum();
 		}
+		
+		// Monatsauswahl beim Laden wiederherstellen
+		function restoreMonthSelection() {
+			const savedMonth = localStorage.getItem('monatsplan_selectMonth');
+			if (savedMonth) {
+				const monthSelect = document.getElementById('monthSelect');
+				monthSelect.value = savedMonth;
+				updateMonthInfo();
+				updateExistingTableHeaders();
+			}
+		}
+		
 		function updateMonatsplanDatum() {
 			const monthInput = document.getElementById('monthSelect');
 			const wochenplanDatum = document.getElementById('wochenplan-datum');

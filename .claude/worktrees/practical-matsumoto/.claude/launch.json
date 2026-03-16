@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "KanFlow Dev Server",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "-C",
+        "/tmp",
+        "node",
+        "/tmp/kanflow-server.js"
+      ],
+      "port": 8080
+    }
+  ]
+}

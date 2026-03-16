@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preise & Tarife</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007AFF;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1d1d1f;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #007AFF;
+        }
+
+                .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .login-btn {
+            color: #1d1d1f;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+        }
+
+        .signup-btn {
+            background: #007AFF;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .signup-btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+        
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007AFF;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #1d1d1f;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: #007AFF;
+        }
+        .pricing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+
+        .pricing-header h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .pricing-header h3, .pricing-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            color: white;
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .pricing-card:hover:before {
+            left: 100%;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .pricing-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            color: #007aff;
+        }
+        .pricing-price {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1d1d1f;
+        }
+        .pricing-desc {
+            color: #86868b;
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+            text-align: center;
+        }
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+            width: 100%;
+        }
+        .pricing-features li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f2f2f7;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        .pricing-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .pricing-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .pricing-card.premium {
+            border: 2px solid #f093fb;
+        }
+
+        .pricing-card.free {
+            border: 2px solid #4facfe;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-header h1 {
+                font-size: 2rem;
+            }
+
+            .pricing-cards {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .pricing-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">         
+            <a href="welcome.html" class="logo">OrgaShift</a>
+            <ul class="nav-links">
+                <li><a href="#products">Produkte</a></li>
+                <li><a href="#explore">Erkunden</a></li>
+                <li><a href="#help">Hilfe</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+                <li><a href="pricing.html">Preise</a></li>
+            </ul>
+             <div class="nav-buttons">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="register.html" class="signup-btn">Kostenlos starten</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pricing-container">
+        <div class="pricing-header">
+            <h1>Unsere Tarife</h1>
+            <h3>Pläne, die mit Ihnen wachsen</h3>
+            <p>Wählen Sie das passende Paket für Ihren Bedarf. Jederzeit kündbar.</p>
+        </div>
+        <div class="pricing-cards">
+            <!-- Free Trial -->
+            <div class="pricing-card free">
+                <div class="pricing-title">Free Trial</div>
+                <div class="pricing-price">0&nbsp;€<span style="font-size:1rem;font-weight:400;">/Monat</span></div>
+                <div class="pricing-desc">Ideal zum Ausprobieren – kostenlos und unverbindlich.</div>
+                <ul class="pricing-features">
+                    <li>✅ 1 Nutzer</li>
+                    <li>✅ Bis zu 10 Dienstpläne</li>
+                    <li>✅ Basisfunktionen</li>
+                    <li>❌ Kein Export</li>
+                    <li>❌ Kein Support</li>
+                </ul>
+                <button class="pricing-btn" onclick="window.location.href='register.html'">Jetzt starten</button>
+            </div>
+            <!-- Basic -->
+            <div class="pricing-card">
+                <div class="pricing-title">Basic</div>
+                <div class="pricing-price">9&nbsp;€<span style="font-size:1rem;font-weight:400;">/Monat</span></div>
+                <div class="pricing-desc">Für kleine Teams, die mehr Flexibilität benötigen.</div>
+                <ul class="pricing-features">
+                    <li>✅ Bis zu 5 Nutzer</li>
+                    <li>✅ Unbegrenzte Dienstpläne</li>
+                    <li>✅ Excel-Export</li>
+                    <li>✅ E-Mail Support</li>
+                    <li>❌ Premium-Funktionen</li>
+                </ul>
+                <button class="pricing-btn">Basic wählen</button>
+            </div>
+            <!-- Premium -->
+            <div class="pricing-card premium">
+                <div class="pricing-title">Premium</div>
+                <div class="pricing-price">29&nbsp;€<span style="font-size:1rem;font-weight:400;">/Monat</span></div>
+                <div class="pricing-desc">Für Unternehmen mit höchsten Ansprüchen.</div>
+                <ul class="pricing-features">
+                    <li>✅ Unbegrenzte Nutzer</li>
+                    <li>✅ Unbegrenzte Dienstpläne</li>
+                    <li>✅ Alle Exporte (Excel, Google Sheets)</li>
+                    <li>✅ Priorisierter Support</li>
+                    <li>✅ Premium-Funktionen</li>
+                </ul>
+                <button class="pricing-btn">Premium wählen</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

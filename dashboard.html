@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <script>
+    const supabase = supabase.createClient("https://supabase.com/dashboard/project/iycgzdxjwjwbcntkbzpy", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5Y2d6ZHhqd2p3YmNudGtienB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1MTcwNjIsImV4cCI6MjA3MzA5MzA2Mn0.EAq3Tb-yR0KzwWvb-3BgJ3ZQCjO4ARl_UI3R5ckubCU");
+
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "index.html"; // zurück zum Login
+      } else {
+        document.getElementById("user-email").textContent = user.email;
+      }
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = "index.html";
+    }
+
+    window.onload = checkUser;
+  </script>
+</head>
+<body>
+  <h2>Willkommen im Dashboard</h2>
+  <p>Eingeloggt als: <span id="user-email"></span></p>
+  <button onclick="logout()">Abmelden</button>
+</body>
+</html>

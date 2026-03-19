@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift – Mein Urlaub</title>
+    <style>
+        /* ── DESIGN TOKENS ── */
+        :root {
+            --color-accent: #007AFF;
+            --color-text: #f0f0f5;
+            --color-text-muted: #8e8e99;
+            --color-surface: rgba(18,18,28,0.92);
+            --color-surface-glass: rgba(255,255,255,0.07);
+            --color-border: rgba(255,255,255,0.1);
+            --color-bg: #0a0a0f;
+            --color-nav-bg: rgba(8,8,16,0.88);
+            --color-nav-border: rgba(255,255,255,0.08);
+            --color-danger: #FF3B30;
+            --color-success: #34C759;
+            --color-warn: #FF9500;
+            --radius: 14px;
+            --shadow: 0 8px 40px rgba(0,0,0,0.5);
+        }
+
+        /* ── LIGHT MODE ── */
+        body.light {
+            --color-text: #1a1a2e;
+            --color-text-muted: #5a6376;
+            --color-surface: rgba(255,255,255,0.92);
+            --color-surface-glass: rgba(0,0,0,0.04);
+            --color-border: rgba(0,0,0,0.1);
+            --color-bg: #e8edf5;
+            --color-nav-bg: rgba(255,255,255,0.88);
+            --color-nav-border: rgba(0,0,0,0.1);
+            --shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        body.light { background: var(--color-bg); }
+        body.light .logo { color: var(--color-accent); }
+        body.light .nav-links a { color: var(--color-text); }
+        body.light .btn-ghost { color: var(--color-text); }
+        body.light .page-title { color: #1a1a2e; }
+        body.light .page-subtitle { color: rgba(0,0,0,0.6); }
+        body.light .emp-select-wrap { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.12); }
+        body.light .emp-select-wrap label { color: rgba(0,0,0,0.6); }
+        body.light .emp-select { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); color: var(--color-text); }
+        body.light .stat-card { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+        body.light .stat-num { color: #1a1a2e; }
+        body.light .stat-label { color: rgba(0,0,0,0.55); }
+        body.light #noEmpMsg { color: rgba(0,0,0,0.55); }
+        body.light .form-control { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.15); color: var(--color-text); }
+        body.light .vacation-item { border-color: rgba(0,0,0,0.1); }
+        body.light .vacation-item:hover { background: rgba(0,0,0,0.02); }
+        body.light .btn-sm { border-color: rgba(0,0,0,0.12); color: var(--color-text-muted); }
+        body.light .badge-approved { color: #1a8a3a; }
+        body.light #beamsOverlay { animation: overlayPulseLight 10s ease-in-out infinite; }
+        @keyframes overlayPulseLight {
+            0%, 100% { background: rgba(232,237,245,0.2); }
+            50%       { background: rgba(232,237,245,0.4); }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--color-bg, #0a0a0f);
+            transition: background 0.3s ease;
+            min-height: 100vh;
+            color: var(--color-text);
+            overflow-x: hidden;
+        }
+
+        /* ── BEAMS BACKGROUND ── */
+        #beamsCanvas {
+            position: fixed; inset: 0;
+            width: 100%; height: 100%;
+            filter: blur(15px);
+            z-index: 0;
+            pointer-events: none;
+        }
+        #beamsOverlay {
+            position: fixed; inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            backdrop-filter: blur(50px);
+            animation: overlayPulse 10s ease-in-out infinite;
+        }
+        @keyframes overlayPulse {
+            0%, 100% { background: rgba(10,10,15,0.05); }
+            50%       { background: rgba(10,10,15,0.15); }
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--color-nav-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--color-nav-border);
+            z-index: 1000;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo {
+            font-size: 22px; font-weight: 700; color: var(--color-text); text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        .logo-dot { color: var(--color-accent); }
+        .nav-links { display: flex; list-style: none; gap: 24px; }
+        .nav-links a {
+            text-decoration: none; color: var(--color-text);
+            font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s, color 0.2s;
+        }
+        .nav-links a:hover { opacity: 1; color: var(--color-accent); }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        .theme-toggle {
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            color: var(--color-text); font-size: 16px;
+            width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.12); }
+
+        /* ── PAGE WRAP ── */
+        .page-wrap {
+            position: relative; z-index: 2;
+            padding-top: 72px;
+        }
+
+        /* ── PAGE CONTENT ── */
+        .page { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 28px; flex-wrap: wrap; gap: 16px; padding-top: 8px;
+        }
+        .page-title { font-size: 2rem; font-weight: 700; color: #fff; }
+        .page-subtitle { color: rgba(255,255,255,0.7); font-size: 1rem; margin-top: 4px; }
+
+        /* ── EMPLOYEE SELECT ── */
+        .emp-select-wrap {
+            background: var(--color-surface-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px; padding: 8px 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .emp-select-wrap label { color: rgba(255,255,255,0.8); font-size: 0.85rem; white-space: nowrap; }
+        .emp-select {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            padding: 8px 12px; border-radius: 8px; font-size: 0.9rem;
+            outline: none; cursor: pointer; min-height: 40px;
+            transition: border-color 0.2s;
+        }
+        .emp-select:focus { border-color: var(--color-accent); }
+        .emp-select option { background: #1a1a2e; color: #f0f0f5; }
+
+        /* ── STATS ── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px; margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--color-surface-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius); padding: 18px; text-align: center;
+            transition: background 0.3s;
+        }
+        .stat-num { font-size: 2rem; font-weight: 700; color: #fff; }
+        .stat-label { font-size: 0.82rem; color: rgba(255,255,255,0.65); margin-top: 3px; }
+
+        /* ── GRID ── */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media(max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .card-title {
+            font-size: 1.1rem; font-weight: 700; color: var(--color-text);
+            margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+        }
+        .card-title svg { color: var(--color-accent); }
+
+        /* ── FORM ── */
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block; font-size: 0.82rem; font-weight: 500;
+            color: var(--color-text-muted); margin-bottom: 5px;
+        }
+        .form-group label .req { color: var(--color-danger); margin-left: 2px; }
+        .form-control {
+            width: 100%; padding: 10px 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--color-border);
+            border-radius: 8px; font-size: 0.9rem;
+            color: var(--color-text); outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            font-family: inherit;
+        }
+        .form-control:focus {
+            border-color: var(--color-accent);
+            background: rgba(0,122,255,0.06);
+        }
+        .form-control.error { border-color: var(--color-danger); }
+        .form-control::placeholder { color: rgba(255,255,255,0.2); }
+        body.light .form-control::placeholder { color: rgba(0,0,0,0.25); }
+        .field-error { font-size: 0.78rem; color: var(--color-danger); margin-top: 4px; display: none; }
+        .field-error.show { display: block; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .days-preview { font-size: 0.85rem; color: var(--color-text-muted); margin-top: 5px; }
+
+        /* ── PRIMARY BUTTON ── */
+        .btn-primary {
+            background: var(--color-accent); color: #fff;
+            border: none; cursor: pointer; font-weight: 600;
+            font-size: 0.88rem; padding: 10px 18px; border-radius: 8px;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+            font-family: inherit; min-height: 40px;
+        }
+        .btn-primary:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,122,255,0.4);
+        }
+
+        /* ── PROGRESS BAR ── */
+        .progress-bar-wrap { margin-top: 4px; margin-bottom: 16px; }
+        .progress-bar-bg { background: rgba(255,255,255,0.08); border-radius: 4px; height: 6px; }
+        body.light .progress-bar-bg { background: rgba(0,0,0,0.08); }
+        .progress-bar-fill { height: 6px; border-radius: 4px; background: var(--color-accent); transition: width 0.4s ease; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--color-text-muted); margin-top: 5px; }
+
+        /* ── VACATION LIST ── */
+        .vacation-list { display: flex; flex-direction: column; gap: 10px; }
+        .vacation-item {
+            border: 1px solid var(--color-border);
+            border-radius: 12px; padding: 14px 16px;
+            display: flex; align-items: flex-start; gap: 12px;
+            transition: background 0.15s;
+        }
+        .vacation-item:hover { background: rgba(255,255,255,0.03); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+        .status-approved { background: var(--color-success); }
+        .status-pending   { background: var(--color-warn); }
+        .status-rejected  { background: var(--color-danger); }
+        .vacation-info { flex: 1; }
+        .vacation-dates { font-weight: 600; font-size: 0.95rem; color: var(--color-text); }
+        .vacation-days  { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 2px; }
+        .vacation-note  { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; font-style: italic; }
+        .vacation-actions { display: flex; gap: 6px; align-items: flex-start; }
+        .badge {
+            display: inline-block; padding: 3px 10px;
+            border-radius: 20px; font-size: 0.74rem; font-weight: 600; margin-top: 6px;
+        }
+        .badge-pending  { background: rgba(255,149,0,0.15); color: var(--color-warn); }
+        .badge-approved { background: rgba(52,199,89,0.15); color: var(--color-success); }
+        .badge-rejected { background: rgba(255,59,48,0.12); color: var(--color-danger); }
+        .btn-sm {
+            background: none;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-muted);
+            padding: 5px 12px; border-radius: 20px; cursor: pointer;
+            font-size: 0.78rem; transition: all 0.15s; min-height: 30px;
+            font-family: inherit;
+        }
+        .btn-sm:hover { border-color: var(--color-danger); color: var(--color-danger); }
+        .approve-btn { border-color: rgba(52,199,89,0.3); color: var(--color-success); }
+        .approve-btn:hover { background: rgba(52,199,89,0.1); border-color: var(--color-success); }
+        .empty-list { text-align: center; padding: 32px; color: var(--color-text-muted); font-size: 0.9rem; }
+
+        /* ── NO EMP MSG ── */
+        #noEmpMsg { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.65); }
+        #noEmpMsg a { color: #fff; text-decoration: underline; }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width: 900px) {
+            .nav-links { display: none; }
+            .page-title { font-size: 1.5rem; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- BEAMS BACKGROUND -->
+<canvas id="beamsCanvas" aria-hidden="true"></canvas>
+<div id="beamsOverlay" aria-hidden="true"></div>
+
+<nav>
+    <div class="nav-container">
+        <a href="indexneu.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="welcomeneu.html">Dashboard</a></li>
+            <li><a href="wochenplanneu.html">Wochenplan</a></li>
+            <li><a href="personalneu.html">Personal</a></li>
+            <li><a href="urlaubALLE.html">Team-Urlaub</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+<main class="page">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Mein Urlaub</h1>
+            <p class="page-subtitle">Urlaub beantragen und Urlaubstage im Überblick</p>
+        </div>
+        <div class="emp-select-wrap">
+            <label for="empSelect">Mitarbeiter:</label>
+            <select id="empSelect" class="emp-select" aria-label="Mitarbeiter auswählen">
+                <option value="">-- Auswählen --</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="stats-row" id="statsRow" style="display:none">
+        <div class="stat-card" title="Klicken zum Bearbeiten" style="cursor:pointer" onclick="editEntitlement()">
+            <div class="stat-num" id="statTotal" style="border-bottom:1px dotted rgba(255,255,255,0.35);display:inline-block">30</div>
+            <div class="stat-label">Anspruch Tage/Jahr ✏️</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="statUsed">0</div>
+            <div class="stat-label">Genommen (genehmigt)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="statPending">0</div>
+            <div class="stat-label">Ausstehend</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="statLeft">30</div>
+            <div class="stat-label">Verbleibend</div>
+        </div>
+    </div>
+
+    <div id="noEmpMsg">
+        <p>Bitte wählen Sie einen Mitarbeiter aus.</p>
+        <p style="margin-top:8px;font-size:0.9rem">Noch kein Personal? <a href="personalneu.html">Jetzt anlegen</a></p>
+    </div>
+
+    <div id="mainContent" style="display:none">
+        <div class="grid">
+            <!-- Antrag -->
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Urlaub beantragen
+                </h2>
+                <div class="progress-bar-wrap" id="progressWrap">
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+                    <div class="progress-label"><span>Verbraucht</span><span id="progressLabel">0 / 30 Tage</span></div>
+                </div>
+                <form id="vacForm" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fieldFrom">Von <span class="req" aria-hidden="true">*</span></label>
+                            <input type="date" id="fieldFrom" class="form-control" required>
+                            <div class="field-error" id="errFrom">Pflichtfeld.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="fieldTo">Bis <span class="req" aria-hidden="true">*</span></label>
+                            <input type="date" id="fieldTo" class="form-control" required>
+                            <div class="field-error" id="errTo">Muss nach dem Startdatum liegen.</div>
+                        </div>
+                    </div>
+                    <div id="daysPreview" class="days-preview"></div>
+                    <div class="form-group" style="margin-top:12px">
+                        <label for="fieldNote">Notiz (optional)</label>
+                        <input type="text" id="fieldNote" class="form-control" placeholder="z.B. Familienurlaub">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px">
+                        Antrag einreichen
+                    </button>
+                </form>
+            </div>
+
+            <!-- Liste -->
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Meine Anträge
+                </h2>
+                <div class="vacation-list" id="vacationList"></div>
+            </div>
+        </div>
+    </div>
+</main>
+</div>
+
+<script>
+    // ─────────────────────────────────────────
+    //  BEAMS BACKGROUND
+    // ─────────────────────────────────────────
+    (function () {
+        const canvas = document.getElementById('beamsCanvas');
+        const ctx = canvas.getContext('2d');
+        let beams = [];
+        const BEAM_COUNT = 20;
+        const INTENSITY = 1.0;
+
+        function createBeam(w, h) {
+            const angle = -35 + Math.random() * 10;
+            return {
+                x: Math.random() * w * 1.5 - w * 0.25,
+                y: Math.random() * h * 1.5 - h * 0.25,
+                width: 30 + Math.random() * 60,
+                length: h * 2.5,
+                angle: angle,
+                speed: 0.6 + Math.random() * 1.2,
+                opacity: 0.12 + Math.random() * 0.16,
+                hue: 190 + Math.random() * 70,
+                pulse: Math.random() * Math.PI * 2,
+                pulseSpeed: 0.02 + Math.random() * 0.03
+            };
+        }
+
+        function resetBeam(beam, index, total) {
+            const spacing = canvas.width / 3;
+            const column = index % 3;
+            beam.y       = canvas.height + 100;
+            beam.x       = column * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+            beam.width   = 100 + Math.random() * 100;
+            beam.speed   = 0.5 + Math.random() * 0.4;
+            beam.hue     = 190 + (index * 70) / total;
+            beam.opacity = 0.2 + Math.random() * 0.1;
+        }
+
+        function drawBeam(beam) {
+            ctx.save();
+            ctx.translate(beam.x, beam.y);
+            ctx.rotate(beam.angle * Math.PI / 180);
+            const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * INTENSITY;
+            const g = ctx.createLinearGradient(0, 0, 0, beam.length);
+            g.addColorStop(0,   `hsla(${beam.hue},85%,65%,0)`);
+            g.addColorStop(0.1, `hsla(${beam.hue},85%,65%,${pulsingOpacity * 0.5})`);
+            g.addColorStop(0.4, `hsla(${beam.hue},85%,65%,${pulsingOpacity})`);
+            g.addColorStop(0.6, `hsla(${beam.hue},85%,65%,${pulsingOpacity})`);
+            g.addColorStop(0.9, `hsla(${beam.hue},85%,65%,${pulsingOpacity * 0.5})`);
+            g.addColorStop(1,   `hsla(${beam.hue},85%,65%,0)`);
+            ctx.fillStyle = g;
+            ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+            ctx.restore();
+        }
+
+        function updateCanvasSize() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width  = window.innerWidth  * dpr;
+            canvas.height = window.innerHeight * dpr;
+            canvas.style.width  = window.innerWidth  + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            ctx.scale(dpr, dpr);
+            beams = Array.from({ length: BEAM_COUNT }, () =>
+                createBeam(window.innerWidth, window.innerHeight)
+            );
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.filter = 'blur(35px)';
+            beams.forEach((beam, i) => {
+                beam.y     -= beam.speed;
+                beam.pulse += beam.pulseSpeed;
+                if (beam.y + beam.length < -100) resetBeam(beam, i, beams.length);
+                drawBeam(beam);
+            });
+            requestAnimationFrame(animate);
+        }
+
+        updateCanvasSize();
+        window.addEventListener('resize', updateCanvasSize);
+        animate();
+    })();
+
+    // ─────────────────────────────────────────
+    //  THEME TOGGLE
+    // ─────────────────────────────────────────
+    (function () {
+        const btn  = document.getElementById('themeToggleBtn');
+        const body = document.body;
+        if (localStorage.getItem('orgashift_theme') === 'light') body.classList.add('light');
+        btn.textContent = body.classList.contains('light') ? '☀️' : '🌙';
+        btn.addEventListener('click', function () {
+            body.classList.toggle('light');
+            const isLight = body.classList.contains('light');
+            localStorage.setItem('orgashift_theme', isLight ? 'light' : 'dark');
+            btn.textContent = isLight ? '☀️' : '🌙';
+        });
+    })();
+
+    // ─────────────────────────────────────────
+    //  URLAUB FUNKTIONALITÄT
+    // ─────────────────────────────────────────
+    const VAC_KEY         = 'orgashift_vacation';
+    const PERS_KEY        = 'orgashift_personal';
+    const ENTITLEMENT_KEY = 'orgashift_entitlement';
+
+    function getEntitlement(empId) {
+        try { const d = JSON.parse(localStorage.getItem(ENTITLEMENT_KEY) || '{}'); return d[empId] ?? 30; } catch { return 30; }
+    }
+    function setEntitlement(empId, days) {
+        try { const d = JSON.parse(localStorage.getItem(ENTITLEMENT_KEY) || '{}'); d[empId] = days; localStorage.setItem(ENTITLEMENT_KEY, JSON.stringify(d)); } catch {}
+    }
+
+    function loadEmp() { try { return JSON.parse(localStorage.getItem(PERS_KEY))||[]; } catch{return[];} }
+    function loadVac() { try { return JSON.parse(localStorage.getItem(VAC_KEY))||[]; } catch{return[];} }
+    function saveVac(v) { localStorage.setItem(VAC_KEY, JSON.stringify(v)); }
+
+    function countDays(from, to) {
+        const f = new Date(from), t = new Date(to);
+        if (t < f) return 0;
+        let count = 0, d = new Date(f);
+        while (d <= t) {
+            const day = d.getDay();
+            if (day !== 0 && day !== 6) count++;
+            d.setDate(d.getDate()+1);
+        }
+        return count;
+    }
+
+    function formatDE(str) { return new Date(str).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric'}); }
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function getSelectedEmpId() { return document.getElementById('empSelect').value; }
+
+    function updateStats(empId) {
+        const TOTAL     = getEntitlement(empId);
+        const vacations = loadVac().filter(v => v.employeeId === empId);
+        const approved  = vacations.filter(v => v.status === 'approved');
+        const pending   = vacations.filter(v => v.status === 'pending');
+        const usedDays  = approved.reduce((s,v) => s + countDays(v.from, v.to), 0);
+        const pendDays  = pending.reduce((s,v) => s + countDays(v.from, v.to), 0);
+        const leftDays  = Math.max(0, TOTAL - usedDays);
+
+        document.getElementById('statTotal').textContent   = TOTAL;
+        document.getElementById('statUsed').textContent    = usedDays;
+        document.getElementById('statPending').textContent = pendDays;
+        document.getElementById('statLeft').textContent    = leftDays;
+
+        const pct = Math.min(100, Math.round(usedDays / TOTAL * 100));
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressLabel').textContent = `${usedDays} / ${TOTAL} Tage (${pct}%)`;
+    }
+
+    function editEntitlement() {
+        const empId = getSelectedEmpId();
+        if (!empId) return;
+        const statEl = document.getElementById('statTotal');
+        if (!statEl || statEl.tagName === 'INPUT') return;
+        const current = getEntitlement(empId);
+        const input = document.createElement('input');
+        input.type = 'number'; input.min = 1; input.max = 365; input.value = current;
+        input.style.cssText = 'width:72px;font-size:2rem;font-weight:700;color:inherit;background:rgba(0,122,255,0.15);border:1.5px solid var(--color-accent);border-radius:6px;text-align:center;outline:none;padding:0 4px;font-family:inherit;';
+        statEl.replaceWith(input);
+        input.id = 'statTotal';
+        input.focus(); input.select();
+        let saved = false;
+        function save() {
+            if (saved) return; saved = true;
+            const val = Math.max(1, Math.min(365, parseInt(input.value) || current));
+            setEntitlement(empId, val);
+            const span = document.createElement('div');
+            span.id = 'statTotal'; span.className = 'stat-num';
+            span.style.cssText = 'border-bottom:1px dotted rgba(255,255,255,0.35);display:inline-block';
+            span.textContent = val;
+            input.replaceWith(span);
+            updateStats(empId);
+        }
+        input.addEventListener('blur', save);
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { input.blur(); }
+            if (e.key === 'Escape') { input.value = current; input.blur(); }
+        });
+    }
+
+    function renderList(empId) {
+        const vacations = loadVac().filter(v => v.employeeId === empId).sort((a,b) => new Date(b.from)-new Date(a.from));
+        const list = document.getElementById('vacationList');
+        if (vacations.length === 0) { list.innerHTML = '<div class="empty-list">Noch keine Urlaubsanträge.</div>'; return; }
+
+        list.innerHTML = vacations.map(v => {
+            const days = countDays(v.from, v.to);
+            const statusCls = v.status === 'approved' ? 'approved' : v.status === 'rejected' ? 'rejected' : 'pending';
+            const statusLabel = v.status === 'approved' ? 'Genehmigt' : v.status === 'rejected' ? 'Abgelehnt' : 'Ausstehend';
+            return `<div class="vacation-item">
+                <div class="status-dot status-${statusCls}" title="${statusLabel}"></div>
+                <div class="vacation-info">
+                    <div class="vacation-dates">${formatDE(v.from)} – ${formatDE(v.to)}</div>
+                    <div class="vacation-days">${days} Arbeitstag${days !== 1 ? 'e' : ''}</div>
+                    ${v.note ? `<div class="vacation-note">${escHtml(v.note)}</div>` : ''}
+                    <span class="badge badge-${statusCls}">${statusLabel}</span>
+                </div>
+                <div class="vacation-actions">
+                    ${v.status === 'pending' ? `<button class="btn-sm approve-btn" onclick="approveVac('${v.id}')">Genehmigen</button>` : ''}
+                    <button class="btn-sm" onclick="deleteVac('${v.id}')" aria-label="Antrag löschen">Löschen</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function approveVac(id) {
+        const vacs = loadVac();
+        const idx = vacs.findIndex(v => v.id === id);
+        if (idx >= 0) { vacs[idx].status = 'approved'; saveVac(vacs); }
+        const empId = getSelectedEmpId();
+        updateStats(empId); renderList(empId);
+    }
+
+    function deleteVac(id) {
+        if (!confirm('Diesen Urlaubsantrag wirklich löschen?')) return;
+        const vacs = loadVac().filter(v => v.id !== id);
+        saveVac(vacs);
+        const empId = getSelectedEmpId();
+        updateStats(empId); renderList(empId);
+    }
+
+    function populateSelect() {
+        const employees = loadEmp();
+        const sel = document.getElementById('empSelect');
+        sel.innerHTML = '<option value="">-- Auswählen --</option>' +
+            employees.map(e => `<option value="${e.id}">${escHtml(e.name)}</option>`).join('');
+    }
+
+    document.getElementById('empSelect').addEventListener('change', function() {
+        const empId = this.value;
+        if (!empId) {
+            document.getElementById('statsRow').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('noEmpMsg').style.display = 'block';
+            return;
+        }
+        document.getElementById('noEmpMsg').style.display = 'none';
+        document.getElementById('statsRow').style.display = 'grid';
+        document.getElementById('mainContent').style.display = 'block';
+        updateStats(empId); renderList(empId);
+    });
+
+    function updatePreview() {
+        const from = document.getElementById('fieldFrom').value;
+        const to   = document.getElementById('fieldTo').value;
+        const preview = document.getElementById('daysPreview');
+        if (from && to && new Date(to) >= new Date(from)) {
+            const d = countDays(from, to);
+            preview.textContent = `= ${d} Arbeitstag${d !== 1 ? 'e' : ''}`;
+        } else { preview.textContent = ''; }
+    }
+    document.getElementById('fieldFrom').addEventListener('change', updatePreview);
+    document.getElementById('fieldTo').addEventListener('change', updatePreview);
+    document.getElementById('fieldFrom').addEventListener('blur', () => {
+        const v = document.getElementById('fieldFrom').value;
+        document.getElementById('fieldFrom').classList.toggle('error', !v);
+        document.getElementById('errFrom').classList.toggle('show', !v);
+    });
+    document.getElementById('fieldTo').addEventListener('blur', () => {
+        const from = document.getElementById('fieldFrom').value;
+        const to   = document.getElementById('fieldTo').value;
+        const ok = !!to && (!from || new Date(to) >= new Date(from));
+        document.getElementById('fieldTo').classList.toggle('error', !ok);
+        document.getElementById('errTo').classList.toggle('show', !ok);
+    });
+
+    document.getElementById('vacForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const from  = document.getElementById('fieldFrom').value;
+        const to    = document.getElementById('fieldTo').value;
+        const note  = document.getElementById('fieldNote').value.trim();
+        const empId = getSelectedEmpId();
+
+        let ok = true;
+        if (!from) { document.getElementById('fieldFrom').classList.add('error'); document.getElementById('errFrom').classList.add('show'); ok = false; }
+        if (!to || new Date(to) < new Date(from)) { document.getElementById('fieldTo').classList.add('error'); document.getElementById('errTo').classList.add('show'); ok = false; }
+        if (!ok) return;
+
+        const vacs = loadVac();
+        vacs.push({ id: Date.now().toString(), employeeId: empId, from, to, note, status: 'pending' });
+        saveVac(vacs);
+        document.getElementById('vacForm').reset();
+        document.getElementById('daysPreview').textContent = '';
+        updateStats(empId); renderList(empId);
+    });
+
+    // Init
+    populateSelect();
+    const emps = loadEmp();
+    if (emps.length === 1) {
+        document.getElementById('empSelect').value = emps[0].id;
+        document.getElementById('empSelect').dispatchEvent(new Event('change'));
+    }
+</script>
+</body>
+</html>

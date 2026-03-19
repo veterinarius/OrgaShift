@@ -668,6 +668,10 @@
                         <label for="startDate">Eintrittsdatum</label>
                         <input type="date" id="startDate" name="startDate">
                     </div>
+                    <div class="form-group">
+                        <label for="role">Rolle *</label>
+                        <input type="text" id="role" name="role" required placeholder="z.B. Servicekraft">
+                    </div>
                 </div>
                 
                 <div class="form-group remarks-group">
@@ -803,7 +807,8 @@
                 startDate: formData.get('startDate'),
                 email: formData.get('email'),
                 phone: formData.get('phone'),
-                remarks: formData.get('remarks')
+                remarks: formData.get('remarks'),
+                role: formData.get('role')
             };
 
             employees.push(employee);

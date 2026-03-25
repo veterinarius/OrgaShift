@@ -425,6 +425,44 @@
                 font-size: 0.7em;
             }
         }
+
+        .year-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 10px 0 5px;
+        }
+
+        .year-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        .year-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .year-display {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #2c3e50;
+            min-width: 80px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -450,7 +488,12 @@
 
     <div class="container">
         <div class="header">
-            <h1>📅 Jahresplaner 2026</h1>
+            <h1>📅 Jahresplaner</h1>
+            <div class="year-nav">
+                <button class="year-btn" onclick="changeYear(-1)">&#9664;</button>
+                <span class="year-display" id="yearDisplay">2026</span>
+                <button class="year-btn" onclick="changeYear(1)">&#9654;</button>
+            </div>
             <p class="subtitle">Urlaubs- und Krankentage Übersicht</p>
         </div>
 
@@ -527,62 +570,90 @@
             'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
         ];
 
-        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        
+        let currentYear = new Date().getFullYear();
         let employees = [];
         let entries = {};
 
-        // Schaltjahr 2025 prüfen (2025 ist kein Schaltjahr)
-        const currentYear = 2025;
+        // Schaltjahr-Prüfung
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        // Tage pro Monat dynamisch berechnen
+        function getDaysInMonth(year) {
+            return [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        }
+
+        // Storage-Schlüssel
+        const EMPLOYEES_KEY = 'jahresplaner_employees';
+        function entriesKey(year) { return `jahresplaner_entries_${year}`; }
 
         // Lokale Speicherung
         function saveData() {
-            const data = {
-                employees: employees,
-                entries: entries,
-                lastUpdated: new Date().toISOString()
-            };
-            localStorage.setItem('jahresplaner_data', JSON.stringify(data));
+            localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
+            localStorage.setItem(entriesKey(currentYear), JSON.stringify(entries));
             showSaveStatus();
         }
 
         function loadData() {
             try {
-                const savedData = localStorage.getItem('jahresplaner_data');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
+                // Migration vom alten Format (einmalig)
+                const oldData = localStorage.getItem('jahresplaner_data');
+                if (oldData && !localStorage.getItem(EMPLOYEES_KEY)) {
+                    const data = JSON.parse(oldData);
                     employees = data.employees || [];
                     entries = data.entries || {};
-                    updateEmployeeSelect();
-                    generateTable();
+                    localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
+                    localStorage.setItem(entriesKey(currentYear), JSON.stringify(entries));
+                    localStorage.removeItem('jahresplaner_data');
+                } else {
+                    const savedEmployees = localStorage.getItem(EMPLOYEES_KEY);
+                    if (savedEmployees) employees = JSON.parse(savedEmployees);
+                    const savedEntries = localStorage.getItem(entriesKey(currentYear));
+                    entries = savedEntries ? JSON.parse(savedEntries) : {};
                 }
+                updateEmployeeSelect();
+                generateTable();
             } catch (error) {
                 console.error('Fehler beim Laden der Daten:', error);
             }
         }
 
+        // Jahr wechseln
+        function changeYear(delta) {
+            saveData();
+            currentYear += delta;
+            document.getElementById('yearDisplay').textContent = currentYear;
+            try {
+                const savedEntries = localStorage.getItem(entriesKey(currentYear));
+                entries = savedEntries ? JSON.parse(savedEntries) : {};
+                employees.forEach(emp => { if (!entries[emp]) entries[emp] = []; });
+            } catch (e) {
+                entries = {};
+            }
+            generateTable();
+        }
+
         function showSaveStatus() {
             const status = document.getElementById('saveStatus');
             status.classList.add('show');
-            setTimeout(() => {
-                status.classList.remove('show');
-            }, 2000);
+            setTimeout(() => { status.classList.remove('show'); }, 2000);
         }
 
-        // Export/Import Funktionen
+        // Export/Import
         function exportData() {
             const data = {
                 employees: employees,
                 entries: entries,
+                year: currentYear,
                 exportDate: new Date().toISOString(),
-                version: '1.0'
+                version: '2.0'
             };
-            
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `jahresplaner_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `jahresplaner_${currentYear}_backup_${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -597,69 +668,53 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    
+
                     if (confirm('Möchten Sie die importierten Daten mit den aktuellen Daten zusammenführen oder alle aktuellen Daten ersetzen?\n\nOK = Ersetzen\nAbbrechen = Zusammenführen')) {
-                        // Ersetzen
                         employees = data.employees || [];
                         entries = data.entries || {};
                     } else {
-                        // Zusammenführen
                         const importedEmployees = data.employees || [];
                         const importedEntries = data.entries || {};
-                        
-                        // Mitarbeiter zusammenführen
+
                         importedEmployees.forEach(emp => {
-                            if (!employees.includes(emp)) {
-                                employees.push(emp);
-                            }
+                            if (!employees.includes(emp)) employees.push(emp);
                         });
-                        
-                        // Einträge zusammenführen
+
                         Object.keys(importedEntries).forEach(emp => {
-                            if (!entries[emp]) {
-                                entries[emp] = [];
-                            }
+                            if (!entries[emp]) entries[emp] = [];
                             entries[emp] = [...entries[emp], ...importedEntries[emp]];
                         });
                     }
-                    
+
                     employees.sort();
                     updateEmployeeSelect();
                     generateTable();
                     saveData();
                     alert('Daten wurden erfolgreich importiert!');
-                    
                 } catch (error) {
                     alert('Fehler beim Importieren der Datei. Bitte überprüfen Sie das Dateiformat.');
                     console.error('Import error:', error);
                 }
             };
             reader.readAsText(file);
-            input.value = ''; // Reset file input
+            input.value = '';
         }
 
         function isWeekend(date) {
             const day = date.getDay();
-            return day === 0 || day === 6; // Sonntag = 0, Samstag = 6
+            return day === 0 || day === 6;
         }
 
         function addEmployee() {
             const name = document.getElementById('employeeName').value.trim();
-            if (!name) {
-                alert('Bitte geben Sie einen Namen ein.');
-                return;
-            }
-            
-            if (employees.includes(name)) {
-                alert('Dieser Mitarbeiter existiert bereits.');
-                return;
-            }
+            if (!name) { alert('Bitte geben Sie einen Namen ein.'); return; }
+            if (employees.includes(name)) { alert('Dieser Mitarbeiter existiert bereits.'); return; }
 
             employees.push(name);
-            employees.sort(); // Alphabetisch sortieren
+            employees.sort();
             entries[name] = [];
             document.getElementById('employeeName').value = '';
-            
+
             updateEmployeeSelect();
             generateTable();
             saveData();
@@ -668,10 +723,7 @@
         function updateEmployeeSelect() {
             const select = document.getElementById('employeeSelect');
             select.innerHTML = '<option value="">Mitarbeiter wählen...</option>';
-            
-            // Sortierte Liste für das Dropdown-Menü
-            const sortedEmployees = [...employees].sort();
-            sortedEmployees.forEach(employee => {
+            [...employees].sort().forEach(employee => {
                 const option = document.createElement('option');
                 option.value = employee;
                 option.textContent = employee;
@@ -690,54 +742,47 @@
                 return;
             }
 
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-
-            if (start > end) {
+            if (new Date(startDate) > new Date(endDate)) {
                 alert('Das Startdatum muss vor dem Enddatum liegen.');
                 return;
             }
 
+            if (!entries[employee]) entries[employee] = [];
+
             if (type === 'clear') {
-                // Einträge in diesem Zeitraum löschen
-                entries[employee] = entries[employee].filter(entry => {
-                    const entryStart = new Date(entry.start);
-                    const entryEnd = new Date(entry.end);
-                    return !(entryStart <= end && entryEnd >= start);
-                });
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                entries[employee] = entries[employee].filter(entry =>
+                    !(new Date(entry.start) <= end && new Date(entry.end) >= start)
+                );
             } else {
                 entries[employee].push({ start: startDate, end: endDate, type });
             }
-            
-            // Felder zurücksetzen
+
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
-            
+
             generateTable();
             saveData();
         }
 
         function isDateInRange(date, start, end) {
             const checkDate = new Date(date);
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-            return checkDate >= startDate && checkDate <= endDate;
+            return checkDate >= new Date(start) && checkDate <= new Date(end);
         }
 
         function getEntryForDate(employee, dateStr) {
             if (!entries[employee]) return null;
-            
             for (let entry of entries[employee]) {
-                if (isDateInRange(dateStr, entry.start, entry.end)) {
-                    return entry.type;
-                }
+                if (isDateInRange(dateStr, entry.start, entry.end)) return entry.type;
             }
             return null;
         }
 
         function generateTable() {
             const table = document.getElementById('plannerTable');
-            
+            const daysInMonth = getDaysInMonth(currentYear);
+
             if (employees.length === 0) {
                 table.innerHTML = `
                     <tr>
@@ -751,15 +796,12 @@
             }
 
             let html = '<thead><tr><th>Mitarbeiter</th>';
-            
-            // Header für alle Tage des Jahres generieren
+
             for (let month = 0; month < 12; month++) {
-                // Monatsheader mit verschiedenen Farben
                 html += `<th class="month-header month-${month}" colspan="${daysInMonth[month]}">${monthsShort[month]}</th>`;
             }
             html += '</tr><tr><th></th>';
-            
-            // Tage-Header
+
             for (let month = 0; month < 12; month++) {
                 for (let day = 1; day <= daysInMonth[month]; day++) {
                     html += `<th>${day}</th>`;
@@ -767,20 +809,18 @@
             }
             html += '</tr></thead><tbody>';
 
-            // Zeilen für jeden Mitarbeiter (alphabetisch sortiert)
-            const sortedEmployees = [...employees].sort();
-            sortedEmployees.forEach(employee => {
+            [...employees].sort().forEach(employee => {
                 html += `<tr><td>${employee}</td>`;
-                
+
                 for (let month = 0; month < 12; month++) {
                     for (let day = 1; day <= daysInMonth[month]; day++) {
                         const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                         const date = new Date(currentYear, month, day);
                         const entryType = getEntryForDate(employee, dateStr);
-                        
+
                         let className = '';
                         let content = '';
-                        
+
                         if (entryType === 'vacation') {
                             className = 'vacation';
                             content = 'U';
@@ -790,10 +830,8 @@
                         } else if (isWeekend(date)) {
                             className = 'weekend';
                             content = '·';
-                        } else {
-                            content = '';
                         }
-                        
+
                         html += `<td class="${className}" data-employee="${employee}" data-date="${dateStr}">${content}</td>`;
                     }
                 }
@@ -802,11 +840,9 @@
 
             html += '</tbody>';
             table.innerHTML = html;
-            
-            // Event-Listener für Klicks auf Tabellenzellen
-            const cells = table.querySelectorAll('td:not(:first-child)');
-            cells.forEach(cell => {
-                cell.addEventListener('click', function(e) {
+
+            table.querySelectorAll('td:not(:first-child)').forEach(cell => {
+                cell.addEventListener('click', function() {
                     const employee = this.dataset.employee;
                     const date = this.dataset.date;
                     if (this.textContent && !this.classList.contains('weekend')) {
@@ -814,86 +850,52 @@
                     }
                 });
             });
-            
+
             updateStats();
         }
 
         function deleteSingleDay(employee, dateStr) {
             if (!entries[employee]) return;
-            
+
             const newEntries = [];
             let dayDeleted = false;
-            
+
             entries[employee].forEach(entry => {
-                // Arbeite direkt mit Datumsstrings im Format YYYY-MM-DD
                 if (isDateInRange(dateStr, entry.start, entry.end)) {
                     dayDeleted = true;
-                    
-                    // Wenn der Eintrag nur aus einem Tag besteht, komplett löschen
-                    if (entry.start === entry.end) {
-                        return; // Eintrag wird nicht zu newEntries hinzugefügt
-                    }
-                    
-                    // Wenn der angeklickte Tag am Anfang liegt
+
+                    if (entry.start === entry.end) return;
+
                     if (dateStr === entry.start) {
-                        const nextDay = addDays(dateStr, 1);
-                        newEntries.push({
-                            start: nextDay,
-                            end: entry.end,
-                            type: entry.type
-                        });
-                    }
-                    // Wenn der angeklickte Tag am Ende liegt
-                    else if (dateStr === entry.end) {
-                        const prevDay = addDays(dateStr, -1);
-                        newEntries.push({
-                            start: entry.start,
-                            end: prevDay,
-                            type: entry.type
-                        });
-                    }
-                    // Wenn der angeklickte Tag in der Mitte liegt, Eintrag teilen
-                    else {
-                        // Teil vor dem gelöschten Tag
-                        const dayBefore = addDays(dateStr, -1);
-                        newEntries.push({
-                            start: entry.start,
-                            end: dayBefore,
-                            type: entry.type
-                        });
-                        
-                        // Teil nach dem gelöschten Tag
-                        const dayAfter = addDays(dateStr, 1);
-                        newEntries.push({
-                            start: dayAfter,
-                            end: entry.end,
-                            type: entry.type
-                        });
+                        newEntries.push({ start: addDays(dateStr, 1), end: entry.end, type: entry.type });
+                    } else if (dateStr === entry.end) {
+                        newEntries.push({ start: entry.start, end: addDays(dateStr, -1), type: entry.type });
+                    } else {
+                        newEntries.push({ start: entry.start, end: addDays(dateStr, -1), type: entry.type });
+                        newEntries.push({ start: addDays(dateStr, 1), end: entry.end, type: entry.type });
                     }
                 } else {
-                    // Eintrag ist nicht betroffen, beibehalten
                     newEntries.push(entry);
                 }
             });
-            
+
             entries[employee] = newEntries;
-            
+
             if (dayDeleted) {
                 generateTable();
                 saveData();
             }
         }
-        
-        // Hilfsfunktion um Tage zu einem Datum hinzuzufügen
+
         function addDays(dateStr, days) {
-            const date = new Date(dateStr + 'T12:00:00'); // Mittags um Zeitzonenprobleme zu vermeiden
+            const date = new Date(dateStr + 'T12:00:00');
             date.setDate(date.getDate() + days);
             return date.toISOString().split('T')[0];
         }
 
         function updateStats() {
             const statsContainer = document.getElementById('statsContainer');
-            
+
             if (employees.length === 0) {
                 statsContainer.innerHTML = '';
                 return;
@@ -902,9 +904,7 @@
             let totalVacation = 0;
             let totalSick = 0;
 
-            // Mitarbeiter alphabetisch sortiert für Statistiken
-            const sortedEmployees = [...employees].sort();
-            const statsHtml = sortedEmployees.map(employee => {
+            const statsHtml = [...employees].sort().map(employee => {
                 let vacationDays = 0;
                 let sickDays = 0;
 
@@ -913,12 +913,8 @@
                         const start = new Date(entry.start);
                         const end = new Date(entry.end);
                         const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                        
-                        if (entry.type === 'vacation') {
-                            vacationDays += days;
-                        } else if (entry.type === 'sick') {
-                            sickDays += days;
-                        }
+                        if (entry.type === 'vacation') vacationDays += days;
+                        else if (entry.type === 'sick') sickDays += days;
                     });
                 }
 
@@ -934,71 +930,36 @@
                 `;
             }).join('');
 
-            const totalStats = `
+            statsContainer.innerHTML = statsHtml + `
                 <div class="stat-card">
-                    <h4>📊 Gesamt</h4>
+                    <h4>&#128202; Gesamt</h4>
                     <div>Urlaub: <span class="stat-value">${totalVacation}</span> Tage</div>
                     <div>Krank: <span class="stat-value">${totalSick}</span> Tage</div>
                 </div>
             `;
-
-            statsContainer.innerHTML = statsHtml + totalStats;
         }
 
         function clearAllData() {
             if (confirm('Möchten Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
                 employees = [];
                 entries = {};
-                localStorage.removeItem('jahresplaner_data');
+                Object.keys(localStorage)
+                    .filter(key => key.startsWith('jahresplaner_'))
+                    .forEach(key => localStorage.removeItem(key));
                 updateEmployeeSelect();
                 generateTable();
             }
         }
 
-        /*function addSampleData() {
-            employees = ['Anna Müller', 'Max Mustermann', 'Lisa Schmidt', 'Tom Weber', 'Sarah Klein'];
-            entries = {
-                'Anna Müller': [
-                    { start: '2025-03-15', end: '2025-03-22', type: 'vacation' },
-                    { start: '2025-07-01', end: '2025-07-14', type: 'vacation' },
-                    { start: '2025-11-05', end: '2025-11-06', type: 'sick' }
-                ],
-                'Max Mustermann': [
-                    { start: '2025-06-20', end: '2025-07-05', type: 'vacation' },
-                    { start: '2025-02-10', end: '2025-02-12', type: 'sick' },
-                    { start: '2025-12-23', end: '2025-12-31', type: 'vacation' }
-                ],
-                'Lisa Schmidt': [
-                    { start: '2025-08-10', end: '2025-08-25', type: 'vacation' },
-                    { start: '2025-04-01', end: '2025-04-02', type: 'sick' }
-                ],
-                'Tom Weber': [
-                    { start: '2025-05-15', end: '2025-05-30', type: 'vacation' },
-                    { start: '2025-09-01', end: '2025-09-03', type: 'sick' }
-                ],
-                'Sarah Klein': [
-                    { start: '2025-01-02', end: '2025-01-04', type: 'sick' },
-                    { start: '2025-06-01', end: '2025-06-14', type: 'vacation' }
-                ]
-            };
-            updateEmployeeSelect();
-            generateTable();
-            saveData();
-        }*/
-
         // Initialisierung
         window.addEventListener('load', function() {
+            document.getElementById('yearDisplay').textContent = currentYear;
             loadData();
-            if (employees.length === 0) {
-                generateTable();
-            }
+            if (employees.length === 0) generateTable();
         });
 
-        // Automatische Speicherung bei Änderungen
         window.addEventListener('beforeunload', function() {
-            if (employees.length > 0) {
-                saveData();
-            }
+            if (employees.length > 0) saveData();
         });
     </script>
 </body>

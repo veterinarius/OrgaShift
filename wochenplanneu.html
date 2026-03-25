@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – Wochenplan</title>
+    <style>
+        /* ── DESIGN TOKENS ── */
+        :root {
+            --color-accent: #007AFF;
+            --color-text: #f0f0f5;
+            --color-text-muted: #8e8e99;
+            --color-surface: rgba(18,18,28,0.92);
+            --color-surface-glass: rgba(255,255,255,0.07);
+            --color-border: rgba(255,255,255,0.1);
+            --color-bg: #0a0a0f;
+            --color-nav-bg: rgba(8,8,16,0.88);
+            --color-nav-border: rgba(255,255,255,0.08);
+            --radius: 14px;
+            --shadow: 0 8px 40px rgba(0,0,0,0.5);
+        }
+
+        /* ── LIGHT MODE ── */
+        body.light {
+            --color-text: #1a1a2e;
+            --color-text-muted: #5a6376;
+            --color-surface: rgba(255,255,255,0.92);
+            --color-surface-glass: rgba(0,0,0,0.04);
+            --color-border: rgba(0,0,0,0.1);
+            --color-bg: #e8edf5;
+            --color-nav-bg: rgba(255,255,255,0.88);
+            --color-nav-border: rgba(0,0,0,0.1);
+        }
+        body.light { background: var(--color-bg); }
+        body.light nav { border-bottom-color: var(--color-nav-border); }
+        body.light .logo { color: var(--color-accent); }
+        body.light .nav-links a { color: var(--color-text); }
+        body.light .btn-ghost { color: var(--color-text); }
+        body.light .left-panel-wo { box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+        body.light .panel-title { color: var(--color-text); }
+        body.light table th { background: rgba(0,0,0,0.04); color: var(--color-text); }
+        body.light table td { color: var(--color-text); background: rgba(255,255,255,0.7); }
+        body.light table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+        body.light .row-number { background: rgba(0,0,0,0.06) !important; color: var(--color-text-muted) !important; }
+        body.light input, body.light select, body.light textarea {
+            background: rgba(255,255,255,0.9);
+            border-color: rgba(0,0,0,0.15);
+            color: var(--color-text);
+        }
+        body.light .modal-content {
+            background: rgba(255,255,255,0.97);
+            color: var(--color-text);
+            border-color: rgba(0,0,0,0.1);
+        }
+        body.light .modal-content h2 { color: var(--color-text); }
+        body.light .modal-content h3 { color: var(--color-text); }
+        body.light .modal-content label { color: var(--color-text-muted); }
+        body.light #context-menu {
+            background: rgba(255,255,255,0.97) !important;
+            border-color: rgba(0,0,0,0.1) !important;
+        }
+        body.light #custom-alert-box {
+            background: rgba(255,255,255,0.97) !important;
+            color: var(--color-text) !important;
+        }
+        body.light .employee-tag { border-color: rgba(0,0,0,0.15); }
+        body.light .extra-pref-section { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+        body.light .table-title-row { color: var(--color-text); }
+        body.light .btn { border-color: rgba(0,0,0,0.15); }
+        body.light .btn-secondary { background: rgba(0,0,0,0.06); color: var(--color-text); }
+        body.light .btn-settings { background: rgba(0,0,0,0.06); color: var(--color-text); }
+        body.light .export-button { color: var(--color-text); }
+        body.light .btn-print { background: rgba(0,0,0,0.06); color: var(--color-text); }
+        body.light .date-info { color: var(--color-text-muted); }
+        body.light #beamsOverlay { animation: overlayPulseLight 10s ease-in-out infinite; }
+        body.light .share-option { border-color: rgba(0,0,0,0.1) !important; }
+        body.light .share-option div { color: var(--color-text) !important; }
+        body.light .share-option div:last-child { color: var(--color-text-muted) !important; }
+        @keyframes overlayPulseLight {
+            0%, 100% { background: rgba(232,237,245,0.2); }
+            50%       { background: rgba(232,237,245,0.4); }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--color-bg, #0a0a0f);
+            transition: background 0.3s ease;
+            min-height: 100vh;
+            color: var(--color-text);
+            overflow-x: hidden;
+        }
+
+        /* ── BEAMS BACKGROUND ── */
+        #beamsCanvas {
+            position: fixed; inset: 0;
+            width: 100%; height: 100%;
+            filter: blur(15px);
+            z-index: 0;
+            pointer-events: none;
+        }
+        #beamsOverlay {
+            position: fixed; inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            backdrop-filter: blur(50px);
+            animation: overlayPulse 10s ease-in-out infinite;
+        }
+        @keyframes overlayPulse {
+            0%, 100% { background: rgba(10,10,15,0.05); }
+            50%       { background: rgba(10,10,15,0.15); }
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--color-nav-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--color-nav-border);
+            z-index: 1000;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .nav-container {
+            max-width: 1400px; margin: 0 auto; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+        .logo-dot { color: var(--accent); }
+        .logo {
+            font-size: 22px; font-weight: 700; color: var(--color-accent); text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        .nav-links { display: flex; list-style: none; gap: 24px; }
+        .nav-links a {
+            text-decoration: none; color: var(--color-text);
+            font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s, color 0.2s;
+        }
+        .nav-links a:hover { opacity: 1; color: var(--color-accent); }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        .btn-ghost {
+            background: none; border: none; cursor: pointer; color: var(--color-text);
+            padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; width: 36px; height: 36px; opacity: 0.7;
+        }
+        .btn-ghost:hover { background: rgba(0,122,255,0.12); color: var(--color-accent); opacity: 1; }
+        .btn-ghost .icon-sun  { display: none; }
+        .btn-ghost .icon-moon { display: block; }
+        body.light .btn-ghost .icon-sun  { display: block; }
+        body.light .btn-ghost .icon-moon { display: none; }
+
+        /* ── PAGE LAYOUT ── */
+        .page-wrap {
+            position: relative; z-index: 2;
+            padding-top: 72px;
+        }
+
+        /* ── MAIN LAYOUT: sidebar + content ── */
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* ── LEFT SIDEBAR ── */
+        .left-panel-wo {
+            width: 300px;
+            min-width: 240px;
+            flex: 0 0 300px;
+            background: var(--color-surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            transition: background 0.3s ease, border-color 0.3s ease;
+            position: sticky;
+            top: 76px;
+            max-height: calc(100vh - 92px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+        .left-panel-wo::-webkit-scrollbar { width: 4px; }
+        .left-panel-wo::-webkit-scrollbar-track { background: transparent; }
+        .left-panel-wo::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+        .panel-title {
+            font-weight: 700; font-size: 1rem;
+            color: var(--color-text); margin-bottom: 12px;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .right-panel { flex: 1 1 auto; min-width: 0; }
+
+        .container { padding: 0; }
+
+        .header { margin-bottom: 16px; }
+        .header h1 { font-size: 1.6rem; font-weight: 700; color: var(--color-text); }
+        #wochenplan-datum { font-size: 0.9rem; color: var(--color-text-muted); margin: 4px 0; }
+        .header p { color: var(--color-text-muted); font-size: 0.9rem; }
+
+        /* ── DATE SELECTION ── */
+        .date-selection {
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+            margin-bottom: 16px;
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            backdrop-filter: blur(12px);
+        }
+        .date-group { display: flex; flex-direction: column; gap: 4px; }
+        .date-group label { font-size: 12px; color: var(--color-text-muted); font-weight: 500; }
+        .date-info {
+            font-size: 12px; color: var(--color-text-muted); margin-left: auto; line-height: 1.5;
+        }
+
+        /* ── SCHEDULE CONTAINER ── */
+        .schedule-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+        .table-title {
+            font-size: 1rem; font-weight: 700; color: var(--color-text);
+            margin: 16px 0 8px; padding: 8px 12px;
+            background: rgba(0,122,255,0.12);
+            border-left: 3px solid var(--color-accent);
+            border-radius: 6px;
+        }
+        .table-title:first-child { margin-top: 0; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        table th {
+            padding: 10px 12px; font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--color-text-muted);
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--color-border);
+            white-space: nowrap; text-align: center;
+        }
+        table th:first-child { text-align: left; }
+        table td {
+            padding: 8px 10px; text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--color-text); font-size: 0.88rem;
+            transition: background 0.15s;
+            white-space: pre-wrap; word-wrap: break-word;
+        }
+        table td[contenteditable="true"]:hover { background: rgba(255,255,255,0.05); }
+        table td[contenteditable="true"]:focus { background: rgba(0,122,255,0.08); outline: none; box-shadow: inset 0 0 0 1px var(--color-accent); }
+        table tr:last-child td { border-bottom: none; }
+        .row-number {
+            text-align: left !important;
+            font-size: 0.78rem !important;
+            color: var(--color-text-muted) !important;
+            background: rgba(255,255,255,0.03) !important;
+            font-weight: 600;
+            min-width: 60px;
+        }
+
+        /* ── CELL DRAG ── */
+        td.cell-drag-over { background: rgba(0,122,255,0.18) !important; }
+        td.cell-dragging { opacity: 0.5; }
+
+        /* ── REMARKS ── */
+        .remarks-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            backdrop-filter: blur(20px);
+        }
+        .remarks-container h2 { font-size: 1rem; font-weight: 600; color: var(--color-text); margin-bottom: 10px; }
+        .remarks-textarea {
+            width: 100%; min-height: 80px; padding: 10px 12px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--color-border);
+            border-radius: 10px; color: var(--color-text); font-size: 0.9rem;
+            font-family: inherit; resize: vertical; outline: none; transition: border-color 0.2s;
+        }
+        .remarks-textarea:focus { border-color: var(--color-accent); }
+        .remarks-textarea::placeholder { color: rgba(255,255,255,0.2); }
+        body.light .remarks-textarea { background: rgba(0,0,0,0.04); }
+        body.light .remarks-textarea::placeholder { color: rgba(0,0,0,0.25); }
+
+        /* ── INPUTS / SELECTS ── */
+        input[type="text"], input[type="date"], input[type="number"], input[type="email"],
+        select, textarea {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            color: var(--color-text);
+            padding: 8px 10px;
+            font-size: 0.88rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus,
+        select:focus, textarea:focus {
+            border-color: var(--color-accent);
+            background: rgba(0,122,255,0.06);
+        }
+        input::placeholder { color: rgba(255,255,255,0.2); }
+        select option { background: #1a1a2e; color: var(--color-text); }
+        body.light select option { background: #fff; color: #1a1a2e; }
+
+        /* ── INPUT CONTAINER ── */
+        .input-container {
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .input-container input { width: 100%; }
+
+        /* ── EMPLOYEE LIST ── */
+        .employee-list {
+            display: flex; flex-direction: column; gap: 6px;
+            margin-top: 8px;
+        }
+        .employee-tag {
+            display: flex; align-items: center; gap: 4px;
+            padding: 6px 10px;
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--color-text);
+            cursor: grab;
+            transition: background 0.15s;
+        }
+        .employee-tag:hover { background: rgba(255,255,255,0.1); }
+        .employee-tag.drag-over { background: rgba(0,122,255,0.15); border-color: var(--color-accent); }
+        .employee-tag.dragging { opacity: 0.5; }
+        .employee-name-span { flex: 1; font-weight: 500; }
+        .employee-tag button {
+            background: none; border: none; cursor: pointer; color: var(--color-text-muted);
+            padding: 2px 4px; border-radius: 4px; font-size: 0.8rem; transition: color 0.2s;
+        }
+        .employee-tag button:hover { color: var(--color-accent); }
+
+        /* ── EXTRA PREFS SECTION ── */
+        .extra-pref-section {
+            margin-top: 12px; padding: 12px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px; border: 1px solid var(--color-border);
+        }
+        .extra-pref-title {
+            font-weight: 600; font-size: 0.88rem; margin-bottom: 8px; color: var(--color-text);
+        }
+        #extraPrefList { font-size: 0.82rem; color: var(--color-text-muted); }
+        #extraPrefList strong { color: var(--color-text); }
+
+        /* ── BUTTONS ── */
+        .btn {
+            padding: 8px 12px; border-radius: 8px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; border: 1px solid var(--color-border);
+            font-family: inherit; transition: all 0.2s; display: inline-flex;
+            align-items: center; gap: 5px; text-decoration: none;
+        }
+        .btn-primary {
+            background: var(--color-accent); color: #fff; border-color: var(--color-accent);
+        }
+        .btn-primary:hover { background: #0056CC; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,122,255,0.4); }
+        .btn-secondary {
+            background: var(--color-surface-glass); color: var(--color-text);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+        .btn-settings {
+            background: rgba(255,149,0,0.15); color: #FF9500; border-color: rgba(255,149,0,0.3);
+        }
+        .btn-settings:hover { background: rgba(255,149,0,0.25); }
+        .export-button {
+            background: rgba(52,199,89,0.15); color: #34C759; border-color: rgba(52,199,89,0.3);
+        }
+        .export-button:hover { background: rgba(52,199,89,0.25); }
+        .btn-print {
+            background: var(--color-surface-glass); color: var(--color-text);
+        }
+        .btn-print:hover { background: rgba(255,255,255,0.12); }
+        .btn-mobile-share {
+            background: rgba(175,82,222,0.15); color: #AF52DE; border-color: rgba(175,82,222,0.3);
+        }
+        .btn-mobile-share:hover { background: rgba(175,82,222,0.25); }
+
+        /* ── EXPORT ROW ── */
+        .export-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        /* ── CONTEXT MENU ── */
+        #context-menu {
+            position: absolute; z-index: 5000;
+            background: rgba(18,18,28,0.98) !important;
+            border: 1px solid var(--color-border) !important;
+            border-radius: 10px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            padding: 10px;
+        }
+        .color-swatch {
+            width: 22px; height: 22px; border-radius: 5px;
+            cursor: pointer; transition: transform 0.1s;
+        }
+        .color-swatch:hover { transform: scale(1.2); }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex; justify-content: center; align-items: flex-start;
+            padding-top: 80px; z-index: 6000;
+        }
+        .modal-content {
+            background: rgba(12,12,22,0.98);
+            border: 1px solid var(--color-border);
+            padding: 28px 28px;
+            border-radius: 16px;
+            max-width: 700px; width: 100%;
+            max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+            color: var(--color-text);
+            backdrop-filter: blur(20px);
+        }
+        .modal-content h2 { color: var(--color-text); margin-bottom: 20px; font-size: 1.2rem; font-weight: 700; }
+        .modal-content h3 { color: var(--color-text); margin-bottom: 12px; font-size: 1rem; }
+        .modal-content label { color: var(--color-text-muted); font-size: 0.88rem; font-weight: 500; }
+        .modal-content input, .modal-content select {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+        .preference-section { margin-bottom: 20px; }
+        .modal-table { width: 100%; border-collapse: collapse; }
+        .modal-table th, .modal-table td { padding: 8px 10px; border-bottom: 1px solid var(--color-border); font-size: 0.88rem; }
+        .modal-table th { color: var(--color-text-muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+        .modal-table td { color: var(--color-text); }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; }
+        .checkbox-item input[type="checkbox"] { accent-color: var(--color-accent); }
+        .checkbox-item label { color: var(--color-text); }
+
+        /* ── CUSTOM ALERT ── */
+        #custom-alert {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 8000; background: rgba(0,0,0,0.3);
+            justify-content: center; align-items: center;
+        }
+        #custom-alert.show { display: flex !important; }
+        #custom-alert-box {
+            background: rgba(18,18,28,0.98) !important;
+            border: 1px solid var(--color-border);
+            padding: 2rem 2.5rem; border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            font-size: 1.1rem; font-weight: 500; color: var(--color-text) !important;
+            min-width: 260px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+            transform: scale(0.95); opacity: 0;
+            transition: all 0.25s cubic-bezier(.4,1.4,.6,1);
+        }
+
+        /* ── PRINT HEADER ── */
+        #print-header { display: none; }
+
+        /* ── MOBILE SHARE OPTION ── */
+        .share-option {
+            display: flex; align-items: center; padding: 14px;
+            border: 1px solid var(--color-border) !important; border-radius: 12px;
+            margin-bottom: 10px; cursor: pointer; transition: background 0.2s;
+        }
+        .share-option:hover { background: rgba(255,255,255,0.05); }
+
+        /* ── PRINT ── */
+        @media print {
+            #beamsCanvas, #beamsOverlay, nav, .header-actions, .left-panel-wo,
+            .export-row, #themeToggleBtn { display: none !important; }
+            .main-layout { display: block; }
+            .right-panel { width: 100%; }
+            .page-wrap { padding-top: 0; }
+            body { background: white !important; color: #000 !important; }
+            .schedule-container { box-shadow: none; border: 1px solid #ddd; background: white; }
+            table th { background: #f5f5f7 !important; color: #000 !important; }
+            table td { background: white !important; color: #000 !important; border-color: #ddd !important; }
+            .table-title { background: #eef2ff !important; color: #000 !important; border-color: #4a6cf7 !important; }
+            #print-header { display: block; font-weight: bold; margin-bottom: 8px; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; }
+            .left-panel-wo { width: 100%; min-width: 0; flex: none; position: static; max-height: none; }
+            .employee-list { flex-direction: row; flex-wrap: wrap; }
+            .nav-links { display: none; }
+        }
+        @media (max-width: 600px) {
+            .modal-overlay { padding-top: 16px; align-items: flex-start; }
+            .modal-content { max-height: 95vh; border-radius: 12px; padding: 20px; }
+            .main-layout { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- BEAMS BACKGROUND -->
+<canvas id="beamsCanvas" aria-hidden="true"></canvas>
+<div id="beamsOverlay" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-container">
+        <a href="indexneu.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="welcomeneu.html">Dashboard</a></li>
+            <li><a href="monatsplanneu.html">Monatsplan</a></li>
+            <li><a href="personal.html">Personal</a></li>
+            <li><a href="urlaubALLE.html">Urlaub</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="btn-ghost" id="themeToggleBtn" aria-label="Design wechseln">
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <script src="js/employee-sync.js"></script>
+
+    <!-- MAIN LAYOUT -->
+    <div id="left-employee-panel" class="main-layout">
+
+        <!-- LEFT SIDEBAR -->
+        <aside class="left-panel-wo" aria-label="Mitarbeiterliste">
+            <div class="panel-title">Mitarbeiter</div>
+            <div class="input-container" style="margin-bottom:8px;">
+                <input type="text" id="employeeName" placeholder="Name des Mitarbeiters">
+                <button class="btn btn-primary" onclick="addEmployee()">+ Mitarbeiter hinzufügen</button>
+            </div>
+
+            <div id="employeeList" class="employee-list" aria-live="polite"></div>
+
+            <div id="extra-preferences-section" class="extra-pref-section">
+                <div class="extra-pref-title">Zusatzpräferenzen (Urlaub / Krank)</div>
+                <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px;">
+                    <select id="extraPrefEmployeeSelect"><option value="">Mitarbeiter wählen</option></select>
+                    <select id="extraPrefType">
+                        <option value="">Präferenz wählen</option>
+                        <option value="Urlaub">Urlaub</option>
+                        <option value="Krank">Krank</option>
+                    </select>
+                    <input type="date" id="extraPrefStart">
+                    <input type="date" id="extraPrefEnd">
+                    <button class="btn btn-secondary" onclick="addExtraPreference()">Hinzufügen</button>
+                </div>
+                <div id="extraPrefList"></div>
+            </div>
+
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
+                <input type="text" id="whatsappHint" placeholder="Hinweistext für WhatsApp" style="width:100%;">
+                <div class="export-row">
+                    <button class="btn btn-settings" onclick="openSettingsModal()">⚙️ Einstellungen</button>
+                    <button class="btn export-button" onclick="exportToExcel()">📊 Excel</button>
+                    <button class="btn export-button" style="background:rgba(66,133,244,0.15);color:#4285F4;border-color:rgba(66,133,244,0.3);" onclick="exportToGoogleSheets()">📦 Google Sheets</button>
+                    <button class="btn btn-print" onclick="printSchedule()">🖨️ Drucken</button>
+                    <button class="btn btn-secondary" onclick="shareCustomHintOnWhatsApp()">📲 WhatsApp</button>
+                    <button class="btn btn-mobile-share" onclick="mobileShare()">📱 Mobile Share</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="right-panel">
+            <div class="container">
+                <div class="header">
+                    <h1 id="main-title">Dienstplan</h1>
+                    <div id="wochenplan-datum"></div>
+                    <p>Erstellen Sie Ihren Dienstplan einfach und effizient</p>
+                </div>
+                <div id="print-header"></div>
+
+                <div class="date-selection">
+                    <div class="date-group">
+                        <label for="startDate">Startdatum</label>
+                        <input type="date" id="startDate" onchange="updateDateInfo()">
+                    </div>
+                    <div class="date-group">
+                        <label for="endDate">Enddatum</label>
+                        <input type="date" id="endDate" onchange="updateDateInfo()">
+                    </div>
+                    <button class="btn btn-primary" onclick="generateSchedule()">🗓 Dienstplan generieren</button>
+                    <div class="date-info" id="dateInfo"></div>
+                </div>
+
+                <div class="schedule-container" id="schedule-container">
+                    <h2 class="table-title" id="table-title">Dienstplan</h2>
+                    <div class="table-wrapper">
+                        <table id="schedule-table">
+                            <thead id="schedule-head"></thead>
+                            <tbody id="schedule-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="remarks-container">
+                    <h2>Bemerkungen</h2>
+                    <textarea id="remarks-input" class="remarks-textarea"
+                        placeholder="Allgemeine Bemerkungen zum Dienstplan..." oninput="saveRemarks()"></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="context-menu" style="display:none;">
+    <div style="display:flex;gap:5px;">
+        <div class="color-swatch" data-color="#ffffff" title="Keine Farbe" style="background:#2a2a3a;border:1px solid rgba(255,255,255,0.2);"></div>
+        <div class="color-swatch" data-color="#ffe082" title="Gelb" style="background:#ffe082;"></div>
+        <div class="color-swatch" data-color="#b2dfdb" title="Türkis" style="background:#b2dfdb;"></div>
+        <div class="color-swatch" data-color="#c5e1a5" title="Grün" style="background:#c5e1a5;"></div>
+        <div class="color-swatch" data-color="#ffab91" title="Orange" style="background:#ffab91;"></div>
+        <div class="color-swatch" data-color="#b39ddb" title="Lila" style="background:#b39ddb;"></div>
+        <div class="color-swatch" data-color="#90caf9" title="Blau" style="background:#90caf9;"></div>
+        <div class="color-swatch" data-color="#ef9a9a" title="Rot" style="background:#ef9a9a;"></div>
+    </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:600px;">
+        <h2>Dienstplan-Einstellungen</h2>
+        <form id="settingsForm" onsubmit="saveSettings(event)">
+            <div style="margin-bottom:16px;">
+                <label style="font-weight:600;display:block;margin-bottom:6px;">Überschrift:</label>
+                <input type="text" id="mainTitleInput" style="width:100%;" placeholder="Überschrift eingeben">
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="font-weight:600;margin-bottom:6px;color:var(--color-text);">Tabellen (z.B. Bereiche):</div>
+                <div id="shiftNamesContainer"></div>
+                <button type="button" class="btn btn-secondary" onclick="addShiftInput()" style="margin-top:6px;">+ Tabelle hinzufügen</button>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="font-weight:600;margin-bottom:6px;color:var(--color-text);">Tage:</div>
+                <div id="dayNamesContainer"></div>
+                <button type="button" class="btn btn-secondary" onclick="addDayInput()" style="margin-top:6px;">+ Tag hinzufügen</button>
+            </div>
+            <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end;">
+                <button type="submit" class="btn btn-primary">Speichern</button>
+                <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Abbrechen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MOBILE SHARE MODAL -->
+<div id="mobileShareModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:500px;">
+        <div style="font-size:1.1rem;font-weight:bold;margin-bottom:16px;text-align:center;color:var(--color-text);">
+            📱 Mobile Share – Dienstplan teilen
+        </div>
+        <div class="share-option" onclick="shareViaWhatsApp()">
+            <div style="font-size:1.8rem;margin-right:12px;">💬</div>
+            <div style="flex:1;">
+                <div style="font-weight:600;margin-bottom:3px;color:var(--color-text);">WhatsApp teilen</div>
+                <div style="font-size:0.85rem;color:var(--color-text-muted);">Link zur mobilen Dienstplan-Ansicht teilen</div>
+            </div>
+        </div>
+        <div class="share-option" onclick="copyMobileLink()">
+            <div style="font-size:1.8rem;margin-right:12px;">🔗</div>
+            <div style="flex:1;">
+                <div style="font-weight:600;margin-bottom:3px;color:var(--color-text);">Link kopieren</div>
+                <div style="font-size:0.85rem;color:var(--color-text-muted);">Link in Zwischenablage kopieren</div>
+            </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+            <button class="btn btn-secondary" onclick="closeMobileShareModal()">Schließen</button>
+        </div>
+    </div>
+</div>
+
+<!-- CUSTOM ALERT -->
+<div id="custom-alert" style="display:none;">
+    <div id="custom-alert-box">
+        <div style="font-size:2rem;color:#34c759;line-height:1;">✅</div>
+        <span id="custom-alert-message"></span>
+    </div>
+</div>
+
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="js/employees.js"></script>
+<script>
+    // ─────────────────────────────────────────────
+    //  BEAMS BACKGROUND
+    // ─────────────────────────────────────────────
+    (function () {
+        const canvas = document.getElementById('beamsCanvas');
+        const ctx = canvas.getContext('2d');
+        let beams = [];
+        const BEAM_COUNT = 20;
+        const INTENSITY = 1.0;
+
+        function createBeam(w, h) {
+            const angle = -35 + Math.random() * 10;
+            return {
+                x: Math.random() * w * 1.5 - w * 0.25,
+                y: Math.random() * h * 1.5 - h * 0.25,
+                width: 30 + Math.random() * 60,
+                length: h * 2.5,
+                angle: angle,
+                speed: 0.6 + Math.random() * 1.2,
+                opacity: 0.12 + Math.random() * 0.16,
+                hue: 190 + Math.random() * 70,
+                pulse: Math.random() * Math.PI * 2,
+                pulseSpeed: 0.02 + Math.random() * 0.03
+            };
+        }
+
+        function resetBeam(beam, index, total) {
+            const spacing = canvas.width / 3;
+            const column = index % 3;
+            beam.y       = canvas.height + 100;
+            beam.x       = column * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+            beam.width   = 100 + Math.random() * 100;
+            beam.speed   = 0.5 + Math.random() * 0.4;
+            beam.hue     = 190 + (index * 70) / total;
+            beam.opacity = 0.2 + Math.random() * 0.1;
+        }
+
+        function drawBeam(beam) {
+            ctx.save();
+            ctx.translate(beam.x, beam.y);
+            ctx.rotate(beam.angle * Math.PI / 180);
+            const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * INTENSITY;
+            const g = ctx.createLinearGradient(0, 0, 0, beam.length);
+            g.addColorStop(0,   `hsla(${beam.hue},85%,65%,0)`);
+            g.addColorStop(0.1, `hsla(${beam.hue},85%,65%,${pulsingOpacity * 0.5})`);
+            g.addColorStop(0.4, `hsla(${beam.hue},85%,65%,${pulsingOpacity})`);
+            g.addColorStop(0.6, `hsla(${beam.hue},85%,65%,${pulsingOpacity})`);
+            g.addColorStop(0.9, `hsla(${beam.hue},85%,65%,${pulsingOpacity * 0.5})`);
+            g.addColorStop(1,   `hsla(${beam.hue},85%,65%,0)`);
+            ctx.fillStyle = g;
+            ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+            ctx.restore();
+        }
+
+        function updateCanvasSize() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width  = window.innerWidth  * dpr;
+            canvas.height = window.innerHeight * dpr;
+            canvas.style.width  = window.innerWidth  + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            ctx.scale(dpr, dpr);
+            beams = Array.from({ length: BEAM_COUNT }, () =>
+                createBeam(window.innerWidth, window.innerHeight)
+            );
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.filter = 'blur(35px)';
+            beams.forEach((beam, i) => {
+                beam.y     -= beam.speed;
+                beam.pulse += beam.pulseSpeed;
+                if (beam.y + beam.length < -100) resetBeam(beam, i, beams.length);
+                drawBeam(beam);
+            });
+            requestAnimationFrame(animate);
+        }
+
+        updateCanvasSize();
+        window.addEventListener('resize', updateCanvasSize);
+        animate();
+    })();
+
+    // ─────────────────────────────────────────────
+    //  GLOBALE VARIABLEN
+    // ─────────────────────────────────────────────
+    let employees = [];
+    let constraints = {};
+    let schedule = {};
+    let preferences = {};
+    let startDate = null;
+    let endDate = null;
+
+    const days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+    const shifts = ['Frühschicht', 'Spätschicht', 'Werk II', 'TrUS Früh', 'TrUS Spät'];
+
+    window.addEventListener('DOMContentLoaded', function() {
+        if (typeof loadDataFromLocalStorage === 'function') {
+            loadDataFromLocalStorage();
+        }
+    });
+
+    // ─────────────────────────────────────────────
+    //  ZELLEN FARBIG MARKIEREN (KONTEXTMENÜ)
+    // ─────────────────────────────────────────────
+    let currentCell = null;
+    const singleCellColorKey = 'dienstplan_single_cell_color';
+    const employeeCellColorKey = 'dienstplan_employee_cell_colors';
+
+    function getCellKey(cell) {
+        let tbody = cell.closest('tbody');
+        const tbodyId = tbody && tbody.id ? tbody.id : '';
+        const row = cell.parentElement ? Array.from(cell.parentElement.parentElement.children).indexOf(cell.parentElement) : 0;
+        const col = Array.from(cell.parentElement.children).indexOf(cell);
+        return `${tbodyId}_${row}_${col}`;
+    }
+
+    function showContextMenu(e, cell) {
+        e.preventDefault();
+        currentCell = cell;
+        const menu = document.getElementById('context-menu');
+        menu.style.display = 'block';
+        menu.style.left = e.pageX + 'px';
+        menu.style.top = e.pageY + 'px';
+    }
+
+    function hideContextMenu() {
+        const menu = document.getElementById('context-menu');
+        menu.style.display = 'none';
+        currentCell = null;
+    }
+
+    function setCellColor(cell, color) {
+        const isEmployeeCell = cell.cellIndex > 0;
+        if (isEmployeeCell) {
+            if (color !== '#ffffff') {
+                const key = getCellKey(cell);
+                let employeeColors = {};
+                try { employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey) || '{}'); } catch (e) { employeeColors = {}; }
+                employeeColors[key] = color;
+                localStorage.setItem(employeeCellColorKey, JSON.stringify(employeeColors));
+                cell.style.backgroundColor = color;
+            } else {
+                const key = getCellKey(cell);
+                let employeeColors = {};
+                try { employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey) || '{}'); } catch (e) { employeeColors = {}; }
+                delete employeeColors[key];
+                localStorage.setItem(employeeCellColorKey, JSON.stringify(employeeColors));
+                cell.style.backgroundColor = '';
+            }
+        } else {
+            if (color !== '#ffffff') {
+                cell.style.backgroundColor = color;
+                const key = getCellKey(cell);
+                localStorage.setItem(singleCellColorKey, JSON.stringify({ key, color }));
+            } else {
+                localStorage.removeItem(singleCellColorKey);
+                cell.style.backgroundColor = '';
+            }
+        }
+    }
+
+    function applyCellColors() {
+        document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+            cell.style.backgroundColor = '';
+        });
+        let employeeColors = {};
+        try { employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey) || '{}'); } catch (e) { employeeColors = {}; }
+        Object.keys(employeeColors).forEach(key => {
+            document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                if (getCellKey(cell) === key && cell.cellIndex > 0) {
+                    cell.style.backgroundColor = employeeColors[key];
+                }
+            });
+        });
+        let data = null;
+        try { data = JSON.parse(localStorage.getItem(singleCellColorKey) || 'null'); } catch (e) { data = null; }
+        if (data && data.key && data.color) {
+            document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                if (getCellKey(cell) === data.key && cell.cellIndex === 0) {
+                    cell.style.backgroundColor = data.color;
+                }
+            });
+        }
+    }
+
+    function addCellColorListeners() {
+        document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+            cell.addEventListener('contextmenu', function(e) {
+                showContextMenu(e, cell);
+            });
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    //  DATUMS-FUNKTIONEN
+    // ─────────────────────────────────────────────
+    function updateDateInfo() {
+        const startInput = document.getElementById('startDate');
+        const endInput = document.getElementById('endDate');
+        const dateInfo = document.getElementById('dateInfo');
+        if (startInput.value && endInput.value) {
+            startDate = new Date(startInput.value);
+            endDate = new Date(endInput.value);
+            const diffTime = Math.abs(endDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            const weeks = Math.ceil(diffDays / 7);
+            dateInfo.innerHTML = `<strong>Zeitraum:</strong> ${startDate.toLocaleDateString('de-DE')} – ${endDate.toLocaleDateString('de-DE')}<br><strong>Dauer:</strong> ${diffDays} Tage (${weeks} Wochen)`;
+        } else {
+            dateInfo.innerHTML = '';
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    //  DIENSTPLAN GENERIEREN
+    // ─────────────────────────────────────────────
+    function generateSchedule() {
+        if (!startDate || !endDate) { showCustomAlert('Bitte wählen Sie Start- und Enddatum aus.'); return; }
+        if (employees.length === 0) { showCustomAlert('Bitte fügen Sie mindestens einen Mitarbeiter hinzu.'); return; }
+
+        const sortedEmployees = [...employees].sort((a, b) => {
+            const aDr = a.toLowerCase().includes('dr.');
+            const bDr = b.toLowerCase().includes('dr.');
+            if (aDr && !bDr) return -1;
+            if (!aDr && bDr) return 1;
+            return 0;
+        });
+
+        const generatedSchedule = {};
+        shiftNames.forEach((shift, sIdx) => {
+            generatedSchedule[shift] = [];
+            for (let row = 0; row < (rowCounts[sIdx] || 7); row++) {
+                const weekSchedule = [];
+                dayNames.forEach(() => weekSchedule.push(''));
+                generatedSchedule[shift].push(weekSchedule);
+            }
+        });
+
+        sortedEmployees.forEach(employee => {
+            const employeePrefs = preferences[employee] || {};
+            Object.keys(employeePrefs.dayShiftPrefs || {}).forEach(day => {
+                const dayPrefs = employeePrefs.dayShiftPrefs[day] || [];
+                const dayIndex = dayNames.indexOf(day);
+                if (dayIndex !== -1) {
+                    dayPrefs.forEach(shift => {
+                        if (generatedSchedule[shift]) {
+                            const rowPrefs = employeePrefs.rowPrefs?.[shift] || [];
+                            let placed = false;
+                            if (rowPrefs.length > 0) {
+                                for (const rowNum of rowPrefs) {
+                                    if (!generatedSchedule[shift][rowNum-1][dayIndex]) {
+                                        generatedSchedule[shift][rowNum-1][dayIndex] = employee;
+                                        placed = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!placed) {
+                                for (let i = 0; i < generatedSchedule[shift].length; i++) {
+                                    if (!generatedSchedule[shift][i][dayIndex]) {
+                                        generatedSchedule[shift][i][dayIndex] = employee;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        displayGeneratedScheduleUniversal(generatedSchedule);
+        schedule = generatedSchedule;
+        saveDataToLocalStorage();
+        setTimeout(() => {
+            addCellColorListeners();
+            applyCellColors();
+            if (typeof addCellDragDropListeners === 'function') addCellDragDropListeners();
+            if (typeof addTableDataListeners === 'function') addTableDataListeners();
+        }, 100);
+        showCustomAlert('Dienstplan wurde erfolgreich generiert!');
+    }
+
+    function displayGeneratedScheduleUniversal(generatedSchedule) {
+        const container = document.getElementById('schedule-container');
+        container.innerHTML = '';
+        Object.keys(generatedSchedule).forEach((shift, sIdx) => {
+            const shiftTitle = document.createElement('div');
+            shiftTitle.className = 'table-title';
+            shiftTitle.textContent = shift;
+            container.appendChild(shiftTitle);
+            const table = document.createElement('table');
+            let tableHTML = `<thead><tr><th>lfd. Nr. / Zeit</th>${dayNames.map(day => `<th>${day}</th>`).join('')}</tr></thead><tbody id="shiftBody_${sIdx}">`;
+            generatedSchedule[shift].forEach((rowArr, index) => {
+                tableHTML += `<tr><td class="row-number" contenteditable="true">${index + 1}</td>${rowArr.map(employee => `<td contenteditable="true" style="white-space:pre-wrap;word-wrap:break-word;">${employee}</td>`).join('')}</tr>`;
+            });
+            tableHTML += '</tbody>';
+            table.innerHTML = tableHTML;
+            container.appendChild(table);
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    //  MITARBEITER
+    // ─────────────────────────────────────────────
+    function addEmployee() {
+        const input = document.getElementById('employeeName');
+        const name = input.value.trim();
+        if (name) {
+            employees.push(name);
+            preferences[name] = { dayShiftPrefs: {}, rowPrefs: {} };
+            input.value = '';
+            updateEmployeeList();
+            saveDataToLocalStorage();
+            showCustomAlert('Mitarbeiter erfolgreich hinzugefügt!');
+        } else {
+            showCustomAlert('Bitte geben Sie einen Namen ein.');
+        }
+    }
+
+    function removeEmployee(employeeName) {
+        employees = employees.filter(emp => emp !== employeeName);
+        delete preferences[employeeName];
+        updateEmployeeList();
+        displaySchedule();
+        saveDataToLocalStorage();
+    }
+
+    function showPreferences(employeeName) {
+        const preferenceModal = document.createElement('div');
+        preferenceModal.id = 'preferenceModal';
+        preferenceModal.className = 'modal-overlay';
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
+        let modalHTML = `<h2>Präferenzen für ${employeeName}</h2>
+            <div class="preference-section"><h3>Tag/Schicht Präferenzen</h3>
+            <table class="modal-table"><thead><tr><th>Tag</th><th>Präferierte Schichten</th></tr></thead><tbody>
+            ${dayNames.map(day => {
+                const currentPrefs = preferences[employeeName]?.dayShiftPrefs?.[day] || [];
+                return `<tr><td style="font-weight:600;">${day}</td><td><div class="checkbox-group">${shiftNames.map(shift => `<div class="checkbox-item"><input type="checkbox" id="${employeeName.replace(/[^a-zA-Z0-9]/g,'_')}-${day}-${shift}" value="${shift}" ${currentPrefs.includes(shift)?'checked':''} onchange="updatePreference('${employeeName}','${day}','${shift}',this.checked,'dayShift')"><label for="${employeeName.replace(/[^a-zA-Z0-9]/g,'_')}-${day}-${shift}">${shift}</label></div>`).join('')}</div></td></tr>`;
+            }).join('')}
+            </tbody></table></div>
+            <div style="margin-top:16px;text-align:right;"><button class="btn btn-primary" onclick="savePreferences();closePreferenceModal();">Speichern</button></div>`;
+        modalContent.innerHTML = modalHTML;
+        preferenceModal.appendChild(modalContent);
+        document.body.appendChild(preferenceModal);
+        preferenceModal.addEventListener('click', function(e) { if (e.target === preferenceModal) closePreferenceModal(); });
+        const escListener = function(e) { if (e.key === 'Escape') closePreferenceModal(); };
+        document.addEventListener('keydown', escListener);
+        preferenceModal._escListener = escListener;
+    }
+
+    function savePreferences() {
+        try { localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences)); } catch(e) {}
+        try { updateEmployeeList(); displayExtraPreferences(); saveDataToLocalStorage(); } catch(e) {}
+    }
+
+    function closePreferenceModal() {
+        const modal = document.getElementById('preferenceModal');
+        if (!modal) return;
+        try { if (modal._escListener) { document.removeEventListener('keydown', modal._escListener); delete modal._escListener; } } catch(e) {}
+        savePreferences();
+        modal.remove();
+    }
+
+    function updatePreference(employee, key, value, isChecked, type) {
+        if (!preferences[employee]) preferences[employee] = { dayShiftPrefs: {}, rowPrefs: {} };
+        if (type === 'dayShift' && !preferences[employee].dayShiftPrefs[key]) preferences[employee].dayShiftPrefs[key] = [];
+        if (type === 'row' && !preferences[employee].rowPrefs[key]) preferences[employee].rowPrefs[key] = [];
+        if (type === 'dayShift') {
+            if (isChecked && !preferences[employee].dayShiftPrefs[key].includes(value)) preferences[employee].dayShiftPrefs[key].push(value);
+            else if (!isChecked) preferences[employee].dayShiftPrefs[key] = preferences[employee].dayShiftPrefs[key].filter(v => v !== value);
+        } else if (type === 'row') {
+            if (isChecked && !preferences[employee].rowPrefs[key].includes(value)) preferences[employee].rowPrefs[key].push(value);
+            else if (!isChecked) preferences[employee].rowPrefs[key] = preferences[employee].rowPrefs[key].filter(v => v !== value);
+        }
+        try { localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences)); } catch(e) {}
+        saveDataToLocalStorage();
+        updateEmployeeList();
+    }
+
+    function displaySchedule() {
+        const container = document.getElementById('schedule-container');
+        container.innerHTML = '';
+        shiftNames.forEach((shift, sIdx) => {
+            const shiftTitle = document.createElement('div');
+            shiftTitle.className = 'table-title';
+            shiftTitle.textContent = shift;
+            container.appendChild(shiftTitle);
+            const table = document.createElement('table');
+            let tableHTML = `<thead><tr><th>lfd. Nr. / Zeit</th>${dayNames.map(day => `<th>${day}</th>`).join('')}</tr></thead><tbody id="shiftBody_${sIdx}">${Array(rowCounts[sIdx]||7).fill('').map((_,index) => `<tr><td class="row-number" contenteditable="true">${index+1}</td>${dayNames.map(() => `<td contenteditable="true" style="white-space:pre-wrap;word-wrap:break-word;"></td>`).join('')}</tr>`).join('')}</tbody>`;
+            table.innerHTML = tableHTML;
+            container.appendChild(table);
+        });
+        setTimeout(() => {
+            addCellColorListeners();
+            applyCellColors();
+            if (typeof addCellDragDropListeners === 'function') addCellDragDropListeners();
+            if (typeof addTableDataListeners === 'function') addTableDataListeners();
+        }, 100);
+    }
+
+    // ─────────────────────────────────────────────
+    //  EXCEL EXPORT
+    // ─────────────────────────────────────────────
+    function exportToExcel() {
+        const workbook = XLSX.utils.book_new();
+        let start = startDate ? startDate.toLocaleDateString('de-DE') : '';
+        let end = endDate ? endDate.toLocaleDateString('de-DE') : '';
+        const title = `Wochenplan vom: ${start} bis ${end}`;
+        const allData = [];
+        allData.push([title]);
+        allData.push(['']);
+        shiftNames.forEach((shift, sIdx) => {
+            allData.push([shift]);
+            allData.push(['lfd. Nr. / Zeit', ...dayNames]);
+            const shiftData = getTableData(`shiftBody_${sIdx}`);
+            if (shiftData.length > 0) { allData.push(...shiftData); }
+            else { for (let i=0;i<(rowCounts[sIdx]||7);i++){const row=[i+1];dayNames.forEach(()=>row.push(''));allData.push(row);} }
+            allData.push(['']);
+        });
+        const remarksInput = document.getElementById('remarks-input');
+        if (remarksInput && remarksInput.value.trim()) { allData.push(['Bemerkungen:']); allData.push([remarksInput.value.trim()]); }
+        const sheet = XLSX.utils.aoa_to_sheet(allData);
+        applyProfessionalFormatting(sheet, allData);
+        addColorsToSheet(sheet, allData);
+        XLSX.utils.book_append_sheet(workbook, sheet, 'Dienstplan');
+        let fileName = startDate && endDate
+            ? `Dienstplan_${startDate.toLocaleDateString('de-DE').replace(/\./g,'-')}_bis_${endDate.toLocaleDateString('de-DE').replace(/\./g,'-')}.xlsx`
+            : `Dienstplan_${new Date().toISOString().split('T')[0]}.xlsx`;
+        if (!sheet['!pageSetup']) sheet['!pageSetup'] = {};
+        sheet['!pageSetup'].orientation = 'landscape';
+        sheet['!pageSetup'].fitToWidth = 1;
+        sheet['!pageSetup'].fitToHeight = 0;
+        XLSX.writeFile(workbook, fileName);
+    }
+
+    function applyProfessionalFormatting(sheet, allData) {
+        try {
+            if (!sheet['!cols']) sheet['!cols'] = [];
+            for (let i=0;i<dayNames.length+1;i++) sheet['!cols'][i] = { wch: i===0?5:12 };
+            if (!sheet['!rows']) sheet['!rows'] = [];
+            for (let i=0;i<allData.length;i++) sheet['!rows'][i] = { hpt: i===0?14:11 };
+            for (let r=0;r<allData.length;r++) {
+                for (let c=0;c<allData[r].length;c++) {
+                    const cellRef = XLSX.utils.encode_cell({r,c});
+                    if (!sheet[cellRef]) continue;
+                    let style = { font:{name:'Arial',sz:7}, alignment:{horizontal:'center',vertical:'center',wrapText:true}, border:{top:{style:'hair',color:{rgb:'FFCCCCCC'}},bottom:{style:'hair',color:{rgb:'FFCCCCCC'}},left:{style:'hair',color:{rgb:'FFCCCCCC'}},right:{style:'hair',color:{rgb:'FFCCCCCC'}}} };
+                    if (r===0) style.font = {name:'Arial',sz:9,bold:true};
+                    if (r>1 && allData[r][0] && c===0 && allData[r][0]===shiftNames.find(s=>s===allData[r][0])) { style.font={name:'Arial',sz:8,bold:true}; style.fill={patternType:'solid',fgColor:{rgb:'FFF8F9FA'}}; }
+                    if (r>1 && allData[r][0]==='lfd. Nr. / Zeit') { style.font={name:'Arial',sz:7,bold:true}; style.fill={patternType:'solid',fgColor:{rgb:'FFF8F9FA'}}; }
+                    if (c===0 && r>2) { style.fill={patternType:'solid',fgColor:{rgb:'FFF8F9FA'}}; }
+                    sheet[cellRef].s = style;
+                }
+            }
+        } catch(error) {
+            if (!sheet['!cols']) sheet['!cols'] = [];
+            for (let i=0;i<(dayNames.length+1);i++) sheet['!cols'][i]={wch:12};
+        }
+    }
+
+    function getTableData(tableBodyId) {
+        const tableBody = document.getElementById(tableBodyId);
+        if (!tableBody) return [];
+        const rows = tableBody.querySelectorAll('tr');
+        const data = [];
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowData = [];
+            cells.forEach(cell => rowData.push(cell.textContent || ''));
+            data.push(rowData);
+        });
+        return data;
+    }
+
+    // ─────────────────────────────────────────────
+    //  LOCALSTORAGE
+    // ─────────────────────────────────────────────
+    function saveDataToLocalStorage() {
+        localStorage.setItem('dienstplan_employees', JSON.stringify(employees));
+        localStorage.setItem('dienstplan_constraints', JSON.stringify(constraints));
+        localStorage.setItem('dienstplan_schedule', JSON.stringify(schedule));
+        localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences));
+        localStorage.setItem('dienstplan_startDate', startDate ? startDate.toISOString() : '');
+        localStorage.setItem('dienstplan_endDate', endDate ? endDate.toISOString() : '');
+        const tableData = {};
+        shiftNames.forEach((shift, sIdx) => {
+            const tbody = document.getElementById(`shiftBody_${sIdx}`);
+            if (tbody) {
+                tableData[shift] = [];
+                tbody.querySelectorAll('tr').forEach(row => {
+                    const rowData = [];
+                    row.querySelectorAll('td').forEach(cell => rowData.push(cell.textContent || ''));
+                    tableData[shift].push(rowData);
+                });
+            }
+        });
+        localStorage.setItem('dienstplan_tableData', JSON.stringify(tableData));
+    }
+
+    function saveRemarks() {
+        const remarksInput = document.getElementById('remarks-input');
+        if (remarksInput) localStorage.setItem('dienstplan_remarks', remarksInput.value);
+    }
+
+    function loadDataFromLocalStorage() {
+        const savedEmployees = localStorage.getItem('dienstplan_employees');
+        if (savedEmployees) employees = JSON.parse(savedEmployees);
+        try {
+            const savedPreferences = localStorage.getItem('dienstplan_preferences');
+            preferences = savedPreferences ? JSON.parse(savedPreferences) : {};
+        } catch(e) { preferences = {}; }
+        const savedSchedule = localStorage.getItem('dienstplan_schedule');
+        if (savedSchedule) schedule = JSON.parse(savedSchedule);
+        const savedStartDate = localStorage.getItem('dienstplan_startDate');
+        if (savedStartDate) { startDate = new Date(savedStartDate); document.getElementById('startDate').value = startDate.toISOString().split('T')[0]; }
+        const savedEndDate = localStorage.getItem('dienstplan_endDate');
+        if (savedEndDate) { endDate = new Date(savedEndDate); document.getElementById('endDate').value = endDate.toISOString().split('T')[0]; }
+        const savedRemarks = localStorage.getItem('dienstplan_remarks');
+        const remarksInput = document.getElementById('remarks-input');
+        if (savedRemarks && remarksInput) remarksInput.value = savedRemarks;
+        updateDateInfo();
+    }
+
+    function loadTableData() {
+        const savedTableData = localStorage.getItem('dienstplan_tableData');
+        if (!savedTableData) return;
+        const tableData = JSON.parse(savedTableData);
+        Object.keys(tableData).forEach((shift, sIdx) => {
+            const tbody = document.getElementById(`shiftBody_${sIdx}`);
+            if (tbody) {
+                const rows = tbody.querySelectorAll('tr');
+                const shiftData = tableData[shift];
+                rows.forEach((row, rowIndex) => {
+                    if (shiftData[rowIndex]) {
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach((cell, cellIndex) => { if (shiftData[rowIndex][cellIndex]) cell.textContent = shiftData[rowIndex][cellIndex]; });
+                    }
+                });
+            }
+        });
+    }
+
+    function addTableDataListeners() {
+        document.addEventListener('input', function(e) {
+            if (e.target.hasAttribute('contenteditable')) {
+                clearTimeout(window.saveTimeout);
+                window.saveTimeout = setTimeout(() => saveDataToLocalStorage(), 500);
+            }
+        });
+        addCellDragDropListeners();
+    }
+
+    // ─────────────────────────────────────────────
+    //  DOMCONTENTLOADED
+    // ─────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        let savedShifts = localStorage.getItem('dienstplan_shiftNames');
+        let savedDays = localStorage.getItem('dienstplan_dayNames');
+        let savedRowCounts = localStorage.getItem('dienstplan_rowCounts');
+        if (savedShifts && savedDays) {
+            shiftNames = JSON.parse(savedShifts);
+            dayNames = JSON.parse(savedDays);
+            rowCounts = savedRowCounts ? JSON.parse(savedRowCounts) : shiftNames.map(() => 7);
+            if (rowCounts.length < shiftNames.length) { for (let i=rowCounts.length;i<shiftNames.length;i++) rowCounts.push(7); }
+        } else {
+            shiftNames = ['Schicht 1', 'Schicht 2'];
+            dayNames = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5'];
+            rowCounts = [7, 7];
+        }
+        loadDataFromLocalStorage();
+        updateEmployeeList();
+        if (shiftNames && shiftNames.length > 0 && dayNames && dayNames.length > 0) {
+            displaySchedule();
+            setTimeout(() => { loadTableData(); addTableDataListeners(); }, 200);
+            setTimeout(() => { applyCellColors(); addCellColorListeners(); }, 300);
+        } else {
+            openSettingsModal();
+        }
+        setMainTitleFromStorage();
+        updateWochenplanDatum();
+    });
+
+    // ─────────────────────────────────────────────
+    //  EMPLOYEE LIST UPDATE
+    // ─────────────────────────────────────────────
+    function updateEmployeeList() {
+        const container = document.getElementById('employeeList');
+        container.innerHTML = '';
+        const sortedEmployees = [...employees].sort((a, b) => {
+            const aDr = a.toLowerCase().includes('dr.'), bDr = b.toLowerCase().includes('dr.');
+            if (aDr && !bDr) return -1; if (!aDr && bDr) return 1; return 0;
+        });
+        sortedEmployees.forEach(employee => {
+            const tag = document.createElement('div');
+            tag.className = 'employee-tag';
+            tag.draggable = true;
+            tag.dataset.employee = employee;
+            if (employee.includes('Dr.')) {
+                tag.style.background = 'rgba(0,122,255,0.18)';
+                tag.style.borderColor = 'rgba(0,122,255,0.35)';
+            } else {
+                tag.style.background = 'rgba(52,199,89,0.15)';
+                tag.style.borderColor = 'rgba(52,199,89,0.3)';
+            }
+            const prefs = preferences[employee] || {};
+            let prefCount = 0;
+            if (prefs.dayShiftPrefs && typeof prefs.dayShiftPrefs === 'object') Object.values(prefs.dayShiftPrefs).forEach(v => { if (Array.isArray(v)) prefCount += v.length; });
+            if (prefs.rowPrefs && typeof prefs.rowPrefs === 'object') Object.values(prefs.rowPrefs).forEach(v => { if (Array.isArray(v)) prefCount += v.length; });
+            if (Array.isArray(prefs.extra)) prefCount += prefs.extra.length;
+            const editButton = `<button onclick="editEmployeeName('${employee}')" title="Name bearbeiten">✏️</button>`;
+            const prefButton = prefCount > 0
+                ? `<button onclick="showPreferences('${employee}')" title="Präferenzen">⚙️ (${prefCount})</button>`
+                : `<button onclick="showPreferences('${employee}')" title="Präferenzen">⚙️</button>`;
+            tag.innerHTML = `<span class="employee-name-span">${employee}</span>${editButton}${prefButton}<button onclick="removeEmployee('${employee}')" title="Entfernen">✕</button>`;
+            tag.addEventListener('dragstart', handleDragStart);
+            tag.addEventListener('dragend', handleDragEnd);
+            tag.addEventListener('dragover', handleDragOver);
+            tag.addEventListener('drop', handleDrop);
+            tag.addEventListener('dragenter', handleDragEnter);
+            tag.addEventListener('dragleave', handleDragLeave);
+            container.appendChild(tag);
+        });
+        updateExtraPrefEmployeeSelect();
+        displayExtraPreferences();
+    }
+
+    function editEmployeeName(oldName) {
+        const container = document.getElementById('employeeList');
+        const tag = Array.from(container.children).find(div => div.dataset.employee === oldName);
+        if (!tag) return;
+        const span = tag.querySelector('.employee-name-span');
+        if (!span) return;
+        const input = document.createElement('input');
+        input.type = 'text'; input.value = oldName;
+        input.style.minWidth = '100px'; input.style.fontSize = '13px';
+        input.style.borderRadius = '6px'; input.style.padding = '3px 6px';
+        input.style.marginRight = '6px'; input.style.flex = '1';
+        span.replaceWith(input); input.focus(); input.select();
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+        input.addEventListener('blur', function() {
+            const newName = input.value.trim();
+            if (!newName || newName === oldName) { updateEmployeeList(); return; }
+            const idx = employees.indexOf(oldName);
+            if (idx !== -1) employees[idx] = newName;
+            if (preferences[oldName]) { preferences[newName] = preferences[oldName]; delete preferences[oldName]; }
+            Object.keys(preferences).forEach(emp => { if (preferences[emp]?.extra) preferences[emp].extra.forEach(e => { if (e.employee === oldName) e.employee = newName; }); });
+            document.querySelectorAll('td[contenteditable="true"]').forEach(cell => { if (cell.textContent.trim() === oldName) cell.textContent = newName; });
+            saveDataToLocalStorage();
+            updateEmployeeList();
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    //  DRAG & DROP (MITARBEITER-TAGS)
+    // ─────────────────────────────────────────────
+    function handleDragStart(e) { e.target.classList.add('dragging'); e.dataTransfer.setData('text/plain', e.target.dataset.employee); e.dataTransfer.effectAllowed = 'move'; }
+    function handleDragEnd(e) { e.target.classList.remove('dragging'); document.querySelectorAll('.employee-tag').forEach(t => t.classList.remove('drag-over')); }
+    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function handleDrop(e) {
+        e.preventDefault();
+        const draggedEmployee = e.dataTransfer.getData('text/plain');
+        const targetEmployee = e.target.closest('.employee-tag')?.dataset.employee;
+        if (draggedEmployee && targetEmployee && draggedEmployee !== targetEmployee) {
+            const draggedIndex = employees.indexOf(draggedEmployee);
+            const targetIndex = employees.indexOf(targetEmployee);
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                [employees[draggedIndex], employees[targetIndex]] = [employees[targetIndex], employees[draggedIndex]];
+                updateEmployeeList(); saveDataToLocalStorage();
+            }
+        }
+    }
+    function handleDragEnter(e) { e.preventDefault(); e.target.closest('.employee-tag')?.classList.add('drag-over'); }
+    function handleDragLeave(e) { e.target.closest('.employee-tag')?.classList.remove('drag-over'); }
+
+    // ─────────────────────────────────────────────
+    //  ZUSATZPRÄFERENZEN
+    // ─────────────────────────────────────────────
+    function updateExtraPrefEmployeeSelect() {
+        const select = document.getElementById('extraPrefEmployeeSelect');
+        if (!select) return;
+        select.innerHTML = '<option value="">Mitarbeiter wählen</option>' + employees.map(emp => `<option value="${emp}">${emp}</option>`).join('');
+    }
+
+    function addExtraPreference() {
+        const employee = document.getElementById('extraPrefEmployeeSelect').value;
+        const type = document.getElementById('extraPrefType').value;
+        const start = document.getElementById('extraPrefStart').value;
+        const end = document.getElementById('extraPrefEnd').value;
+        if (!employee || !type || !start || !end) { showCustomAlert('Bitte alle Felder ausfüllen!'); return; }
+        if (!preferences[employee]) preferences[employee] = {};
+        if (!preferences[employee].extra) preferences[employee].extra = [];
+        preferences[employee].extra.push({ type, start, end });
+        saveDataToLocalStorage(); displayExtraPreferences();
+    }
+
+    function displayExtraPreferences() {
+        const container = document.getElementById('extraPrefList');
+        if (!container) return;
+        let html = '';
+        employees.forEach(emp => {
+            const extras = preferences[emp]?.extra || [];
+            if (extras.length > 0) {
+                html += `<div style="margin-bottom:6px;"><strong>${emp}:</strong> `;
+                html += extras.map((e, idx) => {
+                    const startStr = new Date(e.start).toLocaleDateString('de-DE');
+                    const endStr = new Date(e.end).toLocaleDateString('de-DE');
+                    return `${e.type} (${startStr}–${endStr}) <button onclick="removeExtraPreference('${emp}',${idx})" style="margin-left:3px;color:#ff6b6b;background:none;border:none;cursor:pointer;font-size:0.9em;">✕</button>`;
+                }).join(', ');
+                html += '</div>';
+            }
+        });
+        container.innerHTML = html || '<span style="color:var(--color-text-muted);font-size:0.82rem;">Keine Einträge.</span>';
+    }
+
+    function removeExtraPreference(employee, idx) {
+        if (!preferences[employee]?.extra) return;
+        if (!window.confirm('Eintrag wirklich löschen?')) return;
+        preferences[employee].extra.splice(idx, 1);
+        saveDataToLocalStorage(); displayExtraPreferences();
+    }
+
+    // ─────────────────────────────────────────────
+    //  PRINT / SHARE
+    // ─────────────────────────────────────────────
+    function printSchedule() {
+        let start = startDate ? startDate.toLocaleDateString('de-DE') : '';
+        let end = endDate ? endDate.toLocaleDateString('de-DE') : '';
+        const header = document.getElementById('print-header');
+        let mainTitle = document.getElementById('main-title').textContent || 'Dienstplan';
+        let dateLine = (start && end) ? `<div>Wochenplan vom ${start} bis ${end}</div>` : '';
+        header.innerHTML = `${mainTitle}${dateLine ? '<br>' + dateLine : ''}`;
+        header.style.display = 'block';
+        window.print();
+        setTimeout(() => { header.style.display = 'none'; }, 500);
+    }
+
+    function shareCustomHintOnWhatsApp() {
+        let start = startDate ? startDate.toLocaleDateString('de-DE') : '';
+        let end = endDate ? endDate.toLocaleDateString('de-DE') : '';
+        const userHint = document.getElementById('whatsappHint').value.trim();
+        const text = userHint ? userHint : `Neuer Wochenplan vom ${start} bis ${end} ist verfügbar!`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    // ─────────────────────────────────────────────
+    //  KONTEXTMENÜ EVENTS
+    // ─────────────────────────────────────────────
+    document.getElementById('context-menu').addEventListener('click', function(e) {
+        const swatch = e.target.closest('.color-swatch');
+        if (swatch && currentCell) { setCellColor(currentCell, swatch.dataset.color); hideContextMenu(); }
+    });
+    document.addEventListener('click', function(e) { if (!e.target.closest('#context-menu')) hideContextMenu(); });
+    window.addEventListener('scroll', hideContextMenu);
+    window.addEventListener('resize', hideContextMenu);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { const modal = document.getElementById('preferenceModal'); if (modal) closePreferenceModal(); }
+    });
+
+    // ─────────────────────────────────────────────
+    //  GOOGLE SHEETS EXPORT
+    // ─────────────────────────────────────────────
+    function exportToGoogleSheets() {
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:9000;display:flex;justify-content:center;align-items:center;';
+        const box = document.createElement('div');
+        box.style.cssText = 'background:rgba(12,12,22,0.98);border:1px solid rgba(255,255,255,0.1);padding:28px;border-radius:16px;max-width:540px;width:90vw;max-height:80vh;overflow-y:auto;color:#f0f0f5;backdrop-filter:blur(20px);';
+        box.innerHTML = `<div style="font-size:1.1rem;font-weight:bold;margin-bottom:12px;">Schritt-für-Schritt: Export nach Google Sheets</div>
+            <ol style="margin-bottom:12px;padding-left:1.2em;font-size:0.9rem;line-height:1.7;">
+              <li>CSV-Datei wird heruntergeladen.</li>
+              <li>Google Sheets Import-Seite öffnet sich automatisch.</li>
+              <li>Klicke auf "Datei auswählen" und wähle die CSV-Datei.</li>
+              <li>"Neues Tabellenblatt erstellen" → "Importieren".</li>
+            </ol>
+            <button id="gsheets-export-close" style="padding:8px 20px;font-size:0.9rem;border-radius:10px;border:none;background:#007aff;color:#fff;cursor:pointer;font-weight:600;">Schließen & Export starten</button>`;
+        modal.appendChild(box);
+        document.body.appendChild(modal);
+        document.getElementById('gsheets-export-close').onclick = function() {
+            document.body.removeChild(modal);
+            let start = startDate ? startDate.toLocaleDateString('de-DE') : '';
+            let end = endDate ? endDate.toLocaleDateString('de-DE') : '';
+            const allData = [[`Wochenplan vom: ${start} bis ${end}`],['']];
+            shiftNames.forEach((shift, sIdx) => {
+                allData.push([shift]); allData.push(['lfd. Nr. / Zeit', ...dayNames]);
+                const tbody = document.getElementById(`shiftBody_${sIdx}`);
+                if (tbody) { tbody.querySelectorAll('tr').forEach(row => { const rowData=[]; row.querySelectorAll('td').forEach(cell => rowData.push(cell.textContent||'')); allData.push(rowData); }); }
+                else { for(let i=0;i<(rowCounts[sIdx]||7);i++){const row=[i+1];dayNames.forEach(()=>row.push(''));allData.push(row);} }
+                allData.push(['']);
+            });
+            const remarksInput = document.getElementById('remarks-input');
+            if (remarksInput?.value.trim()) { allData.push(['Bemerkungen:']); allData.push([remarksInput.value.trim()]); }
+            let csv = allData.map(row => row.map(cell => '"'+(cell?String(cell).replace(/"/g,'""'):'')+'"').join(',')).join('\n');
+            const blob = new Blob([csv], {type:'text/csv'});
+            const url = URL.createObjectURL(blob);
+            window.open('https://docs.google.com/spreadsheets/u/0/import?format=csv','_blank');
+            const a = document.createElement('a'); a.href = url; a.download = 'Dienstplan_GoogleSheets.csv';
+            document.body.appendChild(a); a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        };
+    }
+
+    // ─────────────────────────────────────────────
+    //  EINSTELLUNGEN
+    // ─────────────────────────────────────────────
+    let shiftNames = [];
+    let dayNames = [];
+    let rowCounts = [];
+    const ALL_WEEKDAYS = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+
+    function openSettingsModal() {
+        document.getElementById('settingsModal').style.display = 'flex';
+        renderShiftInputs(); renderDayInputs();
+        const savedTitle = localStorage.getItem('dienstplan_mainTitle') || document.getElementById('main-title').textContent;
+        document.getElementById('mainTitleInput').value = savedTitle;
+    }
+    function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+    function addShiftInput(value='') { shiftNames.push(value||`Schicht ${shiftNames.length+1}`); renderShiftInputs(); }
+    function removeShiftInput(index) { shiftNames.splice(index,1); renderShiftInputs(); }
+    function renderShiftInputs() {
+        const container = document.getElementById('shiftNamesContainer');
+        container.innerHTML = '';
+        shiftNames.forEach((name,i) => {
+            const rowVal = Array.isArray(rowCounts)&&rowCounts[i]?rowCounts[i]:7;
+            container.innerHTML += `<div style="display:flex;align-items:center;margin-bottom:5px;gap:6px;"><input type="text" value="${name}" onchange="updateShiftName(${i},this.value)" style="flex:1;"><span style="font-size:0.82rem;white-space:nowrap;color:var(--color-text-muted);">Zeilen:</span><input type="number" min="1" max="50" value="${rowVal}" onchange="updateRowCount(${i},this.value)" style="width:56px;"><button type="button" onclick="removeShiftInput(${i})" style="color:#ff6b6b;background:none;border:none;font-size:1.1em;cursor:pointer;">✕</button></div>`;
+        });
+    }
+    function updateShiftName(index,value) { shiftNames[index]=value; }
+    function updateRowCount(index,value) { rowCounts[index]=parseInt(value); }
+    function addDayInput() {
+        const missing = ALL_WEEKDAYS.filter(wd => !dayNames.includes(wd));
+        if (missing.length === 0) { showCustomAlert('Alle Wochentage sind bereits im Plan.'); return; }
+        const select = document.createElement('select');
+        missing.forEach(wd => { const opt=document.createElement('option'); opt.value=wd; opt.textContent=wd; select.appendChild(opt); });
+        const okBtn = document.createElement('button');
+        okBtn.textContent='Hinzufügen'; okBtn.type='button'; okBtn.className='btn btn-secondary';
+        okBtn.onclick = function() { dayNames.push(select.value); renderDayInputs(); select.parentElement.remove(); };
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText='display:flex;align-items:center;margin-bottom:5px;gap:6px;';
+        wrapper.appendChild(select); wrapper.appendChild(okBtn);
+        document.getElementById('dayNamesContainer').appendChild(wrapper);
+    }
+    function removeDayInput(index) { dayNames.splice(index,1); renderDayInputs(); }
+    function renderDayInputs() {
+        const container = document.getElementById('dayNamesContainer');
+        container.innerHTML = '';
+        dayNames.forEach((name,i) => {
+            container.innerHTML += `<div style="display:flex;align-items:center;margin-bottom:5px;gap:6px;"><input type="text" value="${name}" onchange="updateDayName(${i},this.value)" style="flex:1;"><button type="button" onclick="removeDayInput(${i})" style="color:#ff6b6b;background:none;border:none;font-size:1.1em;cursor:pointer;">✕</button></div>`;
+        });
+    }
+    function updateDayName(index,value) { dayNames[index]=value; }
+    function saveSettings(e) {
+        e.preventDefault();
+        localStorage.setItem('dienstplan_shiftNames',JSON.stringify(shiftNames));
+        localStorage.setItem('dienstplan_dayNames',JSON.stringify(dayNames));
+        localStorage.setItem('dienstplan_rowCounts',JSON.stringify(rowCounts));
+        const newTitle = document.getElementById('mainTitleInput').value.trim();
+        if (newTitle) localStorage.setItem('dienstplan_mainTitle', newTitle);
+        closeSettingsModal(); location.reload();
+    }
+
+    // ─────────────────────────────────────────────
+    //  ZELL FARBEN FÜR EXCEL
+    // ─────────────────────────────────────────────
+    function addColorsToSheet(sheet, allData) {
+        try {
+            let employeeColors = {};
+            try { employeeColors = JSON.parse(localStorage.getItem(employeeCellColorKey)||'{}'); } catch(e) {}
+            let singleCellColor = null;
+            try { singleCellColor = JSON.parse(localStorage.getItem(singleCellColorKey)||'null'); } catch(e) {}
+            const colorMap = {'#ffe082':'FFFFD54F','#b2dfdb':'FFB2DFDB','#c5e1a5':'FFC5E1A5','#ffab91':'FFFFAB91','#b39ddb':'FFB39DDB','#90caf9':'FF90CAF9','#ef9a9a':'FFEF9A9A'};
+            let currentRow = 2;
+            shiftNames.forEach((shift, sIdx) => {
+                currentRow += 2;
+                const tbody = document.getElementById(`shiftBody_${sIdx}`);
+                if (tbody) {
+                    const rows = tbody.querySelectorAll('tr');
+                    rows.forEach((row,rowIndex) => {
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach((cell,cellIndex) => {
+                            const excelRow = currentRow + rowIndex;
+                            const excelCol = cellIndex;
+                            const cellKey = `${tbody.id}_${rowIndex}_${cellIndex}`;
+                            let cellColor = null;
+                            if (cellIndex===0 && singleCellColor?.key===cellKey) cellColor = singleCellColor.color;
+                            else if (cellIndex>0 && employeeColors[cellKey]) cellColor = employeeColors[cellKey];
+                            if (!cellColor && cell.style.backgroundColor) cellColor = cell.style.backgroundColor;
+                            if (cellColor && colorMap[cellColor]) {
+                                const cellRef = XLSX.utils.encode_cell({r:excelRow,c:excelCol});
+                                if (!sheet[cellRef]) sheet[cellRef] = { v: allData[excelRow]?allData[excelRow][excelCol]:'' };
+                                sheet[cellRef].s = { fill:{patternType:'solid',fgColor:{rgb:colorMap[cellColor]}} };
+                            }
+                        });
+                    });
+                }
+                currentRow += tbody ? tbody.querySelectorAll('tr').length : (rowCounts[sIdx]||7);
+                currentRow += 1;
+            });
+        } catch(error) {}
+    }
+
+    // ─────────────────────────────────────────────
+    //  TITEL & DATUM
+    // ─────────────────────────────────────────────
+    function setMainTitleFromStorage() {
+        const savedTitle = localStorage.getItem('dienstplan_mainTitle');
+        document.getElementById('main-title').textContent = savedTitle || 'Dienstplan Bocholt';
+        updateWochenplanDatum();
+    }
+    function updateWochenplanDatum() {
+        const s = document.getElementById('startDate');
+        const e = document.getElementById('endDate');
+        const el = document.getElementById('wochenplan-datum');
+        const start = s?.value ? new Date(s.value).toLocaleDateString('de-DE') : '';
+        const end = e?.value ? new Date(e.value).toLocaleDateString('de-DE') : '';
+        el.textContent = start && end ? `Wochenplan vom ${start} bis ${end}` : '';
+    }
+    document.getElementById('startDate').addEventListener('change', updateWochenplanDatum);
+    document.getElementById('endDate').addEventListener('change', updateWochenplanDatum);
+
+    // ─────────────────────────────────────────────
+    //  CUSTOM ALERT
+    // ─────────────────────────────────────────────
+    function showCustomAlert(message) {
+        const alertBox = document.getElementById('custom-alert');
+        const alertMsg = document.getElementById('custom-alert-message');
+        const alertInner = document.getElementById('custom-alert-box');
+        alertMsg.textContent = message;
+        alertBox.classList.add('show');
+        setTimeout(() => { alertInner.style.opacity='1'; alertInner.style.transform='scale(1)'; }, 10);
+        setTimeout(() => {
+            alertInner.style.opacity='0'; alertInner.style.transform='scale(0.95)';
+            setTimeout(() => alertBox.classList.remove('show'), 250);
+        }, 2000);
+    }
+
+    // ─────────────────────────────────────────────
+    //  DRAG & DROP ZELLEN
+    // ─────────────────────────────────────────────
+    function addCellDragDropListeners() {
+        document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+            if (cell.cellIndex > 0) {
+                cell.setAttribute('draggable','true');
+                cell.addEventListener('dragstart', function(e) {
+                    if (this.textContent.trim()) { this.classList.add('cell-dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',this.textContent.trim()); e.dataTransfer.setData('cell-drag','true'); }
+                    else e.preventDefault();
+                });
+                cell.addEventListener('dragend', function() { this.classList.remove('cell-dragging'); document.querySelectorAll('.cell-drag-over').forEach(el => el.classList.remove('cell-drag-over')); });
+                cell.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; });
+                cell.addEventListener('dragenter', function(e) { e.preventDefault(); this.classList.add('cell-drag-over'); });
+                cell.addEventListener('dragleave', function() { this.classList.remove('cell-drag-over'); });
+                cell.addEventListener('drop', function(e) {
+                    e.preventDefault(); this.classList.remove('cell-drag-over');
+                    if (this.cellIndex > 0) {
+                        const draggedText = e.dataTransfer.getData('text/plain');
+                        const isCellDrag = e.dataTransfer.getData('cell-drag');
+                        if (draggedText) {
+                            const targetText = this.textContent.trim();
+                            const draggedCell = document.querySelector('.cell-dragging');
+                            if (isCellDrag && draggedCell) { this.textContent=draggedText; draggedCell.textContent=targetText; }
+                            else this.textContent = draggedText;
+                            saveDataToLocalStorage();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    //  MOBILE SHARE
+    // ─────────────────────────────────────────────
+    window.mobileShare = function() { openMobileShareModal(); };
+    window.openMobileShareModal = function() {
+        const modal = document.getElementById('mobileShareModal');
+        if (modal) modal.style.display = 'flex';
+    };
+    window.closeMobileShareModal = function() {
+        const modal = document.getElementById('mobileShareModal');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.generateMobileHTML = function() {
+        const tables = document.querySelectorAll('#schedule-container table');
+        const titles = document.querySelectorAll('#schedule-container .table-title');
+        if (tables.length === 0) return null;
+        const mainTitle = document.getElementById('main-title')?.textContent || 'Dienstplan';
+        const dateInfo = document.getElementById('wochenplan-datum')?.textContent || '';
+        const currentTimestamp = new Date().toLocaleString('de-DE');
+        let mobileHTML = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${mainTitle}</title><style>body{font-family:-apple-system,sans-serif;margin:0;padding:1rem;background:#f8f9fa;font-size:14px;}.header{text-align:center;margin-bottom:1.5rem;padding:1rem;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}.header h1{margin:0 0 .5rem;color:#1d1d1f;font-size:1.4rem;}.header .date{color:#86868b;font-weight:600;}.table-section{margin-bottom:1.5rem;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);}.table-title{padding:.8rem 1rem;background:#007aff;color:white;font-weight:600;font-size:1rem;margin:0;}table{width:100%;border-collapse:collapse;font-size:13px;}th,td{padding:.6rem .4rem;text-align:left;border-bottom:1px solid #e5e5ea;vertical-align:top;word-wrap:break-word;}th{background:#f8f9fa;font-weight:600;color:#1d1d1f;font-size:11px;}tr:nth-child(even){background:#fafafa;}.row-number{background:#f0f0f0!important;font-weight:600;text-align:center;width:50px;}.update-info{background:#e8f5e8;padding:.8rem 1rem;margin:0 0 1rem;border-radius:10px;border-left:4px solid #4caf50;font-size:.85rem;color:#2e7d32;}</style></head><body>`;
+        mobileHTML += `<div class="header"><h1>${mainTitle}</h1>${dateInfo?`<div class="date">${dateInfo}</div>`:''}</div>`;
+        mobileHTML += `<div class="update-info"><strong>📱 Mobile Ansicht</strong> – Letzte Aktualisierung: ${currentTimestamp}</div>`;
+        tables.forEach((table, index) => {
+            const title = titles[index] ? titles[index].textContent : `Tabelle ${index+1}`;
+            mobileHTML += `<div class="table-section"><div class="table-title">${title}</div><table>${table.innerHTML}</table></div>`;
+        });
+        mobileHTML += '</body></html>';
+        return mobileHTML;
+    };
+
+    window.createMobileLink = function() {
+        const mobileHTML = generateMobileHTML();
+        if (!mobileHTML) { showCustomAlert('Bitte zuerst einen Dienstplan generieren.'); return null; }
+        const encodedHTML = btoa(unescape(encodeURIComponent(mobileHTML)));
+        return `data:text/html;charset=utf-8;base64,${encodedHTML}`;
+    };
+
+    window.shareViaWhatsApp = function() {
+        const mobileLink = createMobileLink();
+        if (!mobileLink) return;
+        const mainTitle = document.getElementById('main-title')?.textContent || 'Dienstplan';
+        const dateInfo = document.getElementById('wochenplan-datum')?.textContent || '';
+        let message = `📋 ${mainTitle}`;
+        if (dateInfo) message += `\n${dateInfo}`;
+        message += `\n\n📱 Mobile Ansicht verfügbar.`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
+    window.copyMobileLink = function() {
+        const mobileLink = createMobileLink();
+        if (!mobileLink) return;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(mobileLink).then(() => showCustomAlert('✅ Link in Zwischenablage kopiert!')).catch(() => fallbackCopyMethod(mobileLink));
+        } else { fallbackCopyMethod(mobileLink); }
+    };
+
+    window.fallbackCopyMethod = function(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text; textArea.style.cssText='position:fixed;left:-999999px;';
+        document.body.appendChild(textArea); textArea.focus(); textArea.select();
+        try { document.execCommand('copy'); showCustomAlert('✅ Link in Zwischenablage kopiert!'); }
+        catch(err) { showCustomAlert('Kopieren fehlgeschlagen.'); }
+        document.body.removeChild(textArea);
+    };
+
+    // ─────────────────────────────────────────────
+    //  THEME TOGGLE
+    // ─────────────────────────────────────────────
+    (function () {
+        const btn  = document.getElementById('themeToggleBtn');
+        const body = document.body;
+        if (localStorage.getItem('orgashift_theme') === 'light') body.classList.add('light');
+        btn.addEventListener('click', function () {
+            body.classList.toggle('light');
+            localStorage.setItem('orgashift_theme', body.classList.contains('light') ? 'light' : 'dark');
+        });
+    })();
+</script>
+</body>
+</html>

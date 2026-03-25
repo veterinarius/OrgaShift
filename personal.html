@@ -731,8 +731,8 @@
 
         // Load data from memory on page load
         function loadEmployees() {
-            const savedEmployees = JSON.parse(sessionStorage.getItem('orgashift_employees') || '[]');
-            const savedCounter = parseInt(sessionStorage.getItem('orgashift_employee_counter') || '1');
+            const savedEmployees = JSON.parse(localStorage.getItem('orgashift_employees') || '[]');
+            const savedCounter = parseInt(localStorage.getItem('orgashift_employee_counter') || '1');
             
             employees = savedEmployees;
             employeeIdCounter = savedCounter;
@@ -741,8 +741,48 @@
 
         // Save data to memory
         function saveEmployees() {
-            sessionStorage.setItem('orgashift_employees', JSON.stringify(employees));
-            sessionStorage.setItem('orgashift_employee_counter', employeeIdCounter.toString());
+            localStorage.setItem('orgashift_employees', JSON.stringify(employees));
+            localStorage.setItem('orgashift_employee_counter', employeeIdCounter.toString());
+            syncToSchedule();
+        }
+
+        // Formatiert den Anzeigenamen eines Mitarbeiters (wie er im Wochenplan erscheint)
+        function getEmployeeDisplayName(emp) {
+            return (emp.title ? emp.title + ' ' : '') + emp.firstName + ' ' + emp.lastName;
+        }
+
+        // Synchronisiert Mitarbeiternamen in dienstplan_employees, monatsplan_employees und shared_employees
+        function syncToSchedule() {
+            try {
+                const names = employees.map(getEmployeeDisplayName);
+                const keys = ['dienstplan_employees', 'monatsplan_employees', 'shared_employees'];
+
+                keys.forEach(key => {
+                    let stored = JSON.parse(localStorage.getItem(key) || '[]');
+                    names.forEach(name => {
+                        if (!stored.includes(name)) {
+                            stored.push(name);
+                        }
+                    });
+                    localStorage.setItem(key, JSON.stringify(stored));
+                });
+            } catch (e) {
+                console.error('Fehler beim Synchronisieren mit den Dienstplänen:', e);
+            }
+        }
+
+        // Entfernt einen Mitarbeiternamen aus dienstplan_employees, monatsplan_employees und shared_employees
+        function removeFromSchedule(displayName) {
+            try {
+                const keys = ['dienstplan_employees', 'monatsplan_employees', 'shared_employees'];
+                keys.forEach(key => {
+                    let stored = JSON.parse(localStorage.getItem(key) || '[]');
+                    stored = stored.filter(n => n !== displayName);
+                    localStorage.setItem(key, JSON.stringify(stored));
+                });
+            } catch (e) {
+                console.error('Fehler beim Entfernen aus den Dienstplänen:', e);
+            }
         }
 
         // Add employee
@@ -785,8 +825,11 @@
         // Delete employee
         function deleteEmployee(id) {
             if (confirm('Möchten Sie diesen Mitarbeitenden wirklich löschen?')) {
+                const toDelete = employees.find(emp => emp.id === id);
+                const displayName = toDelete ? getEmployeeDisplayName(toDelete) : null;
                 employees = employees.filter(emp => emp.id !== id);
                 saveEmployees();
+                if (displayName) removeFromSchedule(displayName);
                 renderEmployees();
             }
         }
@@ -868,6 +911,8 @@
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
 
+            const oldDisplayName = getEmployeeDisplayName(employee);
+
             // Get updated values
             employee.title = document.getElementById(`edit-title-${id}`).value;
             employee.firstName = document.getElementById(`edit-firstName-${id}`).value;
@@ -903,6 +948,10 @@
                 return;
             }
 
+            const newDisplayName = getEmployeeDisplayName(employee);
+            if (oldDisplayName !== newDisplayName) {
+                removeFromSchedule(oldDisplayName);
+            }
             saveEmployees();
             renderEmployees();
         }

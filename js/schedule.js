@@ -33,10 +33,38 @@ function generateSchedule() {
     sortedEmployees.forEach(employee => {
         const employeePrefs = data.preferences[employee] || {};
         const shiftPreferences = {};
-        
+        // Zusatzpräferenzen (Urlaub/Krank) holen
+        const extraPrefs = (employeePrefs.extra && Array.isArray(employeePrefs.extra)) ? employeePrefs.extra : [];
+
+        // Hilfsfunktion: true, wenn Mitarbeiter an Tag blockiert ist
+        function isBlocked(dayName) {
+            // Prüfe alle extraPrefs auf Blockade für diesen Tag
+            for (const pref of extraPrefs) {
+                if ((pref.type === 'Urlaub' || pref.type === 'Krank') && pref.start && pref.end) {
+                    const start = new Date(pref.start);
+                    const end = new Date(pref.end);
+                    // dayName ist z.B. "Montag"; wir brauchen das Datum dieses Wochentags im aktuellen Planungszeitraum
+                    // Hole alle Daten im Zeitraum für diesen Wochentag
+                    let current = new Date(data.startDate);
+                    while (current <= data.endDate) {
+                        const weekday = current.toLocaleDateString('de-DE', { weekday: 'long' });
+                        if (weekday === dayName) {
+                            // Liegt dieser Tag im Blockadezeitraum?
+                            if (current >= start && current <= end) {
+                                return true;
+                            }
+                        }
+                        current.setDate(current.getDate() + 1);
+                    }
+                }
+            }
+            return false;
+        }
+
         data.shiftNames.forEach(shift => shiftPreferences[shift] = []);
-        
+
         Object.keys(employeePrefs).forEach(day => {
+            if (day === 'extra') return; // extra nicht als Tag behandeln
             const dayPrefs = employeePrefs[day] || [];
             dayPrefs.forEach(shift => {
                 if (shiftPreferences[shift]) {
@@ -44,13 +72,15 @@ function generateSchedule() {
                 }
             });
         });
-        
+
         Object.keys(shiftPreferences).forEach(shift => {
             const preferredDays = shiftPreferences[shift];
             if (preferredDays.length > 0) {
                 preferredDays.forEach(day => {
                     const dayIndex = data.dayNames.indexOf(day);
                     if (dayIndex !== -1) {
+                        // Prüfe, ob Mitarbeiter an diesem Tag blockiert ist
+                        if (isBlocked(day)) return;
                         for (let i = 0; i < generatedSchedule[shift].length; i++) {
                             if (!generatedSchedule[shift][i][dayIndex]) {
                                 generatedSchedule[shift][i][dayIndex] = employee;

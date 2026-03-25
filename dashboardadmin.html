@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – Dashboard Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black:   #050505;
+            --border:  #27272a;
+            --text:    #ffffff;
+            --text-sec: rgba(255,255,255,0.6);
+            --text-muted: rgba(255,255,255,0.3);
+            --accent:  #007AFF;
+            --surface: rgba(255,255,255,0.05);
+            --nav-bg:  rgba(5,5,5,0.82);
+        }
+        html[data-theme="light"] {
+            --black:      #f5f4f2;
+            --border:     #e4e4e7;
+            --text:       #0a0a0b;
+            --text-sec:   rgba(10,10,11,0.55);
+            --text-muted: rgba(10,10,11,0.28);
+            --accent:     #007AFF;
+            --surface:    rgba(0,0,0,0.04);
+            --nav-bg:     rgba(245,244,242,0.85);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--black);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--nav-bg); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+        .logo-dot { color: var(--accent); }
+        .nav-links { display: flex; list-style: none; gap: 28px; }
+        .nav-links a { text-decoration: none; color: var(--text-sec); font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-buttons { display: flex; gap: 10px; align-items: center; }
+        .login-btn { color: var(--text-sec); text-decoration: none; font-size: 0.88rem; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+        .login-btn:hover { color: var(--text); background: var(--surface); }
+        .signup-btn {
+            background: var(--text); color: var(--black); text-decoration: none;
+            font-weight: 600; font-size: 0.88rem; padding: 9px 20px;
+            border-radius: 25px; transition: all 0.2s;
+        }
+        .signup-btn:hover { background: rgba(255,255,255,0.88); }
+        .theme-toggle {
+            background: none; border: 1px solid var(--border); border-radius: 50%;
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: var(--surface); }
+
+        /* PAGE */
+        .page { max-width: 1200px; margin: 0 auto; padding: 88px 24px 60px; }
+
+        /* HEADER */
+        .page-header {
+            border: 1px solid var(--border); padding: 32px 40px; margin-bottom: 40px;
+            position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        html[data-theme="light"] .page-header::before {
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+        }
+        .page-header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+        .page-header p  { color: var(--text-sec); font-size: 0.95rem; }
+
+        /* GRID */
+        .cards-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1px; background: var(--border); border: 1px solid var(--border);
+        }
+
+        /* CARD */
+        .card {
+            background: var(--black); padding: 36px 32px; text-decoration: none;
+            color: var(--text); display: flex; flex-direction: column; gap: 14px;
+            transition: background 0.2s; position: relative; overflow: hidden;
+        }
+        .card:hover { background: rgba(255,255,255,0.025); }
+        html[data-theme="light"] .card:hover { background: rgba(0,0,0,0.025); }
+        .card-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .card-body { flex: 1; }
+        .card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+        .card p  { font-size: 0.88rem; color: var(--text-sec); line-height: 1.6; }
+        .card-arrow {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.82rem; font-weight: 500; color: var(--text-muted);
+            margin-top: 4px; transition: color 0.2s;
+        }
+        .card:hover .card-arrow { color: var(--text-sec); }
+        .card-arrow svg { transition: transform 0.2s; }
+        .card:hover .card-arrow svg { transform: translateX(3px); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .page-header { padding: 24px 20px; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .card { padding: 28px 24px; }
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="wochenplan.html">Wochenplan</a></li>
+            <li><a href="monatsplann.html">Monatsplan</a></li>
+            <li><a href="urlaubALLE.html">Urlaub</a></li>
+            <li><a href="personal.html">Personal</a></li>
+        </ul>
+        <div class="nav-buttons">
+            <button class="theme-toggle" id="themeToggle" title="Farbschema wechseln">🌙</button>
+            <a href="login.html" class="login-btn">Login</a>
+            <a href="register.html" class="signup-btn">Registrieren</a>
+        </div>
+    </div>
+</nav>
+
+<main class="page">
+    <div class="page-header">
+        <h1>Willkommen bei OrgaShift</h1>
+        <p>Ihre intelligente Lösung für Dienstplanung und Urlaubsverwaltung. Wählen Sie einen Bereich.</p>
+    </div>
+
+    <div class="cards-grid">
+
+        <a href="wochenplan.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(102,126,234,.2),rgba(0,122,255,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Wochenplan</h3>
+                <p>Schichten zuweisen und Wochendienstpläne für das gesamte Team verwalten.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="monatsplan.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(240,147,251,.2),rgba(245,87,108,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Monatsplan</h3>
+                <p>Detaillierte Monatsübersicht mit allen Schichten und Terminen auf einen Blick.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="urlaubALLE.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(79,172,254,.2),rgba(0,242,254,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Urlaub Übersicht</h3>
+                <p>Komplette Teamübersicht aller Urlaubsanträge mit Überschneidungserkennung.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="urlaubMA.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(52,199,89,.2),rgba(56,249,215,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Mein Urlaub</h3>
+                <p>Persönliche Urlaubsverwaltung – Anträge stellen und Resturlaub im Überblick.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="personal.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(253,160,133,.2),rgba(245,87,108,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Personal</h3>
+                <p>Mitarbeiterdaten verwalten – bis zu 20 Personen mit Rollen und Farben.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="pause.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(253,160,133,.2),rgba(245,87,108,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Mach mal Pause!</h3>
+                <p>AUSZEIT!</p>
+            </div>
+                <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </div>
+            </a>
+
+        <!--<a href="index.html" class="card" style="opacity:0.6;cursor:default;pointer-events:none">
+            <div class="card-icon" style="background:rgba(255,255,255,0.05)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="card-body">
+                <h3 style="color:var(--text-sec)">Mehr kommt bald</h3>
+                <p>Analytics, Benachrichtigungen und weitere Features in Planung.</p>
+            </div>
+            <div class="card-arrow">In Kürze</div>
+        </a>-->
+
+    </div>
+</main>
+<script>
+(function() {
+    var html = document.documentElement;
+    var btn  = document.getElementById('themeToggle');
+    function applyTheme(t) {
+        html.setAttribute('data-theme', t);
+        btn.textContent = t === 'light' ? '☀️' : '🌙';
+        try { localStorage.setItem('theme', t); } catch(e) {}
+    }
+    var stored = null;
+    try { stored = localStorage.getItem('theme'); } catch(e) {}
+    if (stored === 'light' || stored === 'dark') {
+        applyTheme(stored);
+    } else {
+        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    btn.addEventListener('click', function() {
+        applyTheme(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+})();
+</script>
+</body>
+</html>

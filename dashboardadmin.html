@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrgaShift 2 – Dashboard</title>
+    <title>OrgaShift 2 – Dashboard Admin</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -59,18 +59,12 @@
         }
         .signup-btn:hover { background: rgba(255,255,255,0.88); }
         .theme-toggle {
-            background: none; border: 1px solid var(--border); border-radius: 8px;
+            background: none; border: 1px solid var(--border); border-radius: 50%;
             width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-sec); transition: color 0.2s, background 0.2s, border-color 0.2s;
+            cursor: pointer; font-size: 16px; transition: background 0.2s, border-color 0.2s;
             flex-shrink: 0;
         }
-        .theme-toggle:hover { color: var(--text); background: var(--surface); }
-        html[data-theme="dark"]  .icon-moon { display: none; }
-        html[data-theme="dark"]  .icon-sun  { display: block; }
-        html[data-theme="light"] .icon-sun  { display: none; }
-        html[data-theme="light"] .icon-moon { display: block; }
-        html:not([data-theme])   .icon-moon { display: none; }
-        html:not([data-theme])   .icon-sun  { display: block; }
+        .theme-toggle:hover { background: var(--surface); }
 
         /* PAGE */
         .page { max-width: 1200px; margin: 0 auto; padding: 88px 24px 60px; }
@@ -135,18 +129,15 @@
     <div class="nav-container">
         <a href="index.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
         <ul class="nav-links">
-            <li><a href="wochenplanneu.html">Wochenplan</a></li>
-            <li><a href="monatsplanneu.html">Monatsplan</a></li>
+            <li><a href="wochenplan.html">Wochenplan</a></li>
+            <li><a href="monatsplann.html">Monatsplan</a></li>
             <li><a href="urlaubALLE.html">Urlaub</a></li>
             <li><a href="personal.html">Personal</a></li>
         </ul>
         <div class="nav-buttons">
-            <button class="theme-toggle" id="themeToggle" aria-label="Farbschema wechseln" title="Farbschema wechseln">
-                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            </button>
-            <a href="loginneu.html" class="login-btn">Login</a>
-            <a href="registerneu.html" class="signup-btn">Registrieren</a>
+            <button class="theme-toggle" id="themeToggle" title="Farbschema wechseln">🌙</button>
+            <a href="login.html" class="login-btn">Login</a>
+            <a href="register.html" class="signup-btn">Registrieren</a>
         </div>
     </div>
 </nav>
@@ -159,7 +150,7 @@
 
     <div class="cards-grid">
 
-        <a href="wochenplanneu.html" class="card">
+        <a href="wochenplan.html" class="card">
             <div class="card-icon" style="background:linear-gradient(135deg,rgba(102,126,234,.2),rgba(0,122,255,.14))">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
@@ -173,7 +164,7 @@
             </div>
         </a>
 
-        <a href="monatsplanneu.html" class="card">
+        <a href="monatsplan.html" class="card">
             <div class="card-icon" style="background:linear-gradient(135deg,rgba(240,147,251,.2),rgba(245,87,108,.14))">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             </div>
@@ -262,6 +253,7 @@
     var btn  = document.getElementById('themeToggle');
     function applyTheme(t) {
         html.setAttribute('data-theme', t);
+        btn.textContent = t === 'light' ? '☀️' : '🌙';
         try { localStorage.setItem('theme', t); } catch(e) {}
     }
     var stored = null;

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – Monatsplan User</title>
+    <style>
+        /* ── DESIGN TOKENS ── */
+        :root {
+            --color-accent: #007AFF;
+            --color-text: #f0f0f5;
+            --color-text-muted: #8e8e99;
+            --color-surface: rgba(18,18,28,0.92);
+            --color-surface-glass: rgba(255,255,255,0.07);
+            --color-border: rgba(255,255,255,0.1);
+            --color-bg: #0a0a0f;
+            --color-nav-bg: rgba(8,8,16,0.88);
+            --color-nav-border: rgba(255,255,255,0.08);
+            --radius: 14px;
+            --shadow: 0 8px 40px rgba(0,0,0,0.5);
+        }
+
+        /* ── LIGHT MODE ── */
+        body.light {
+            --color-text: #1a1a2e;
+            --color-text-muted: #5a6376;
+            --color-surface: rgba(255,255,255,0.92);
+            --color-surface-glass: rgba(0,0,0,0.04);
+            --color-border: rgba(0,0,0,0.1);
+            --color-bg: #e8edf5;
+            --color-nav-bg: rgba(255,255,255,0.88);
+            --color-nav-border: rgba(0,0,0,0.1);
+        }
+        body.light { background: var(--color-bg); }
+        body.light nav { border-bottom-color: var(--color-nav-border); }
+        body.light .logo { color: var(--color-accent); }
+        body.light .nav-links a { color: var(--color-text); }
+        body.light .btn-ghost { color: var(--color-text); }
+        body.light .schedule-container { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+        body.light table th { background: rgba(0,0,0,0.04); color: var(--color-text); }
+        body.light table td { color: var(--color-text); background: rgba(255,255,255,0.7); }
+        body.light table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+        body.light .row-number { background: rgba(0,0,0,0.06) !important; color: var(--color-text-muted) !important; }
+        body.light .remarks-textarea { background: rgba(0,0,0,0.04); color: var(--color-text); }
+        body.light .date-info-bar { color: var(--color-text-muted); }
+        body.light .badge-readonly { background: rgba(52,199,89,0.12); color: #34C759; border-color: rgba(52,199,89,0.25); }
+        body.light .empty-state { color: var(--color-text-muted); }
+        body.light #beamsOverlay { animation: overlayPulseLight 10s ease-in-out infinite; }
+        @keyframes overlayPulseLight {
+            0%, 100% { background: rgba(232,237,245,0.2); }
+            50%       { background: rgba(232,237,245,0.4); }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--color-bg, #0a0a0f);
+            transition: background 0.3s ease;
+            min-height: 100vh;
+            color: var(--color-text);
+            overflow-x: hidden;
+        }
+
+        /* ── BEAMS BACKGROUND (from index.html) ── */
+        #beams-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; display: block;
+            filter: blur(15px);
+            z-index: 0;
+            pointer-events: none;
+        }
+        #beamsOverlay {
+            position: fixed; inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: rgba(10,10,10,0.05);
+            animation: overlayPulse 10s ease-in-out infinite;
+            backdrop-filter: blur(50px);
+        }
+        @keyframes overlayPulse {
+            0%, 100% { opacity: 0.05; }
+            50%       { opacity: 0.15; }
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--color-nav-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--color-nav-border);
+            z-index: 1000;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .nav-container {
+            max-width: 1400px; margin: 0 auto; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo {
+            font-size: 22px; font-weight: 700; color: var(--color-text);
+            text-decoration: none; letter-spacing: -0.02em;
+        }
+        .logo-dot { color: var(--color-accent); }
+        .nav-links { display: flex; list-style: none; gap: 24px; }
+        .nav-links a {
+            text-decoration: none; color: var(--color-text);
+            font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s, color 0.2s;
+        }
+        .nav-links a:hover { opacity: 1; color: var(--color-accent); }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        .theme-toggle {
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            color: var(--color-text); font-size: 16px;
+            width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.12); }
+        .btn-logout {
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            color: var(--color-text); font-size: 0.85rem;
+            padding: 7px 14px; border-radius: 8px;
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.1); }
+
+        /* ── PAGE LAYOUT ── */
+        .page-wrap {
+            position: relative; z-index: 2;
+            padding-top: 80px;
+            max-width: 1400px; margin: 0 auto;
+            padding-left: 20px; padding-right: 20px;
+            padding-bottom: 40px;
+        }
+
+        /* ── HEADER ── */
+        .header { margin-bottom: 20px; padding-top: 12px; }
+        .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+        .header h1 { font-size: 1.7rem; font-weight: 700; color: var(--color-text); letter-spacing: -0.02em; }
+        .badge-readonly {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+            background: rgba(52,199,89,0.15); color: #34C759;
+            border: 1px solid rgba(52,199,89,0.3);
+            white-space: nowrap; margin-top: 4px;
+        }
+        .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #34C759; }
+        #wochenplan-datum { font-size: 0.9rem; color: var(--color-text-muted); margin-top: 4px; }
+        .header-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+        /* ── DATE INFO BAR ── */
+        .date-info-bar {
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            padding: 12px 16px;
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(12px);
+            margin-bottom: 16px;
+            font-size: 0.88rem; color: var(--color-text-muted);
+        }
+        .date-info-bar strong { color: var(--color-text); }
+
+        /* ── SCHEDULE CONTAINER ── */
+        .schedule-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+        .table-title {
+            font-size: 1rem; font-weight: 700; color: var(--color-text);
+            margin: 16px 0 8px; padding: 8px 12px;
+            background: rgba(0,122,255,0.12);
+            border-left: 3px solid var(--color-accent);
+            border-radius: 6px;
+        }
+        .table-title:first-child { margin-top: 0; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        table th {
+            padding: 10px 12px; font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--color-text-muted);
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--color-border);
+            white-space: nowrap; text-align: center;
+        }
+        table th:first-child { text-align: left; }
+        table td {
+            padding: 8px 10px; text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--color-text); font-size: 0.88rem;
+            white-space: pre-wrap; word-wrap: break-word;
+        }
+        table tr:last-child td { border-bottom: none; }
+        .row-number {
+            text-align: left !important;
+            font-size: 0.78rem !important;
+            color: var(--color-text-muted) !important;
+            background: rgba(255,255,255,0.03) !important;
+            font-weight: 600;
+            min-width: 60px;
+        }
+
+        /* ── REMARKS ── */
+        .remarks-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 16px;
+        }
+        .remarks-container h2 { font-size: 1rem; font-weight: 600; color: var(--color-text); margin-bottom: 10px; }
+        .remarks-textarea {
+            width: 100%; min-height: 80px; padding: 10px 12px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--color-border);
+            border-radius: 10px; color: var(--color-text); font-size: 0.9rem;
+            font-family: inherit; resize: none; outline: none;
+            cursor: default;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            padding: 8px 14px; border-radius: 8px; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; border: 1px solid var(--color-border);
+            font-family: inherit; transition: all 0.2s; display: inline-flex;
+            align-items: center; gap: 5px; text-decoration: none;
+        }
+        .btn-print {
+            background: var(--color-surface-glass); color: var(--color-text);
+        }
+        .btn-print:hover { background: rgba(255,255,255,0.12); }
+        body.light .btn-print { background: rgba(0,0,0,0.06); color: var(--color-text); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            color: var(--color-text-muted); font-size: 0.95rem;
+        }
+        .empty-state-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .empty-state p { max-width: 340px; margin: 0 auto; line-height: 1.6; }
+
+        /* ── PRINT ── */
+        #print-header { display: none; }
+        @media print {
+            #beams-canvas, #beamsOverlay, nav, .header-actions, .date-info-bar,
+            .badge-readonly { display: none !important; }
+            .page-wrap { padding-top: 0; max-width: 100%; }
+            body { background: white !important; color: #000 !important; font-size: 9pt !important; }
+            .schedule-container { box-shadow: none; border: 1px solid #ddd; background: white; overflow: visible; }
+            table { font-size: 7pt !important; }
+            table th { background: #f5f5f7 !important; color: #000 !important; padding: 2px 4px !important; }
+            table td { background: white !important; color: #000 !important; border-color: #ddd !important; padding: 2px 4px !important; }
+            .table-title { background: #eef2ff !important; color: #000 !important; font-size: 0.85rem !important; }
+            .remarks-container { background: white; border-color: #ddd; }
+            .remarks-textarea { background: white !important; color: #000 !important; border-color: #ddd !important; }
+            #print-header { display: block; font-weight: bold; margin-bottom: 8px; text-align: center; }
+            @page { size: A4 landscape; margin: 0.3cm; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+        }
+        @media (max-width: 600px) {
+            .page-wrap { padding-left: 12px; padding-right: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- BEAMS BACKGROUND -->
+<canvas id="beams-canvas" aria-hidden="true"></canvas>
+<div id="beamsOverlay" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-container">
+        <a href="dashboarduser.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="dashboarduser.html">Dashboard</a></li>
+            <li><a href="wochenplanuser.html">Wochenplan</a></li>
+            <li><a href="urlaubMA.html">Mein Urlaub</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button>
+            <button class="btn-logout" onclick="logout()">Abmelden</button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-top">
+            <h1 id="main-title">Monatsplan</h1>
+            <span class="badge-readonly"><span class="badge-dot"></span>Nur-Lese-Ansicht</span>
+        </div>
+        <div id="wochenplan-datum"></div>
+        <div class="header-actions">
+            <button class="btn btn-print" onclick="printSchedule()">🖨️ Drucken</button>
+        </div>
+    </div>
+
+    <!-- DATE INFO -->
+    <div class="date-info-bar" id="date-info-bar" style="display:none;">
+        <span><strong>Monat:</strong> <span id="date-month-text"></span></span>
+        <span><strong>Tage:</strong> <span id="date-days-text"></span></span>
+    </div>
+
+    <!-- PRINT HEADER -->
+    <div id="print-header"></div>
+
+    <!-- SCHEDULE -->
+    <div class="schedule-container" id="schedule-container">
+        <div class="empty-state" id="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <p>Noch kein Monatsplan verfügbar. Der Administrator hat noch keinen Plan erstellt.</p>
+        </div>
+    </div>
+
+    <!-- REMARKS -->
+    <div class="remarks-container" id="remarks-container" style="display:none;">
+        <h2>Bemerkungen</h2>
+        <textarea id="remarks-display" class="remarks-textarea" readonly></textarea>
+    </div>
+</div>
+
+<script>
+    // ─────────────────────────────────────────
+    //  BEAMS BACKGROUND (from index.html)
+    // ─────────────────────────────────────────
+    (function () {
+        const canvas = document.getElementById('beams-canvas');
+        const ctx = canvas.getContext('2d');
+        const MINIMUM_BEAMS = 20;
+        const intensity = 1.0;
+        let beams = [];
+        let animId;
+
+        function createBeam(width, height) {
+            const angle = -35 + Math.random() * 10;
+            return {
+                x: Math.random() * width * 1.5 - width * 0.25,
+                y: Math.random() * height * 1.5 - height * 0.25,
+                width: 30 + Math.random() * 60,
+                length: height * 2.5,
+                angle,
+                speed: 0.6 + Math.random() * 1.2,
+                opacity: 0.12 + Math.random() * 0.16,
+                hue: 190 + Math.random() * 70,
+                pulse: Math.random() * Math.PI * 2,
+                pulseSpeed: 0.02 + Math.random() * 0.03,
+            };
+        }
+
+        function resetBeam(beam, index, total) {
+            const col = index % 3;
+            const spacing = window.innerWidth / 3;
+            beam.y = window.innerHeight + 100;
+            beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+            beam.width = 100 + Math.random() * 100;
+            beam.speed = 0.5 + Math.random() * 0.4;
+            beam.hue = 190 + (index * 70) / total;
+            beam.opacity = 0.2 + Math.random() * 0.1;
+        }
+
+        function drawBeam(beam) {
+            ctx.save();
+            ctx.translate(beam.x, beam.y);
+            ctx.rotate(beam.angle * Math.PI / 180);
+            const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * intensity;
+            const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
+            gradient.addColorStop(0,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+            gradient.addColorStop(0.1, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+            gradient.addColorStop(0.4, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+            gradient.addColorStop(0.6, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+            gradient.addColorStop(0.9, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+            gradient.addColorStop(1,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+            ctx.restore();
+        }
+
+        function updateCanvasSize() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            ctx.scale(dpr, dpr);
+            const total = Math.floor(MINIMUM_BEAMS * 1.5);
+            beams = Array.from({ length: total }, () => createBeam(window.innerWidth, window.innerHeight));
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.filter = 'blur(35px)';
+            const total = beams.length;
+            beams.forEach((beam, i) => {
+                beam.y -= beam.speed;
+                beam.pulse += beam.pulseSpeed;
+                if (beam.y + beam.length < -100) resetBeam(beam, i, total);
+                drawBeam(beam);
+            });
+            animId = requestAnimationFrame(animate);
+        }
+
+        updateCanvasSize();
+        window.addEventListener('resize', updateCanvasSize);
+        animate();
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) cancelAnimationFrame(animId);
+            else animate();
+        });
+    }());
+
+    // ─────────────────────────────────────────
+    //  STORAGE KEYS
+    // ─────────────────────────────────────────
+    const KEYS = {
+        mainTitle:    'monatsplan_mainTitle',
+        shiftNames:   'monatsplan_shiftNames',
+        dayNames:     'monatsplan_dayNames',
+        rowCounts:    'monatsplan_rowCounts',
+        tableData:    'monatsplan_tableData',
+        startDate:    'monatsplan_startDate',
+        endDate:      'monatsplan_endDate',
+        remarks:      'monatsplan_remarks',
+        cellColors:   'monatsplan_employee_cell_colors',
+        singleColor:  'monatsplan_single_cell_color',
+        customHeader: 'monatsplan_customHeader',
+        selectMonth:  'monatsplan_selectMonth',
+    };
+
+    // ─────────────────────────────────────────
+    //  LOAD & RENDER
+    // ─────────────────────────────────────────
+    function loadSchedule() {
+        // Title
+        const title = localStorage.getItem(KEYS.mainTitle) || 'Monatsplan';
+        document.getElementById('main-title').textContent = title;
+
+        // Subtitle / datum
+        const datumEl  = document.getElementById('wochenplan-datum');
+        const barEl    = document.getElementById('date-info-bar');
+        const customHeader = localStorage.getItem(KEYS.customHeader);
+        const selectMonth  = localStorage.getItem(KEYS.selectMonth); // "YYYY-MM"
+
+        if (customHeader && customHeader.trim()) {
+            datumEl.textContent = customHeader;
+        } else if (selectMonth) {
+            const [year, month] = selectMonth.split('-').map(Number);
+            const date = new Date(year, month - 1, 1);
+            const monthName = date.toLocaleString('de-DE', { month: 'long' });
+            datumEl.textContent = `Monatsplan für ${monthName} ${year}`;
+        } else {
+            const startRaw = localStorage.getItem(KEYS.startDate);
+            if (startRaw) {
+                const d = new Date(startRaw);
+                const monthName = d.toLocaleString('de-DE', { month: 'long' });
+                datumEl.textContent = `Monatsplan für ${monthName} ${d.getFullYear()}`;
+            } else {
+                datumEl.textContent = '';
+            }
+        }
+
+        // Date info bar
+        if (selectMonth) {
+            const [year, month] = selectMonth.split('-').map(Number);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const date = new Date(year, month - 1, 1);
+            const monthName = date.toLocaleString('de-DE', { month: 'long' });
+            document.getElementById('date-month-text').textContent = `${monthName} ${year}`;
+            document.getElementById('date-days-text').textContent = `${daysInMonth} Tage`;
+            barEl.style.display = 'flex';
+        } else {
+            barEl.style.display = 'none';
+        }
+
+        // Shift/day config
+        let shiftNames, dayNames;
+        try { shiftNames = JSON.parse(localStorage.getItem(KEYS.shiftNames) || 'null'); } catch(e) { shiftNames = null; }
+        try { dayNames   = JSON.parse(localStorage.getItem(KEYS.dayNames)   || 'null'); } catch(e) { dayNames = null; }
+        let tableData;
+        try { tableData  = JSON.parse(localStorage.getItem(KEYS.tableData)  || 'null'); } catch(e) { tableData = null; }
+
+        const container  = document.getElementById('schedule-container');
+        const emptyState = document.getElementById('empty-state');
+
+        if (!shiftNames || !dayNames || !tableData) {
+            container.innerHTML = '';
+            container.appendChild(emptyState);
+            emptyState.style.display = '';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        container.innerHTML = '';
+
+        shiftNames.forEach((shift, sIdx) => {
+            // Section title
+            const titleEl = document.createElement('div');
+            titleEl.className = 'table-title';
+            titleEl.textContent = shift;
+            container.appendChild(titleEl);
+
+            // Table wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-wrapper';
+
+            const table = document.createElement('table');
+            const rows  = tableData[shift] || [];
+
+            // Month header row
+            if (selectMonth) {
+                const [year, month] = selectMonth.split('-').map(Number);
+                const date = new Date(year, month - 1, 1);
+                const monthName = date.toLocaleString('de-DE', { month: 'long', year: 'numeric' });
+                const monthNameCap = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                const tHead = document.createElement('thead');
+                tHead.innerHTML = `
+                    <tr><th colspan="${dayNames.length + 1}" style="font-size:1em;font-weight:bold;text-align:center;background:rgba(0,122,255,0.1);color:var(--color-text);">${monthNameCap}</th></tr>
+                    <tr><th>lfd. Nr. / Datum</th>${dayNames.map(d => `<th>${d}</th>`).join('')}</tr>
+                `;
+                table.appendChild(tHead);
+            } else {
+                const tHead = document.createElement('thead');
+                tHead.innerHTML = `<tr><th>lfd. Nr. / Datum</th>${dayNames.map(d => `<th>${d}</th>`).join('')}</tr>`;
+                table.appendChild(tHead);
+            }
+
+            // Body
+            const tbody = document.createElement('tbody');
+            tbody.id = `shiftBody_${sIdx}`;
+            rows.forEach(rowArr => {
+                const tr = document.createElement('tr');
+                rowArr.forEach((cellText, cIdx) => {
+                    const td = document.createElement('td');
+                    td.textContent = cellText || '';
+                    if (cIdx === 0) td.className = 'row-number';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            wrapper.appendChild(table);
+            container.appendChild(wrapper);
+        });
+
+        // Cell colors
+        applyCellColors(shiftNames, tableData);
+
+        // Remarks
+        const remarks          = localStorage.getItem(KEYS.remarks) || '';
+        const remarksContainer = document.getElementById('remarks-container');
+        const remarksDisplay   = document.getElementById('remarks-display');
+        if (remarks.trim()) {
+            remarksDisplay.value = remarks;
+            remarksContainer.style.display = '';
+        } else {
+            remarksContainer.style.display = 'none';
+        }
+    }
+
+    // ─────────────────────────────────────────
+    //  CELL COLORS
+    // ─────────────────────────────────────────
+    function getCellKey(tbodyId, rowIndex, colIndex) {
+        return `${tbodyId}_${rowIndex}_${colIndex}`;
+    }
+
+    function applyCellColors(shiftNames) {
+        let employeeColors = {};
+        try { employeeColors = JSON.parse(localStorage.getItem(KEYS.cellColors) || '{}'); } catch(e) {}
+        let singleCellColor = null;
+        try { singleCellColor = JSON.parse(localStorage.getItem(KEYS.singleColor) || 'null'); } catch(e) {}
+
+        shiftNames.forEach((shift, sIdx) => {
+            const tbodyId = `shiftBody_${sIdx}`;
+            const tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((tr, rowIndex) => {
+                const cells = tr.querySelectorAll('td');
+                cells.forEach((cell, colIndex) => {
+                    const key = getCellKey(tbodyId, rowIndex, colIndex);
+                    if (colIndex === 0) {
+                        if (singleCellColor && singleCellColor.key === key && singleCellColor.color && singleCellColor.color !== '#ffffff') {
+                            cell.style.backgroundColor = singleCellColor.color;
+                        }
+                    } else {
+                        if (employeeColors[key] && employeeColors[key] !== '#ffffff') {
+                            cell.style.backgroundColor = employeeColors[key];
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    // ─────────────────────────────────────────
+    //  LIVE UPDATE (cross-tab)
+    // ─────────────────────────────────────────
+    window.addEventListener('storage', function(e) {
+        if (e.key && e.key.startsWith('monatsplan_')) {
+            loadSchedule();
+        }
+    });
+
+    // ─────────────────────────────────────────
+    //  PRINT
+    // ─────────────────────────────────────────
+    function printSchedule() {
+        const header = document.getElementById('print-header');
+        const title  = document.getElementById('main-title').textContent || 'Monatsplan';
+        const datum  = document.getElementById('wochenplan-datum').textContent;
+        header.innerHTML = `<strong>${title}</strong>${datum ? '<br>' + datum : ''}`;
+        header.style.display = 'block';
+        window.print();
+        setTimeout(() => { header.style.display = 'none'; }, 500);
+    }
+
+    // ─────────────────────────────────────────
+    //  LOGOUT
+    // ─────────────────────────────────────────
+    function logout() {
+        window.location.href = 'index.html';
+    }
+
+    // ─────────────────────────────────────────
+    //  THEME TOGGLE
+    // ─────────────────────────────────────────
+    (function () {
+        const btn  = document.getElementById('themeToggleBtn');
+        const body = document.body;
+        const saved = localStorage.getItem('orgashift_theme');
+        if (saved === 'light') body.classList.add('light');
+        btn.textContent = body.classList.contains('light') ? '☀️' : '🌙';
+        btn.addEventListener('click', function () {
+            body.classList.toggle('light');
+            const isLight = body.classList.contains('light');
+            localStorage.setItem('orgashift_theme', isLight ? 'light' : 'dark');
+            btn.textContent = isLight ? '☀️' : '🌙';
+        });
+    }());
+
+    // ─────────────────────────────────────────
+    //  INIT
+    // ─────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', loadSchedule);
+</script>
+</body>
+</html>

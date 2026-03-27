@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrgaShift – Impressum</title>
+    <title>OrgaShift 2 – AGB</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -45,7 +45,7 @@
             line-height: 1.6;
         }
 
-        /* ── NAV ──────────────────────────────────── */
+        /* ── NAV ──────────────────────────────────────────── */
         nav {
             position: fixed; top: 0; width: 100%;
             background: var(--nav-bg);
@@ -82,7 +82,7 @@
         .signup-btn:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
         html.light .signup-btn:hover { background: rgba(0,0,0,0.82); }
 
-        /* ── BEAMS ───────────────────────────────────── */
+        /* ── BEAMS ─────────────────────────────────────────────── */
         #beams-canvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; display: block; z-index: 0;
@@ -100,14 +100,14 @@
             50%       { opacity: 0.15; }
         }
 
-        /* ── IMPRINT SECTION ─────────────────────────── */
-        .imprint-section {
+        /* ── CONTENT SECTION ─────────────────────────────────── */
+        .content-section {
             position: relative; z-index: 1;
             padding: 128px 0 80px;
             min-height: 100vh;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-        .imprint-wrap { max-width: 820px; margin: 0 auto; }
+        .content-wrap { max-width: 820px; margin: 0 auto; }
 
         .section-tag {
             display: inline-block; padding: 4px 14px; border-radius: 20px;
@@ -116,51 +116,91 @@
             text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
         }
 
-        .imprint-card-outer {
+        .card-outer {
             border: 1px solid var(--border); padding: 8px;
         }
-        .imprint-card-inner {
+        .card-inner {
             border: 1px solid var(--border); padding: 52px;
             position: relative; overflow: hidden;
             background: rgba(255,255,255,0.02);
         }
-        html.light .imprint-card-inner {
-            background: rgba(0,0,0,0.02);
-        }
-        .imprint-card-inner::before {
+        html.light .card-inner { background: rgba(0,0,0,0.02); }
+        .card-inner::before {
             content: '';
             position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
         }
-        html.light .imprint-card-inner::before {
+        html.light .card-inner::before {
             background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
         }
 
-        .imprint-card-inner h1 {
+        .card-inner h1 {
             font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
             color: var(--text); margin-bottom: 40px;
         }
-        .imprint-card-inner h2 {
+        .card-inner h2 {
             font-size: 0.95rem; font-weight: 600; color: var(--text);
             margin-top: 2em; margin-bottom: 0.6em; letter-spacing: -0.01em;
         }
-        .imprint-card-inner p,
-        .imprint-card-inner address {
+        .card-inner p {
             font-size: 0.92rem; color: var(--text-sec);
-            line-height: 1.75; font-style: normal; margin-bottom: 0.4em;
+            line-height: 1.75; margin-bottom: 0.6em;
         }
-        .imprint-card-inner strong { color: var(--text); font-weight: 600; }
-        .imprint-card-inner .small { font-size: 0.86rem; color: var(--text-muted); }
-        .imprint-card-inner a { color: var(--accent); text-decoration: none; }
-        .imprint-card-inner a:hover { text-decoration: underline; }
+        .card-inner address {
+            font-style: normal; font-size: 0.92rem;
+            color: var(--text-sec); line-height: 1.75;
+        }
+        .card-inner strong { color: var(--text); font-weight: 600; }
+        .card-inner a { color: var(--accent); text-decoration: none; }
+        .card-inner a:hover { text-decoration: underline; }
+
+        .data-box {
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            background: var(--surface);
+            padding: 20px 24px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .data-box ul { list-style: none; padding: 0; }
+        .data-box li {
+            font-size: 0.9rem; color: var(--text-sec);
+            padding: 4px 0; line-height: 1.6;
+        }
+        .data-box li strong { color: var(--text); }
+
+        .rights-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 10px; margin: 16px 0; list-style: none; padding: 0;
+        }
+        .rights-grid li {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 14px 16px; border-radius: 6px;
+            font-size: 0.88rem; color: var(--text-sec);
+            border-left: 3px solid rgba(0,122,255,0.4);
+            transition: background 0.2s;
+        }
+        .rights-grid li:hover { background: var(--surface-hover); }
+
+        .terms-list { list-style: none; padding: 0; margin: 16px 0; }
+        .terms-list li {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 14px 18px; margin-bottom: 8px;
+            border-radius: 6px; font-size: 0.9rem;
+            color: var(--text-sec); line-height: 1.6;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .terms-list li:hover { background: var(--surface-hover); border-color: rgba(0,122,255,0.3); }
 
         .divider {
             height: 1px; background: var(--border);
             margin: 32px 0; opacity: 0.6;
         }
 
-        /* ── FOOTER ──────────────────────────────────── */
+        /* ── FOOTER ────────────────────────────────────────────── */
         footer {
             background: var(--footer-bg); border-top: 1px solid var(--border);
             padding: 64px 0 32px; transition: background 0.35s ease;
@@ -184,7 +224,7 @@
         .footer-bottom p { color: var(--text-muted); font-size: 0.82rem; }
         .footer-logo { font-size: 16px; font-weight: 700; color: var(--text-sec); }
 
-        /* ── THEME TOGGLE ────────────────────────────── */
+        /* ── THEME TOGGLE ──────────────────────────────────────── */
         .theme-toggle {
             width: 36px; height: 36px; border-radius: 50%;
             border: 1px solid var(--border); background: var(--surface);
@@ -195,18 +235,19 @@
         }
         .theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
 
-        /* ── FADE-IN ─────────────────────────────────── */
+        /* ── FADE-IN ────────────────────────────────────────────── */
         .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .fi.visible { opacity: 1; transform: none; }
 
-        /* ── RESPONSIVE ──────────────────────────────── */
+        /* ── RESPONSIVE ─────────────────────────────────────────── */
         @media (max-width: 768px) {
             .nav-links { display: none; }
-            .imprint-card-inner { padding: 36px 28px; }
+            .card-inner { padding: 36px 28px; }
+            .rights-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) {
-            .imprint-card-outer { border: none; padding: 0; }
-            .imprint-card-inner { padding: 28px 20px; }
+            .card-outer { border: none; padding: 0; }
+            .card-inner { padding: 28px 20px; }
         }
     </style>
 </head>
@@ -247,68 +288,88 @@
 <canvas id="beams-canvas"></canvas>
 <div class="beams-overlay"></div>
 
-<!-- IMPRESSUM CONTENT -->
-<section class="imprint-section">
+<!-- MAIN CONTENT -->
+<section class="content-section">
     <div class="container">
-        <div class="imprint-wrap">
+        <div class="content-wrap">
             <div class="fi">
                 <div class="section-tag">Rechtliches</div>
             </div>
-            <div class="imprint-card-outer fi">
-                <div class="imprint-card-inner">
-                    <h1>Impressum</h1>
+            <div class="card-outer fi">
+                <div class="card-inner">
+                    <h1>Einwilligung &amp; Nutzungsbedingungen</h1>
 
-                    <h2>Angaben gemäß § 5 TMG</h2>
-                    <address>
-                        Max Mustermann<br>
-                        Musterstr. 93<br>
-                        Musterstadt<br>
-                        Deutschland
-                    </address>
-                    <p><strong>Vertreten durch:</strong><br>
-                    Max Mustermann</p>
-
-                    <div class="divider"></div>
-
-                    <h2>Kontakt</h2>
+                    <h2>1. Verantwortlicher</h2>
                     <p>
-                        Telefon: 01234 / 567890<br>
-                        E-Mail: <a href="mailto:info@example.com">info@example.com</a>
+                        Verantwortlich für die Datenverarbeitung im Rahmen dieser App ist:<br>
+                        <strong>Dr. Stephan Wegmann</strong><br>
+                        Von-Martels Str. 10, 48683 Ahaus<br>
+                        <a href="mailto:info@planbor.de">info@planbor.de</a><br>
+                        Tel: +49 (0) 151 46523245
                     </p>
 
                     <div class="divider"></div>
 
-                    <h2>Umsatzsteuer-ID</h2>
+                    <h2>2. Zweck der Datenerhebung</h2>
+                    <p>Im Rahmen der Nutzung dieser App werden folgende personenbezogene Daten erhoben:</p>
+                    <div class="data-box">
+                        <ul>
+                            <li><strong>Pflichtangaben:</strong> Vorname, Nachname, E-Mail-Adresse, Passwort</li>
+                            <li><strong>Freiwillige Angaben:</strong> Dienstplan-Wünsche</li>
+                        </ul>
+                    </div>
+                    <p>Diese Daten dienen der Benutzerverwaltung sowie der Erstellung eines Dienstplans.</p>
+
+                    <div class="divider"></div>
+
+                    <h2>3. Datenempfänger</h2>
+                    <p>Die folgenden Dienste empfangen und verarbeiten Daten:</p>
+                    <div class="data-box">
+                        <ul>
+                            <li><strong>Firebase (Google LLC):</strong> Speicherung von Benutzerkonten und Authentifizierungsdaten</li>
+                            <li><strong>Google Sheets (Google LLC):</strong> Speicherung von Dienstplanwünschen</li>
+                        </ul>
+                    </div>
+                    <p>Die Daten können auf Servern in den USA verarbeitet werden. Google ist nach dem EU-U.S. Data Privacy Framework zertifiziert.</p>
+
+                    <div class="divider"></div>
+
+                    <h2>4. Rechtsgrundlage</h2>
+                    <p>Die Verarbeitung erfolgt gemäß Art. 6 Abs. 1 lit. a DSGVO auf Basis Ihrer Einwilligung.</p>
+
+                    <div class="divider"></div>
+
+                    <h2>5. Widerruf der Einwilligung</h2>
                     <p>
-                        Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br>
-                        DE123456789
+                        Die Einwilligung kann jederzeit per E-Mail an <strong><a href="mailto:info@planbor.de">info@planbor.de</a></strong> widerrufen werden. Bei Widerruf wird das Benutzerkonto gelöscht.
                     </p>
 
                     <div class="divider"></div>
 
-                    <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
-                    <address>
-                        Max Mustermann<br>
-                        Musterstraße 1<br>
-                        12345 Musterstadt<br>
-                        Deutschland
-                    </address>
+                    <h2>6. Speicherdauer</h2>
+                    <p>Die Daten werden gespeichert, solange das Benutzerkonto aktiv ist, und anschließend innerhalb von 30 Tagen gelöscht.</p>
 
                     <div class="divider"></div>
 
-                    <h2>Haftungsausschluss</h2>
-                    <p class="small">
-                        Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
-                    </p>
+                    <h2>7. Ihre Rechte</h2>
+                    <ul class="rights-grid">
+                        <li>Recht auf Auskunft (Art. 15 DSGVO)</li>
+                        <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
+                        <li>Recht auf Löschung (Art. 17 DSGVO)</li>
+                        <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+                        <li>Recht auf Datenübertragbarkeit (Art. 20 DSGVO)</li>
+                        <li>Beschwerderecht bei einer Aufsichtsbehörde (Art. 77 DSGVO)</li>
+                    </ul>
 
                     <div class="divider"></div>
 
-                    <h2>Streitschlichtung</h2>
-                    <p class="small">
-                        Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-                        <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>.<br>
-                        Unsere E-Mail-Adresse finden Sie oben im Impressum.
-                    </p>
+                    <h2>8. Nutzungsbedingungen</h2>
+                    <ul class="terms-list">
+                        <li>Nur autorisierte Mitarbeitende dürfen die App nutzen.</li>
+                        <li>Es dürfen nur wahrheitsgemäße Angaben gemacht werden.</li>
+                        <li>Missbrauch kann zum Ausschluss führen.</li>
+                        <li>Der Betreiber behält sich Änderungen der App vor.</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -343,8 +404,8 @@
             <div class="footer-section">
                 <h4>Rechtliches</h4>
                 <ul>
-                    <li><a href="#">Datenschutz</a></li>
-                    <li><a href="#">AGB</a></li>
+                    <li><a href="datenschutz.html">Datenschutz</a></li>
+                    <li><a href="agb.html">AGB</a></li>
                     <li><a href="impressum.html">Impressum</a></li>
                 </ul>
             </div>
@@ -357,7 +418,7 @@
 </footer>
 
 <script>
-// ── BEAMS BACKGROUND ───────────────────────────────────────────────────
+// ── BEAMS BACKGROUND ───────────────────────────────────────────────────────────────────────
 (function () {
     const canvas = document.getElementById('beams-canvas');
     const ctx = canvas.getContext('2d');
@@ -444,7 +505,7 @@
     });
 }());
 
-// ── SCROLL ANIMATIONS ──────────────────────────────────────────────────
+// ── SCROLL ANIMATIONS ──────────────────────────────────────────────────────────────────
 const obs = new IntersectionObserver((entries) => {
     entries.forEach((e, i) => {
         if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 70);
@@ -453,7 +514,7 @@ const obs = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fi').forEach(el => obs.observe(el));
 
-// ── NAV SCROLL ─────────────────────────────────────────────────────────
+// ── NAV SCROLL ─────────────────────────────────────────────────────────────────
 function updateNavBg() {
     const isLight = document.documentElement.classList.contains('light');
     const scrolled = window.scrollY > 60;
@@ -463,7 +524,7 @@ function updateNavBg() {
 }
 window.addEventListener('scroll', updateNavBg, { passive: true });
 
-// ── THEME TOGGLE ───────────────────────────────────────────────────────
+// ── THEME TOGGLE ───────────────────────────────────────────────────────────────
 (function () {
     const html = document.documentElement;
     const btn  = document.getElementById('theme-toggle');

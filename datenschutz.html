@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift – Datenschutz</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black:          #050505;
+            --border:         #27272a;
+            --border-glass:   rgba(255,255,255,0.07);
+            --text:           #ffffff;
+            --text-sec:       rgba(255,255,255,0.6);
+            --text-muted:     rgba(255,255,255,0.3);
+            --accent:         #007AFF;
+            --surface:        rgba(255,255,255,0.04);
+            --surface-hover:  rgba(255,255,255,0.07);
+            --nav-bg:         rgba(5,5,5,0.75);
+            --footer-bg:      #020204;
+        }
+        html.light {
+            --black:          #f7f7f8;
+            --border:         #dcdce0;
+            --text:           #0a0a0a;
+            --text-sec:       rgba(0,0,0,0.58);
+            --text-muted:     rgba(0,0,0,0.35);
+            --surface:        rgba(0,0,0,0.04);
+            --surface-hover:  rgba(0,0,0,0.07);
+            --nav-bg:         rgba(247,247,248,0.82);
+            --footer-bg:      #f0f0f5;
+        }
+        html { scroll-behavior: smooth; }
+        body { transition: background 0.35s ease, color 0.35s ease; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--black); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+        nav { position: fixed; top: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 1000; transition: background 0.35s ease; }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        .logo { font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+        .logo-dot { color: var(--accent); }
+        .nav-links { display: flex; list-style: none; gap: 28px; }
+        .nav-links a { text-decoration: none; color: var(--text-sec); font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-buttons { display: flex; gap: 10px; align-items: center; }
+        .login-btn { color: var(--text-sec); text-decoration: none; font-size: 0.88rem; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+        .login-btn:hover { color: var(--text); background: var(--surface); }
+        .signup-btn { background: var(--text); color: var(--black); text-decoration: none; font-weight: 600; font-size: 0.88rem; padding: 9px 20px; border-radius: 25px; transition: all 0.2s; white-space: nowrap; }
+        .signup-btn:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+        html.light .signup-btn:hover { background: rgba(0,0,0,0.82); }
+        #beams-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: block; z-index: 0; filter: blur(15px); }
+        .beams-overlay { position: fixed; inset: 0; z-index: 0; background: rgba(10,10,10,0.05); animation: overlayPulse 10s ease-in-out infinite; backdrop-filter: blur(50px); pointer-events: none; }
+        @keyframes overlayPulse { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.15; } }
+        .content-section { position: relative; z-index: 1; padding: 128px 0 80px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .content-wrap { max-width: 820px; margin: 0 auto; }
+        .section-tag { display: inline-block; padding: 4px 14px; border-radius: 20px; background: rgba(0,122,255,0.1); border: 1px solid rgba(0,122,255,0.2); color: var(--accent); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+        .card-outer { border: 1px solid var(--border); padding: 8px; }
+        .card-inner { border: 1px solid var(--border); padding: 52px; position: relative; overflow: hidden; background: rgba(255,255,255,0.02); }
+        html.light .card-inner { background: rgba(0,0,0,0.02); }
+        .card-inner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%); }
+        html.light .card-inner::before { background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%); }
+        .card-inner h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; color: var(--text); margin-bottom: 40px; }
+        .card-inner h2 { font-size: 1rem; font-weight: 700; color: var(--text); margin-top: 2.2em; margin-bottom: 0.7em; padding-top: 1.2em; border-top: 1px solid var(--border); }
+        .card-inner h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-top: 1.6em; margin-bottom: 0.5em; }
+        .card-inner p { font-size: 0.9rem; color: var(--text-sec); line-height: 1.75; margin-bottom: 0.7em; }
+        .card-inner p strong { color: var(--text); font-weight: 600; }
+        .card-inner a { color: var(--accent); text-decoration: none; }
+        .card-inner a:hover { text-decoration: underline; }
+        footer { background: var(--footer-bg); border-top: 1px solid var(--border); padding: 64px 0 32px; position: relative; z-index: 1; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 40px; margin-bottom: 48px; }
+        .footer-section h4 { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin-bottom: 8px; }
+        .footer-section ul li a { color: var(--text-sec); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+        .footer-section ul li a:hover { color: var(--text); }
+        .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .footer-bottom p { color: var(--text-muted); font-size: 0.82rem; }
+        .footer-logo { font-size: 16px; font-weight: 700; color: var(--text-sec); }
+        .theme-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text-sec); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.2s; flex-shrink: 0; }
+        .theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
+        .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fi.visible { opacity: 1; transform: none; }
+        @media (max-width: 768px) { .nav-links { display: none; } .card-inner { padding: 36px 28px; } }
+        @media (max-width: 480px) { .card-outer { border: none; padding: 0; } .card-inner { padding: 28px 20px; } }
+    </style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true"><defs><filter id="container-glass" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.05 0.05" numOctaves="1" seed="1" result="turbulence"/><feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise"/><feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="70" xChannelSelector="R" yChannelSelector="B" result="displaced"/><feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur"/><feComposite in="finalBlur" in2="finalBlur" operator="over"/></filter></defs></svg>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#about">Über uns</a></li>
+            <li><a href="pricing.html">Preise</a></li>
+            <li><a href="index.html#contact">Kontakt</a></li>
+        </ul>
+        <div class="nav-buttons">
+            <button class="theme-toggle" id="theme-toggle">🌙</button>
+            <a href="login.html" class="login-btn">Login</a>
+            <a href="pricing.html" class="signup-btn">Kostenlos starten</a>
+        </div>
+    </div>
+</nav>
+
+<canvas id="beams-canvas"></canvas>
+<div class="beams-overlay"></div>
+
+<section class="content-section">
+    <div class="container">
+        <div class="content-wrap">
+            <div class="fi"><div class="section-tag">Rechtliches</div></div>
+            <div class="card-outer fi">
+                <div class="card-inner">
+                    <h1>Datenschutzerklärung</h1>
+                    <p>Einleitung</p>
+                    <p>Mit der folgenden Datenschutzerklärung möchten wir Sie darüber aufklären, welche Arten Ihrer personenbezogenen Daten (nachfolgend auch kurz als „Daten“ bezeichnet) wir zu welchen Zwecken und in welchem Umfang verarbeiten. Die Datenschutzerklärung gilt für alle von uns durchgeführten Verarbeitungen personenbezogener Daten, sowohl im Rahmen der Erbringung unserer Leistungen als auch insbesondere auf unseren Webseiten, in mobilen Applikationen sowie innerhalb externer Onlinepräsenzen, wie z.B. unserer Social-Media-Profile (nachfolgend zusammenfassend bezeichnet als „Onlineangebot“).</p>
+                    <p>Die verwendeten Begriffe sind nicht geschlechtsspezifisch.</p>
+                    <p>Stand: 01. Januar 2024</p>
+                    <h2>Inhaltsübersicht</h2>
+                    <p>- Einleitung</p>
+                                <p>- Verantwortlicher</p>
+                                <p>- Übersicht der Verarbeitungen</p>
+                    <p>- Maßgebliche Rechtsgrundlagen</p>
+                    <p>- Sicherheitsmaßnahmen</p>
+                    <p>- Übermittlung und Offenbarung von personenbezogenen Daten</p>
+                    <p>- Datenverarbeitung in Drittländern</p>
+                    <p>- Einsatz von Cookies</p>
+                    <p>- Kontaktaufnahme</p>
+                    <p>- Bereitstellung des Onlineangebotes und Webhosting</p>
+                    <p>- Onlinemarketing</p>
+                    <p>- Affiliate-Programme und Affiliate-Links</p>
+                    <p>- Plugins und eingebettete Funktionen sowie Inhalte</p>
+                    <p>- Löschung von Daten</p>
+                    <p>- Änderung und Aktualisierung der Datenschutzerklärung</p>
+                    <p>- Rechte der betroffenen Personen</p>
+                    <p>- Begriffsdefinitionen</p>
+                    <p>Verantwortlicher:</p>
+                    Dr. Stephan Wegmann
+                    Von-Martels Str. 10
+                    48683 Ahaus
+                    E-Mail-Adresse: info@planbor.de
+                    <p>Impressum: https://www.planbor.de/impressum</p>
+                    <h2>Übersicht der Verarbeitungen</h2>
+                    <p>Die nachfolgende Übersicht fasst die Arten der verarbeiteten Daten und die Zwecke ihrer Verarbeitung zusammen und verweist auf die betroffenen Personen.</p>
+                    <h3>Arten der verarbeiteten Daten</h3>
+                    <p>- Bestandsdaten (z.B. Namen, Adressen)</p>
+                    <p>- Inhaltsdaten (z.B. Texteingaben, Fotografien, Videos)</p>
+                    <p>- Kontaktdaten (z.B. E-Mail, Telefonnummern)</p>
+                    <p>- Meta-/Kommunikationsdaten (z.B. Geräte-Informationen, IP-Adressen)</p>
+                    <p>- Nutzungsdaten (z.B. besuchte Webseiten, Interesse an Inhalten, Zugriffszeiten)</p>
+                    <p>- Vertragsdaten (z.B. Vertragsgegenstand, Laufzeit, Kundenkategorie)</p>
+                    <h3>Kategorien betroffener Personen</h3>
+                    <p>- Interessenten</p>
+                    <p>- Kommunikationspartner</p>
+                    <p>- Nutzer (z.B. Webseitenbesucher, Nutzer von Onlinediensten)</p>
+                    <h3>Zwecke der Verarbeitungen</h3>
+                    <p>- Affiliate-Nachverfolgung</p>
+                    <p>- Bereitstellung unseres Onlineangebotes und Nutzerfreundlichkeit</p>
+                    <p>- Besuchsaktionsauswertung</p>
+                    <p>- Interessenbasiertes und verhaltensbezogenes Marketing</p>
+                    <p>- Kontaktanfragen und Kommunikation</p>
+                    <p>- Konversionsmessung (Messung der Effektivität von Marketingmaßnahmen)</p>
+                    <p>- Profiling (Erstellen von Nutzerprofilen)</p>
+                    <p>- Remarketing</p>
+                    <p>- Reichweitenmessung (z.B. Zugriffsstatistiken, Erkennung wiederkehrender Besucher)</p>
+                    <p>- Tracking (z.B. interessens-/verhaltensbezogenes Profiling, Nutzung von Cookies)</p>
+                    <p>- Vertragliche Leistungen und Service</p>
+                    <h3>Maßgebliche Rechtsgrundlagen</h3>
+                    <p>Im Folgenden teilen wir die Rechtsgrundlagen der Datenschutzgrundverordnung (DSGVO), auf deren Basis wir die personenbezogenen Daten verarbeiten, mit. Bitte beachten Sie, dass zusätzlich zu den Regelungen der DSGVO die nationalen Datenschutzvorgaben in Ihrem bzw. unserem Wohn- und Sitzland gelten können. Sollten ferner im Einzelfall speziellere Rechtsgrundlagen maßgeblich sein, teilen wir Ihnen diese in der Datenschutzerklärung mit.</p>
+                    <p>- Einwilligung (Art. 6 Abs. 1 S. 1 lit. a DSGVO) – Die betroffene Person hat ihre Einwilligung in die Verarbeitung der sie betreffenden personenbezogenen Daten für einen spezifischen Zweck oder mehrere bestimmte Zwecke gegeben.</p>
+                    <p>- Vertragserfüllung und vorvertragliche Anfragen (Art. 6 Abs. 1 S. 1 lit. b. DSGVO) – Die Verarbeitung ist für die Erfüllung eines Vertrags, dessen Vertragspartei die betroffene Person ist, oder zur Durchführung vorvertraglicher Maßnahmen erforderlich, die auf Anfrage der betroffenen Person erfolgen.</p>
+                    <p>- Berechtigte Interessen (Art. 6 Abs. 1 S. 1 lit. f. DSGVO) – Die Verarbeitung ist zur Wahrung der berechtigten Interessen des Verantwortlichen oder eines Dritten erforderlich, sofern nicht die Interessen oder Grundrechte und Grundfreiheiten der betroffenen Person, die den Schutz personenbezogener Daten erfordern, überwiegen.</p>
+                    <p><strong>Nationale Datenschutzregelungen in Deutschland:</strong></p>
+                    <p>Zusätzlich zu den Datenschutzregelungen der Datenschutz-Grundverordnung gelten nationale Regelungen zum Datenschutz in Deutschland. Hierzu gehört insbesondere das Gesetz zum Schutz vor Missbrauch personenbezogener Daten bei der Datenverarbeitung (Bundesdatenschutzgesetz – BDSG). Das BDSG enthält insbesondere Spezialregelungen zum Recht auf Auskunft, zum Recht auf Löschung, zum Widerspruchsrecht, zur Verarbeitung besonderer Kategorien personenbezogener Daten, zur Verarbeitung für andere Zwecke und zur Übermittlung sowie automatisierten Entscheidungsfindung im Einzelfall einschließlich Profiling. Des Weiteren regelt es die Datenverarbeitung für Zwecke des Beschäftigungsverhältnisses (§ 26 BDSG), insbesondere im Hinblick auf die Begründung, Durchführung oder Beendigung von Beschäftigungsverhältnissen sowie die Einwilligung von Beschäftigten. Ferner können Landesdatenschutzgesetze der einzelnen Bundesländer zur Anwendung gelangen.</p> 
+                    <br>
+                    <h2>Sicherheitsmaßnahmen</h2>
+                    <br>
+                    <p>Wir treffen nach Maßgabe der gesetzlichen Vorgaben unter Berücksichtigung des Stands der Technik, der Implementierungskosten und der Art, des Umfangs, der Umstände und der Zwecke der Verarbeitung sowie der unterschiedlichen Eintrittswahrscheinlichkeiten und des Ausmaßes der Bedrohung der Rechte und Freiheiten natürlicher Personen geeignete technische und organisatorische Maßnahmen, um ein dem Risiko angemessenes Schutzniveau zu gewährleisten.</p>
+                    <br>
+                    <p>Zu den Maßnahmen gehören insbesondere die Sicherung der Vertraulichkeit, Integrität und Verfügbarkeit von Daten durch Kontrolle des physischen und elektronischen Zugangs zu den Daten als auch des sie betreffenden Zugriffs, der Eingabe, der Weitergabe, der Sicherung der Verfügbarkeit und ihrer Trennung. Des Weiteren haben wir Verfahren eingerichtet, die eine Wahrnehmung von Betroffenenrechten, die Löschung von Daten und Reaktionen auf die Gefährdung der Daten gewährleisten. Ferner berücksichtigen wir den Schutz personenbezogener Daten bereits bei der Entwicklung bzw. Auswahl von Hardware, Software sowie Verfahren entsprechend dem Prinzip des Datenschutzes, durch Technikgestaltung und durch datenschutzfreundliche Voreinstellungen.</p>
+                    <br>
+                    <h2>Übermittlung und Offenbarung von personenbezogenen Daten</h2>
+                    <br>
+                    <p>Im Rahmen unserer Verarbeitung von personenbezogenen Daten kommt es vor, dass die Daten an andere Stellen, Unternehmen, rechtlich selbstständige Organisationseinheiten oder Personen übermittelt oder sie ihnen gegenüber offengelegt werden. Zu den Empfängern dieser Daten können z.B. Zahlungsinstitute im Rahmen von Zahlungsvorgängen, mit IT-Aufgaben beauftragte Dienstleister oder Anbieter von Diensten und Inhalten, die in eine Webseite eingebunden werden, gehören. In solchen Fall beachten wir die gesetzlichen Vorgaben und schließen insbesondere entsprechende Verträge bzw. Vereinbarungen, die dem Schutz Ihrer Daten dienen, mit den Empfängern Ihrer Daten ab.</p>
+                    <br>
+                    <h2>Datenverarbeitung in Drittländern</h2>
+                    <br>
+                    <p>Sofern wir Daten in einem Drittland (d.h., außerhalb der Europäischen Union (EU), des Europäischen Wirtschaftsraums (EWR)) verarbeiten oder die Verarbeitung im Rahmen der Inanspruchnahme von Diensten Dritter oder der Offenlegung bzw. Übermittlung von Daten an andere Personen, Stellen oder Unternehmen stattfindet, erfolgt dies nur im Einklang mit den gesetzlichen Vorgaben.</p>
+                    <br>
+                    <p>Vorbehaltlich ausdrücklicher Einwilligung oder vertraglich oder gesetzlich erforderlicher Übermittlung verarbeiten oder lassen wir die Daten nur in Drittländern mit einem anerkannten Datenschutzniveau, zu denen die unter dem „Privacy-Shield“ zertifizierten US-Verarbeiter gehören, oder auf Grundlage besonderer Garantien, wie z.B. vertraglicher Verpflichtung durch sogenannte Standardschutzklauseln der EU-Kommission, des Vorliegens von Zertifizierungen oder verbindlicher interner Datenschutzvorschriften, verarbeiten (Art. 44 bis 49 DSGVO, Informationsseite der EU-Kommission: https://ec.europa.eu/info/law/law-topic/data-protection/international-dimension-data-protection_de ).</p>
+                    <br>
+                    <h2>Einsatz von Cookies</h2>
+                    <br>
+                    <p>Cookies sind Textdateien, die Daten von besuchten Websites oder Domains enthalten und von einem Browser auf dem Computer des Benutzers gespeichert werden. Ein Cookie dient in erster Linie dazu, die Informationen über einen Benutzer während oder nach seinem Besuch innerhalb eines Onlineangebotes zu speichern. Zu den gespeicherten Angaben können z.B. die Spracheinstellungen auf einer Webseite, der Loginstatus, ein Warenkorb oder die Stelle, an der ein Video geschaut wurde, gehören. Zu dem Begriff der Cookies zählen wir ferner andere Technologien, die die gleichen Funktionen wie Cookies erfüllen (z.B., wenn Angaben der Nutzer anhand pseudonymer Onlinekennzeichnungen gespeichert werden, auch als „Nutzer-IDs“ bezeichnet)</p>
+                    <br>
+                    <p><strong>Die folgenden Cookie-Typen und Funktionen werden unterschieden:</strong></p>
+                    <br>
+                    <p><strong>Temporäre Cookies (auch: Session- oder Sitzungs-Cookies):</strong></p> <p>Temporäre Cookies werden spätestens gelöscht, nachdem ein Nutzer ein Online-Angebot verlassen und seinen Browser geschlossen hat.</p>
+                    <p><strong>Permanente Cookies:</strong></p> <p>Permanente Cookies bleiben auch nach dem Schließen des Browsers gespeichert. So kann beispielsweise der Login-Status gespeichert oder bevorzugte Inhalte direkt angezeigt werden, wenn der Nutzer eine Website erneut besucht. Ebenso können die Interessen von Nutzern, die zur Reichweitenmessung oder zu Marketingzwecken verwendet werden, in einem solchen Cookie gespeichert werden.</p>
+                    <p><strong>First-Party-Cookies:</strong></p> <p>First-Party-Cookies werden von uns selbst gesetzt.</p>
+                    <p><strong>Third-Party-Cookies (auch: Drittanbieter-Cookies):</strong></p> <p>Drittanbieter-Cookies werden hauptsächlich von Werbetreibenden (sog. Dritten) verwendet, um Benutzerinformationen zu verarbeiten.</p>
+                    <p><strong>Notwendige (auch: essentielle oder unbedingt erforderliche) Cookies:</strong></p> <p>Cookies können zum einen für den Betrieb einer Webseite unbedingt erforderlich sein (z.B. um Logins oder andere Nutzereingaben zu speichern oder aus Gründen der Sicherheit).</p>
+                    <p><strong>Statistik-, Marketing- und Personalisierungs-Cookies:</strong></p> <p>Ferner werden Cookies im Regelfall auch im Rahmen der Reichweitenmessung eingesetzt sowie dann, wenn die Interessen eines Nutzers oder sein Verhalten (z.B. Betrachten bestimmter Inhalte, Nutzen von Funktionen etc.) auf einzelnen Webseiten in einem Nutzerprofil gespeichert werden. Solche Profile dienen dazu, den Nutzern z.B. Inhalte anzuzeigen, die ihren potentiellen Interessen entsprechen. Dieses Verfahren wird auch als „Tracking“, d.h., Nachverfolgung der potentiellen Interessen der Nutzer bezeichnet. . Soweit wir Cookies oder „Tracking“-Technologien einsetzen, informieren wir Sie gesondert in unserer Datenschutzerklärung oder im Rahmen der Einholung einer Einwilligung.</p>
+                    <br>
+                    <p><strong>Hinweise zu Rechtsgrundlagen:</strong></p> <p>Auf welcher Rechtsgrundlage wir Ihre personenbezogenen Daten mit Hilfe von Cookies verarbeiten, hängt davon ab, ob wir Sie um eine Einwilligung bitten. Falls dies zutrifft und Sie in die Nutzung von Cookies einwilligen, ist die Rechtsgrundlage der Verarbeitung Ihrer Daten die erklärte Einwilligung. Andernfalls werden die mithilfe von Cookies verarbeiteten Daten auf Grundlage unserer berechtigten Interessen (z.B. an einem betriebswirtschaftlichen Betrieb unseres Onlineangebotes und dessen Verbesserung) verarbeitet oder, wenn der Einsatz von Cookies erforderlich ist, um unsere vertraglichen Verpflichtungen zu erfüllen.</p>
+                    <br>
+                    <p><strong>Allgemeine Hinweise zum Widerruf und Widerspruch (Opt-Out):</strong></p> <p>Abhängig davon, ob die Verarbeitung auf Grundlage einer Einwilligung oder gesetzlichen Erlaubnis erfolgt, haben Sie jederzeit die Möglichkeit, eine erteilte Einwilligung zu widerrufen oder der Verarbeitung Ihrer Daten durch Cookie-Technologien zu widersprechen (zusammenfassend als „Opt-Out“ bezeichnet). Sie können Ihren Widerspruch zunächst mittels der Einstellungen Ihres Browsers erklären, z.B., indem Sie die Nutzung von Cookies deaktivieren (wobei hierdurch auch die Funktionsfähigkeit unseres Onlineangebotes eingeschränkt werden kann). Ein Widerspruch gegen den Einsatz von Cookies zu Zwecken des Onlinemarketings kann auch mittels einer Vielzahl von Diensten, vor allem im Fall des Trackings, über die Webseiten https://optout.aboutads.info und https://www.youronlinechoices.com/ erklärt werden. Daneben können Sie weitere Widerspruchshinweise im Rahmen der Angaben zu den eingesetzten Dienstleistern und Cookies erhalten.</p>
+                    <br>
+                    <p><strong>Verarbeitung von Cookie-Daten auf Grundlage einer Einwilligung:</strong></p> <p>Bevor wir Daten im Rahmen der Nutzung von Cookies verarbeiten oder verarbeiten lassen, bitten wir die Nutzer um eine jederzeit widerrufbare Einwilligung. Bevor die Einwilligung nicht ausgesprochen wurde, werden allenfalls Cookies eingesetzt, die für den Betrieb unseres Onlineangebotes erforderlich sind. Deren Einsatz erfolgt auf der Grundlage unseres Interesses und des Interesses der Nutzer an der erwarteten Funktionsfähigkeit unseres Onlineangebotes.</p>
+                    <br>
+                    <p><strong>Verarbeitete Datenarten:</strong></p> <p>Nutzungsdaten (z.B. besuchte Webseiten, Interesse an Inhalten, Zugriffszeiten), Meta-/Kommunikationsdaten (z.B. Geräte-Informationen, IP-Adressen).</p>
+                    <p><strong>Betroffene Personen:</strong></p> <p>Nutzer (z.B. Webseitenbesucher, Nutzer von Onlinediensten).</p>
+                    <p><strong>Rechtsgrundlagen:</strong></p> <p>Einwilligung (Art. 6 Abs. 1 S. 1 lit. a DSGVO), Berechtigte Interessen (Art. 6 Abs. 1 S. 1 lit. f. DSGVO).</p>
+                    <br>
+                    <h2>Kontaktaufnahme</h2>
+                    <br>
+                    <p>Bei der Kontaktaufnahme mit uns (z.B. per Kontaktformular, E-Mail, Telefon oder via soziale Medien) werden die Angaben der anfragenden Personen verarbeitet, soweit dies zur Beantwortung der Kontaktanfragen und etwaiger angefragter Maßnahmen erforderlich ist.</p>
+                    <br>
+                    <p>Die Beantwortung der Kontaktanfragen im Rahmen von vertraglichen oder vorvertraglichen Beziehungen erfolgt zur Erfüllung unserer vertraglichen Pflichten oder zur Beantwortung von (vor)vertraglichen Anfragen und im Übrigen auf Grundlage der berechtigten Interessen an der Beantwortung der Anfragen.</p>
+                    <br>
+                    <p><strong>Verarbeitete Datenarten:</strong></p> <p>Bestandsdaten (z.B. Namen, Adressen), Kontaktdaten (z.B. E-Mail, Telefonnummern), Inhaltsdaten (z.B. Texteingaben, Fotografien, Videos).</p>
+                    <p><strong>Betroffene Personen:</strong></p> <p>Kommunikationspartner.</p>
+                    <p><strong>Zwecke der Verarbeitung:</strong></p> <p>Kontaktanfragen und Kommunikation.</p>
+                    <p><strong>Rechtsgrundlagen:</strong></p> <p>ertragserfüllung und vorvertragliche Anfragen (Art. 6 Abs. 1 S. 1 lit. b. DSGVO), Berechtigte Interessen (Art. 6 Abs. 1 S. 1 lit. f. DSGVO).</p>
+                    <br>
+                    <h2>Bereitstellung des Onlineangebotes und Webhosting</h2>
+                    <br>
+                    <p>Um unser Onlineangebot sicher und effizient bereitstellen zu können, nehmen wir die Leistungen von einem oder mehreren Webhosting-Anbietern in Anspruch, von deren Servern (bzw. von ihnen verwalteten Servern) das Onlineangebot abgerufen werden kann. Zu diesen Zwecken können wir Infrastruktur- und Plattformdienstleistungen, Rechenkapazität, Speicherplatz und Datenbankdienste sowie Sicherheitsleistungen und technische Wartungsleistungen in Anspruch nehmen.</p>
+                    <br>
+                    <p>Zu den im Rahmen der Bereitstellung des Hostingangebotes verarbeiteten Daten können alle die Nutzer unseres Onlineangebotes betreffenden Angaben gehören, die im Rahmen der Nutzung und der Kommunikation anfallen. Hierzu gehören regelmäßig die IP-Adresse, die notwendig ist, um die Inhalte von Onlineangeboten an Browser ausliefern zu können, und alle innerhalb unseres Onlineangebotes oder von Webseiten getätigten Eingaben.</p>
+                    <br>
+                    <p><strong>Erhebung von Zugriffsdaten und Logfiles:</strong></p> 
+                    <p>Wir selbst (bzw. unser Webhostinganbieter) erheben Daten zu jedem Zugriff auf den Server (sogenannte Serverlogfiles). Zu den Serverlogfiles können die Adresse und Name der abgerufenen Webseiten und Dateien, Datum und Uhrzeit des Abrufs, übertragene Datenmengen, Meldung über erfolgreichen Abruf, Browsertyp nebst Version, das Betriebssystem des Nutzers, Referrer URL (die zuvor besuchte Seite) und im Regelfall IP-Adressen und der anfragende Provider gehören.</p>
+                    <br>
+                    <p>Die Serverlogfiles können zum einen zu Zwecken der Sicherheit eingesetzt werden, z.B., um eine Überlastung der Server zu vermeiden (insbesondere im Fall von missbräuchlichen Angriffen, sogenannten DDoS-Attacken) und zum anderen, um die Auslastung der Server und ihre Stabilität sicherzustellen.</p>
+                    <br>
+                    <p><strong>- Verarbeitete Datenarten:</strong></p> <p>Inhaltsdaten (z.B. Texteingaben, Fotografien, Videos), Nutzungsdaten (z.B. besuchte Webseiten, Interesse an Inhalten, Zugriffszeiten), Meta-/Kommunikationsdaten (z.B. Geräte-Informationen, IP-Adressen).</p>
+                    <p><strong>- Betroffene Personen:</strong></p> <p>Nutzer (z.B. Webseitenbesucher, Nutzer von Onlinediensten).</p>
+                    <p><strong>- Rechtsgrundlagen:</strong></p> <p>Berechtigte Interessen (Art. 6 Abs. 1 S. 1 lit. f. DSGVO).</p>
+                    <br>
+                    <h3>Onlinemarketing</h3>
+                    <br>
+                    <p>Wir verarbeiten personenbezogene Daten zu Zwecken des Onlinemarketings, worunter insbesondere die Vermarktung von Werbeflächen oder Darstellung von werbenden und sonstigen Inhalten (zusammenfassend als „Inhalte“ bezeichnet) anhand potentieller Interessen der Nutzer sowie die Messung ihrer Effektivität fallen kann.</p>
+                    <br>
+                    <p>Zu diesen Zwecken werden sogenannte Nutzerprofile angelegt und in einer Datei (sogenannte „Cookie“) gespeichert oder ähnliche Verfahren genutzt, mittels derer die für die Darstellung der vorgenannten Inhalte relevante Angaben zum Nutzer gespeichert werden. Zu diesen Angaben können z.B. betrachtete Inhalte, besuchte Webseiten, genutzte Onlinenetzwerke, aber auch Kommunikationspartner und technische Angaben, wie der verwendete Browser, das verwendete Computersystem sowie Angaben zu Nutzungszeiten gehören. Sofern Nutzer in die Erhebung ihrer Standortdaten eingewilligt haben, können auch diese verarbeitet werden.</p>
+                    <br>
+                    <p>Es werden ebenfalls die IP-Adressen der Nutzer gespeichert. Jedoch nutzen wir zur Verfügung stehende IP-Masking-Verfahren (d.h., Pseudonymisierung durch Kürzung der IP-Adresse) zum Schutz der Nutzer. Generell werden im Rahmen des Onlinemarketingverfahren keine Klardaten der Nutzer (wie z.B. E-Mail-Adressen oder Namen) gespeichert, sondern Pseudonyme. D.h., wir als auch die Anbieter der Onlinemarketingverfahren kennen nicht die tatsächlich Identität der Nutzer, sondern nur die in deren Profilen gespeicherten Angaben.</p>
+                    <br>
+                    <p>Die Angaben in den Profilen werden im Regelfall in den Cookies oder mittels ähnlicher Verfahren gespeichert. Diese Cookies können später generell auch auf anderen Webseiten die dasselbe Onlinemarketingverfahren einsetzen, ausgelesen und zu Zwecken der Darstellung von Inhalten analysiert als auch mit weiteren Daten ergänzt und auf dem Server des Onlinemarketingverfahrensanbieters gespeichert werden.</p>
+                    <br>
+                    <p>Ausnahmsweise können Klardaten den Profilen zugeordnet werden. Das ist der Fall, wenn die Nutzer z.B. Mitglieder eines sozialen Netzwerks sind, dessen Onlinemarketingverfahren wir einsetzen und das Netzwerk die Profile der Nutzer mit den vorgenannten Angaben verbindet. Wir bitten darum, zu beachten, dass Nutzer mit den Anbietern zusätzliche Abreden, z.B. durch Einwilligung im Rahmen der Registrierung, treffen können.</p>
+                    <br>
+                    <p>Wir erhalten grundsätzlich nur Zugang zu zusammengefassten Informationen über den Erfolg unserer Werbeanzeigen. Jedoch können wir im Rahmen sogenannter Konversionsmessungen prüfen, welche unserer Onlinemarketingverfahren zu einer sogenannten Konversion geführt haben, d.h. z.B., zu einem Vertragsschluss mit uns. Die Konversionsmessung wird alleine zur Analyse des Erfolgs unserer Marketingmaßnahmen verwendet.</p>
+                    <br>
+                    <p>Solange nicht anders angegeben, bitten wir Sie davon auszugehen, dass verwendete Cookies für einen Zeitraum von zwei Jahren gespeichert werden.</p>
+                    <br>
+                    <p><strong>Hinweise zu Rechtsgrundlagen:</strong></p> <p>Sofern wir die Nutzer um deren Einwilligung in den Einsatz der Drittanbieter bitten, ist die Rechtsgrundlage der Verarbeitung von Daten die Einwilligung. Ansonsten werden die Daten der Nutzer auf Grundlage unserer berechtigten Interessen (d.h. Interesse an effizienten, wirtschaftlichen und empfängerfreundlichen Leistungen) verarbeitet. In diesem Zusammenhang möchten wir Sie auch auf die Informationen zur Verwendung von Cookies in dieser Datenschutzerklärung hinweisen.</p>
+                    <br>
+                    <p><strong>- Verarbeitete Datenarten:</strong></p> <p>Nutzungsdaten (z.B. besuchte Webseiten, Interesse an Inhalten, Zugriffszeiten), Meta-/Kommunikationsdaten (z.B. Geräte-Informationen, IP-Adressen).</p>
+                    <p><strong>- Betroffene Personen:</strong></p> <p>utzer (z.B. Webseitenbesucher, Nutzer von Onlinediensten), Interessenten.</p>
+                    <p><strong>- Zwecke der Verarbeitung:</strong></p> <p>Tracking (z.B. interessens-/verhaltensbezogenes Profiling, Nutzung von Cookies), Remarketing, Besuchsaktionsauswertung, Interessenbasiertes und verhaltensbezogenes Marketing, Profiling (Erstellen von Nutzerprofilen), Konversionsmessung (Messung der Effektivität von Marketingmaßnahmen), Reichweitenmessung (z.B. Zugriffsstatistiken, Erkennung wiederkehrender Besucher).</p>
+                    <p><strong>- Sicherheitsmaßnahmen:</strong></p> <p>IP-Masking (Pseudonymisierung der IP-Adresse).</p>
+                    <p><strong>- Rechtsgrundlagen:</strong></p> <p>Einwilligung (Art. 6 Abs. 1 S. 1 lit. a DSGVO), Berechtigte Interessen (Art. 6 Abs. 1 S. 1 lit. f. DSGVO).</p>
+                    <p><strong>- Widerspruchsmöglichkeit (Opt-Out):</strong></p> <p>Wir verweisen auf die Datenschutzhinweise der jeweiligen Anbieter und die zu den Anbietern angegebenen Widerspruchsmöglichkeiten (sog. \“Opt-Out\“). Sofern keine explizite Opt-Out-Möglichkeit angegeben wurde, besteht zum einen die Möglichkeit, dass Sie Cookies in den Einstellungen Ihres Browsers abschalten. Hierdurch können jedoch Funktionen unseres Onlineangebotes eingeschränkt werden. Wir empfehlen daher zusätzlich die folgenden Opt-Out-Möglichkeiten, die zusammenfassend auf jeweilige Gebiete gerichtet angeboten werden: a) Europa: https://www.youronlinechoices.eu. b) Kanada: https://www.youradchoices.ca/choices. c) USA: https://www.aboutads.info/choices. d) Gebietsübergreifend: https://optout.aboutads.info.</p>
+                    <br>
+                    <p><strong>Eingesetzte Dienste und Diensteanbieter:</strong></p>
+                    <br>
+                    <p><strong>- Google Analytics:</strong></p> <p>Onlinemarketing und Webanalyse; Dienstanbieter: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland, Mutterunternehmen: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA; Website: https://marketingplatform.google.com/intl/de/about/analytics/; Datenschutzerklärung: https://policies.google.com/privacy; Privacy Shield (Gewährleistung Datenschutzniveau bei Verarbeitung von Daten in den USA): https://www.privacyshield.gov/participant?id=a2zt000000001L5AAI&status=Active; Widerspruchsmöglichkeit (Opt-Out): Opt-Out-Plugin: https://tools.google.com/dlpage/gaoptout?hl=de, Einstellungen für die Darstellung von Werbeeinblendungen: https://adssettings.google.com/authenticated.</p>
+                    <br>
+                    <h3>Affiliate-Programme und Affiliate-Links</h3>
+                    <br>
+                    <p>In unser Onlineangebot binden wir sogenannte Affiliate-Links oder andere Verweise (zu denen z.B. Rabatt-Codes gehören können) auf die Angebote und Leistungen von Drittanbietern ein (zusammenfassend bezeichnet als „Affiliate-Links“). Wenn Nutzer den Affiliate-Links folgen, bzw. anschließend die Angebote wahrnehmen, können wir von diesen Drittanbietern eine Provision oder sonstige Vorteile erhalten (zusammenfassend bezeichnet als „Provision“).</p>
+                    <br>
+                    <p>Um nachverfolgen zu können, ob die Nutzer die Angebote eines von uns eingesetzten Affiliate-Links wahrgenommen haben, ist es notwendig, dass die jeweiligen Drittanbieter erfahren, dass die Nutzer einem innerhalb unseres Onlineangebotes eingesetzten Affiliate-Link gefolgt sind. Die Zuordnung der Affiliate-Links zu den jeweiligen Geschäftsabschlüssen oder zu sonstigen Aktionen (z.B. Käufen) dient alleine dem Zweck der Provisionsabrechnung und wird aufgehoben, sobald sie für den Zweck nicht mehr erforderlich ist.</p>
+                    <br>
+                    <p>Für die Zwecke der vorgenannten Zuordnung der Affiliate-Links können die Affiliate-Links um bestimmte Werte ergänzt werden, die ein Bestandteil des Links sind oder anderweitig, z.B. in einem Cookie, gespeichert werden können. Zu den Werten können insbesondere die Ausgangswebseite (Referrer), der Zeitpunkt, eine Online-Kennung der Betreiber der Webseite, auf der sich der Affiliate-Link befand, eine Online-Kennung des jeweiligen Angebotes, die Art des verwendeten Links, die Art des Angebotes und eine Online-Kennung des Nutzers gehören.</p>
+                    <br>
+                    <p><strong>Hinweise zu Rechtsgrundlagen:</strong></p> <p>Sofern wir die Nutzer um deren Einwilligung in den Einsatz der Drittanbieter bitten, ist die Rechtsgrundlage der Verarbeitung von Daten die Einwilligung. Ferner kann deren Einsatz ein Bestandteil unserer (vor)vertraglichen Leistungen sein, sofern der Einsatz der Drittanbieter in diesem Rahmen vereinbart wurde. Ansonsten werden die Daten der Nutzer auf Grundlage unserer berechtigten Interessen (d.h. Interesse an effizienten, wirtschaftlichen und empfängerfreundlichen Leistungen) verarbeitet. In diesem Zusammenhang möchten wir Sie auch auf die Informationen zur Verwendung von Cookies in dieser Datenschutzerklärung hinweisen.</p>
+                    <br>
+                    <p><strong>Verarbeitete Datenarten:</strong></p> <p>Vertragsdaten (z.B. Vertragsgegenstand, Laufzeit, Kundenkategorie), Nutzungsdaten (z.B. besuchte Webseiten, Interesse an Inhalten, Zugriffszeiten), Meta-/Kommunikationsdaten (z.B. Geräte-Informationen, IP-Adressen).</p>
+                    <p><strong>Betroffene Personen:</strong></p> <p>Nutzer (z.B. Webseitenbesucher, Nutzer von Onlinediensten).</p>
+                    <p><strong>Zwecke der Verarbeitung:</strong></p> <p>Affiliate-Nachverfolgung.</p>
+                    <p><strong>Rechtsgrundlagen:</strong></p> <p>Einwilligung (Art. 6 Abs. 1 S. 1 lit. a DSGVO), Vertragserfüllung und vorvertragliche Anfragen (Art. 6 Abs. 1 S. 1 lit. b. DSGVO), Berechtigte Interessen (Art. 6 Abs. 1 S. 1 lit. f. DSGVO).</p>
+                    <br>
+                    <h3>Plugins und eingebettete Funktionen sowie Inhalte</h3>
+                    <br>
+                    <p>Wir binden in unser Onlineangebot Funktions- und Inhaltselemente ein, die von den Servern ihrer jeweiligen Anbieter (nachfolgend bezeichnet als „Drittanbieter”) bezogen werden. Dabei kann es sich zum Beispiel um Grafiken, Videos oder Social-Media-Schaltflächen sowie Beiträge handeln (nachfolgend einheitlich bezeichnet als „Inhalte”).</p>
+                    <br>
+                    <p>Die Einbindung setzt immer voraus, dass die Drittanbieter dieser Inhalte die IP-Adresse der Nutzer verarbeiten, da sie ohne die IP-Adresse die Inhalte nicht an deren Browser senden könnten. Die IP-Adresse ist damit für die Darstellung dieser Inhalte oder Funktionen erforderlich. Wir bemühen uns, nur solche Inhalte zu verwenden, deren jeweilige Anbieter die IP-Adresse lediglich zur Auslieferung der Inhalte verwenden. Drittanbieter können ferner sogenannte Pixel-Tags (unsichtbare Grafiken, auch als „Web Beacons“ bezeichnet) für statistische oder Marketingzwecke verwenden. Durch die „Pixel-Tags“ können Informationen, wie der Besucherverkehr auf den Seiten dieser Webseite, ausgewertet werden. Die pseudonymen Informationen können ferner in Cookies auf dem Gerät der Nutzer gespeichert werden und unter anderem technische Informationen zum Browser und zum Betriebssystem, zu verweisenden Webseiten, zur Besuchszeit sowie weitere Angaben zur Nutzung unseres Onlineangebotes enthalten als auch mit solchen Informationen aus anderen Quellen verbunden werden.</p>
+                    <br>
+                    <p><strong>Hinweise zu Rechtsgrundlagen:</strong></p> <p>Sofern wir die Nutzer um deren Einwilligung in den Einsatz der Drittanbieter bitten, ist die Rechtsgrundlage der Verarbeitung von Daten die Einwilligung. Ansonsten werden die Daten der Nutzer auf Grundlage unserer berechtigten Interessen (d.h. Interesse an effizienten, wirtschaftlichen und empfängerfreundlichen Leistungen) verarbeitet. In diesem Zusammenhang möchten wir Sie auch auf die Informationen zur Verwendung von Cookies in dieser Datenschutzerklärung hinweisen.</p>
+                    <br>
+                    <p><strong>- Verarbeitete Datenarten:</strong></p> <p>Nutzungsdaten (z.B. besuchte Webseiten, Interesse an Inhalten, Zugriffszeiten), Meta-/Kommunikationsdaten (z.B. Geräte-Informationen, IP-Adressen).</p>
+                    <p><strong>- Betroffene Personen:</strong></p> <p>Nutzer (z.B. Webseitenbesucher, Nutzer von Onlinediensten).</p>
+                    <p><strong>- Zwecke der Verarbeitung:</strong></p> <p>Bereitstellung unseres Onlineangebotes und Nutzerfreundlichkeit, Vertragliche Leistungen und Service.</p>
+                    <p><strong>- Rechtsgrundlagen:</strong></p> <p>Berechtigte Interessen (Art. 6 Abs. 1 S. 1 lit. f. DSGVO).</p>
+                    <br>
+                    <p><strong>Eingesetzte Dienste und Diensteanbieter:</strong></p>
+                    <br>
+                    <p><strong>Google Fonts:</strong></p> <p>Wir binden die Schriftarten („Google Fonts“) des Anbieters Google ein, wobei die Daten der Nutzer allein zu Zwecken der Darstellung der Schriftarten im Browser der Nutzer verwendet werden. Die Einbindung erfolgt auf Grundlage unserer berechtigten Interessen an einer technisch sicheren, wartungsfreien und effizienten Nutzung von Schriftarten, deren einheitlicher Darstellung sowie unter Berücksichtigung möglicher lizenzrechtlicher Restriktionen für deren Einbindung. Dienstanbieter: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland, Mutterunternehmen: Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA; Website: https://fonts.google.com/; Datenschutzerklärung: https://policies.google.com/privacy; Privacy Shield (Gewährleistung Datenschutzniveau bei Verarbeitung von Daten in den USA): https://www.privacyshield.gov/participant?id=a2zt000000001L5AAI&status=Active.</p>
+                    <br>
+                    <h3>Löschung von Daten</h3>
+                    <br>
+                    <p>Die von uns verarbeiteten Daten werden nach Maßgabe der gesetzlichen Vorgaben gelöscht, sobald deren zur Verarbeitung erlaubten Einwilligungen widerrufen werden oder sonstige Erlaubnisse entfallen (z.B., wenn der Zweck der Verarbeitung dieser Daten entfallen ist oder sie für den Zweck nicht erforderlich sind).</p>
+                    <br>
+                    <p>Sofern die Daten nicht gelöscht werden, weil sie für andere und gesetzlich zulässige Zwecke erforderlich sind, wird deren Verarbeitung auf diese Zwecke beschränkt. D.h., die Daten werden gesperrt und nicht für andere Zwecke verarbeitet. Das gilt z.B. für Daten, die aus handels- oder steuerrechtlichen Gründen aufbewahrt werden müssen oder deren Speicherung zur Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen oder zum Schutz der Rechte einer anderen natürlichen oder juristischen Person erforderlich ist.</p>
+                    <br>
+                    <p>Weitere Hinweise zu der Löschung von personenbezogenen Daten können ferner im Rahmen der einzelnen Datenschutzhinweise dieser Datenschutzerklärung erfolgen.</p>
+                    <br>
+                    <h3>Änderung und Aktualisierung der Datenschutzerklärung</h3>
+                    <br>
+                    <p>Wir bitten Sie, sich regelmäßig über den Inhalt unserer Datenschutzerklärung zu informieren. Wir passen die Datenschutzerklärung an, sobald die Änderungen der von uns durchgeführten Datenverarbeitungen dies erforderlich machen. Wir informieren Sie, sobald durch die Änderungen eine Mitwirkungshandlung Ihrerseits (z.B. Einwilligung) oder eine sonstige individuelle Benachrichtigung erforderlich wird.</p>
+                    <br>
+                    <p>Sofern wir in dieser Datenschutzerklärung Adressen und Kontaktinformationen von Unternehmen und Organisationen angeben, bitten wir zu beachten, dass die Adressen sich über die Zeit ändern können und bitten die Angaben vor Kontaktaufnahme zu prüfen.</p>
+                    <br>
+                    <h3>Rechte der betroffenen Personen</h3>
+                    <br>
+                    <p>Ihnen stehen als Betroffene nach der DSGVO verschiedene Rechte zu, die sich insbesondere aus Art. 15 bis 18 und 21 DSGVO ergeben:</p>
+                    <br>
+                    <p><strong>- Widerspruchsrecht: Sie haben das Recht, aus Gründen, die sich aus Ihrer besonderen Situation ergeben, jederzeit gegen die Verarbeitung der Sie betreffenden personenbezogenen Daten, die aufgrund von Art. 6 Abs. 1 lit. e oder f DSGVO erfolgt, Widerspruch einzulegen; dies gilt auch für ein auf diese Bestimmungen gestütztes Profiling. Werden die Sie betreffenden personenbezogenen Daten verarbeitet, um Direktwerbung zu betreiben, haben Sie das Recht, jederzeit Widerspruch gegen die Verarbeitung der Sie betreffenden personenbezogenen Daten zum Zwecke derartiger Werbung einzulegen; dies gilt auch für das Profiling, soweit es mit solcher Direktwerbung in Verbindung steht.</strong></p>
+                    <p><strong>- Widerrufsrecht bei Einwilligungen:</strong></p> <p>Sie haben das Recht, erteilte Einwilligungen jederzeit zu widerrufen.</p>
+                    <p><strong>- Auskunftsrecht:</strong></p> Sie haben das Recht, eine Bestätigung darüber zu verlangen, ob betreffende Daten verarbeitet werden und auf Auskunft über diese Daten sowie auf weitere Informationen und Kopie der Daten entsprechend den gesetzlichen Vorgaben.</p>
+                    <p><strong>- Recht auf Berichtigung:</strong></p> Sie haben entsprechend den gesetzlichen Vorgaben das Recht, die Vervollständigung der Sie betreffenden Daten oder die Berichtigung der Sie betreffenden unrichtigen Daten zu verlangen.</p>
+                    <p><strong>- Recht auf Löschung und Einschränkung der Verarbeitung:</strong></p> Sie haben nach Maßgabe der gesetzlichen Vorgaben das Recht, zu verlangen, dass Sie betreffende Daten unverzüglich gelöscht werden, bzw. alternativ nach Maßgabe der gesetzlichen Vorgaben eine Einschränkung der Verarbeitung der Daten zu verlangen.</p>
+                    <p><strong>- Recht auf Datenübertragbarkeit:</strong></p> Sie haben das Recht, Sie betreffende Daten, die Sie uns bereitgestellt haben, nach Maßgabe der gesetzlichen Vorgaben in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten oder deren Übermittlung an einen anderen Verantwortlichen zu fordern.</p>
+                    <p><strong>- Beschwerde bei Aufsichtsbehörde:</strong></p> Sie haben ferner nach Maßgabe der gesetzlichen Vorgaben das Recht, bei einer Aufsichtsbehörde, insbesondere in dem Mitgliedstaat Ihres gewöhnlichen Aufenthaltsorts, Ihres Arbeitsplatzes oder des Orts des mutmaßlichen Verstoßes Beschwerde einzulegen, wenn Sie der Ansicht sind, dass die Verarbeitung der Sie betreffenden personenbezogenen Daten gegen die DSGVO verstößt.</p>
+                    <br>
+                    <h3>Begriffsdefinitionen</h3>
+                    <br>
+                    <p>In diesem Abschnitt erhalten Sie eine Übersicht über die in dieser Datenschutzerklärung verwendeten Begrifflichkeiten. Viele der Begriffe sind dem Gesetz entnommen und vor allem im Art. 4 DSGVO definiert. Die gesetzlichen Definitionen sind verbindlich. Die nachfolgenden Erläuterungen sollen dagegen vor allem dem Verständnis dienen. Die Begriffe sind alphabetisch sortiert.</p>
+                    <br>
+                    <p><strong>Affiliate-Nachverfolgung:</strong></p> <p>Im Rahmen der Affiliate-Nachverfolgung werden Links, mit deren Hilfe die verlinkenden Webseiten Nutzer zu Webseiten mit Produkt- oder sonstigen Angeboten verweisen, protokolliert. Die Betreiber der jeweils verlinkenden Webseiten können eine Provision erhalten, wenn Nutzer diesen sogenannten Affiliate-Links folgen und anschließend die Angebote wahrnehmen (z.B. Waren kaufen oder Dienstleistungen in Anspruch nehmen). Hierzu ist es erforderlich, dass die Anbieter nachverfolgen können, ob Nutzer, die sich für bestimmte Angebote interessieren, diese anschließend auf die Veranlassung der Affiliate-Links wahrnehmen. Daher ist es für die Funktionsfähigkeit von Affiliate-Links erforderlich, dass sie um bestimmte Werte ergänzt werden, die ein Bestandteil des Links werden oder anderweitig, z.B. in einem Cookie, gespeichert werden. Zu den Werten gehören insbesondere die Ausgangswebseite (Referrer), der Zeitpunkt, eine Online-Kennung der Betreiber der Webseite, auf der sich der Affiliate-Link befand, eine Online-Kennung des jeweiligen Angebotes, eine Online-Kennung des Nutzers als auch nachverfolgungsspezifische Werte, wie, z.B. Werbemittel-ID, Partner-ID und Kategorisierungen.</p>
+                    <p><strong>- Besuchsaktionsauswertung:</strong></p><p>„Besuchsaktionsauswertung“ (englisch „Conversion Tracking“) bezeichnet ein Verfahren, mit dem die Wirksamkeit von Marketingmaßnahmen festgestellt werden kann. Dazu wird im Regelfall ein Cookie auf den Geräten der Nutzer innerhalb der Webseiten, auf denen die Marketingmaßnahmen erfolgen, gespeichert und dann erneut auf der Zielwebseite abgerufen. Beispielsweise können wir so nachvollziehen, ob die von uns auf anderen Webseiten geschalteten Anzeigen erfolgreich waren).</p>
+                    <p><strong>- IP-Masking:</strong></p> <p>Als „IP-Masking” wird eine Methode bezeichnet, bei der das letzte Oktett, d.h., die letzten beiden Zahlen einer IP-Adresse, gelöscht wird, damit die IP-Adresse nicht mehr der eindeutigen Identifizierung einer Person dienen kann. Daher ist das IP-Masking ein Mittel zur Pseudonymisierung von Verarbeitungsverfahren, insbesondere im Onlinemarketing</p>
+                    <p><strong>- Interessenbasiertes und verhaltensbezogenes Marketing:</strong></p> <p>Von interessens- und/oder verhaltensbezogenem Marketing spricht man, wenn potentielle Interessen von Nutzern an Anzeigen und sonstigen Inhalten möglichst genau vorbestimmt werden. Dies geschieht anhand von Angaben zu deren Vorverhalten (z.B. Aufsuchen von bestimmten Webseiten und Verweilen auf diesen, Kaufverhaltens oder Interaktion mit anderen Nutzern), die in einem sogenannten Profil gespeichert werden. Zu diesen Zwecken werden im Regelfall Cookies eingesetzt.</p>
+                    <p><strong>- Konversionsmessung:</strong></p> <p>Die Konversionsmessung ist ein Verfahren, mit dem die Wirksamkeit von Marketingmaßnahmen festgestellt werden kann. Dazu wird im Regelfall ein Cookie auf den Geräten der Nutzer innerhalb der Webseiten, auf denen die Marketingmaßnahmen erfolgen, gespeichert und dann erneut auf der Zielwebseite abgerufen. Beispielsweise können wir so nachvollziehen, ob die von uns auf anderen Webseiten geschalteten Anzeigen erfolgreich waren.</p>
+                    <p><strong>- Personenbezogene Daten:</strong></p> <p>„Personenbezogene Daten“ sind alle Informationen, die sich auf eine identifizierte oder identifizierbare natürliche Person (im Folgenden „betroffene Person“) beziehen; als identifizierbar wird eine natürliche Person angesehen, die direkt oder indirekt, insbesondere mittels Zuordnung zu einer Kennung wie einem Namen, zu einer Kennnummer, zu Standortdaten, zu einer Online-Kennung (z.B. Cookie) oder zu einem oder mehreren besonderen Merkmalen identifiziert werden kann, die Ausdruck der physischen, physiologischen, genetischen, psychischen, wirtschaftlichen, kulturellen oder sozialen Identität dieser natürlichen Person sind.</p>
+                    <p><strong>- Profiling:</strong></p> <p>Als „Profiling“ wird jede Art der automatisierten Verarbeitung personenbezogener Daten bezeichnet, die darin besteht, dass diese personenbezogenen Daten verwendet werden, um bestimmte persönliche Aspekte, die sich auf eine natürliche Person beziehen (je nach Art des Profilings gehören dazu Informationen betreffend das Alter, das Geschlecht, Standortdaten und Bewegungsdaten, Interaktion mit Webseiten und deren Inhalten, Einkaufsverhalten, soziale Interaktionen mit anderen Menschen) zu analysieren, zu bewerten oder, um sie vorherzusagen (z.B. die Interessen an bestimmten Inhalten oder Produkten, das Klickverhalten auf einer Webseite oder den Aufenthaltsort). Zu Zwecken des Profilings werden häufig Cookies und Web-Beacons eingesetzt.</p>
+                    <p><strong>- Reichweitenmessung:</strong></p> <p>Die Reichweitenmessung (auch als Web Analytics bezeichnet) dient der Auswertung der Besucherströme eines Onlineangebotes und kann das Verhalten oder Interessen der Besucher an bestimmten Informationen, wie z.B. Inhalten von Webseiten, umfassen. Mit Hilfe der Reichweitenanalyse können Webseiteninhaber z.B. erkennen, zu welcher Zeit Besucher ihre Webseite besuchen und für welche Inhalte sie sich interessieren. Dadurch können sie z.B. die Inhalte der Webseite besser an die Bedürfnisse ihrer Besucher anpassen. Zu Zwecken der Reichweitenanalyse werden häufig pseudonyme Cookies und Web-Beacons eingesetzt, um wiederkehrende Besucher zu erkennen und so genauere Analysen zur Nutzung eines Onlineangebotes zu erhalten.</p>
+                    <p><strong>- Remarketing:</strong></p> <p>Vom „Remarketing“ bzw. „Retargeting“ spricht man, wenn z.B. zu Werbezwecken vermerkt wird, für welche Produkte sich ein Nutzer auf einer Webseite interessiert hat, um den Nutzer auf anderen Webseiten an diese Produkte, z.B. in Werbeanzeigen, zu erinnern.</p>
+                    <p><strong>- Tracking:</strong></p> <p>Vom „Tracking“ spricht man, wenn das Verhalten von Nutzern über mehrere Onlineangebote hinweg nachvollzogen werden kann. Im Regelfall werden im Hinblick auf die genutzten Onlineangebote Verhaltens- und Interessensinformationen in Cookies oder auf Servern der Anbieter der Trackingtechnologien gespeichert (sogenanntes Profiling). Diese Informationen können anschließend z.B. eingesetzt werden, um den Nutzern Werbeanzeigen anzuzeigen, die voraussichtlich deren Interessen entsprechen.</p>
+                    <p><strong>- Verantwortlicher:</strong></p> <p>Als „Verantwortlicher“ wird die natürliche oder juristische Person, Behörde, Einrichtung oder andere Stelle, die allein oder gemeinsam mit anderen über die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten entscheidet, bezeichnet.</p>
+                    <p><strong>- Verarbeitung:</strong></p> <p>„Verarbeitung“ ist jeder mit oder ohne Hilfe automatisierter Verfahren ausgeführte Vorgang oder jede solche Vorgangsreihe im Zusammenhang mit personenbezogenen Daten. Der Begriff reicht weit und umfasst praktisch jeden Umgang mit Daten, sei es das Erheben, das Auswerten, das Speichern, das Übermitteln oder das Löschen.</p>
+                    <br>
+                    <p>Erstellt mit kostenlosem Datenschutz-Generator.de von Dr. Thomas Schwenke</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section"><h4>OrgaShift</h4><ul><li><a href="index.html#about">Über uns</a></li></ul></div>
+            <div class="footer-section"><h4>Produkt</h4><ul><li><a href="index.html#features">Features</a></li><li><a href="pricing.html">Preise</a></li></ul></div>
+            <div class="footer-section"><h4>Support</h4><ul><li><a href="#">Hilfe</a></li><li><a href="#">Dokumentation</a></li><li><a href="index.html#contact">Kontakt</a></li></ul></div>
+            <div class="footer-section"><h4>Rechtliches</h4><ul><li><a href="datenschutz.html">Datenschutz</a></li><li><a href="agb.html">AGB</a></li><li><a href="impressum.html">Impressum</a></li></ul></div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 OrgaShift. Alle Rechte vorbehalten.</p>
+            <span class="footer-logo">OrgaShift</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+(function(){
+    const canvas=document.getElementById('beams-canvas'),ctx=canvas.getContext('2d');
+    const BEAMS=20,intensity=1.0;let beams=[],animId;
+    function createBeam(w,h){return{x:Math.random()*w*1.5-w*0.25,y:Math.random()*h*1.5-h*0.25,width:30+Math.random()*60,length:h*2.5,angle:-35+Math.random()*10,speed:0.6+Math.random()*1.2,opacity:0.12+Math.random()*0.16,hue:190+Math.random()*70,pulse:Math.random()*Math.PI*2,pulseSpeed:0.02+Math.random()*0.03};}
+    function resize(){const dpr=window.devicePixelRatio||1;canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.scale(dpr,dpr);beams=Array.from({length:Math.floor(BEAMS*1.5)},()=>createBeam(innerWidth,innerHeight));}
+    function reset(b,i,t){const c=i%3,s=innerWidth/3;b.y=innerHeight+100;b.x=c*s+s/2+(Math.random()-0.5)*s*0.5;b.width=100+Math.random()*100;b.speed=0.5+Math.random()*0.4;b.hue=190+(i*70)/t;b.opacity=0.2+Math.random()*0.1;}
+    function draw(b){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle*Math.PI/180);const op=b.opacity*(0.8+Math.sin(b.pulse)*0.2)*intensity;const g=ctx.createLinearGradient(0,0,0,b.length);g.addColorStop(0,`hsla(${b.hue},85%,65%,0)`);g.addColorStop(0.1,`hsla(${b.hue},85%,65%,${op*.5})`);g.addColorStop(0.4,`hsla(${b.hue},85%,65%,${op})`);g.addColorStop(0.6,`hsla(${b.hue},85%,65%,${op})`);g.addColorStop(0.9,`hsla(${b.hue},85%,65%,${op*.5})`);g.addColorStop(1,`hsla(${b.hue},85%,65%,0)`);ctx.fillStyle=g;ctx.fillRect(-b.width/2,0,b.width,b.length);ctx.restore();}
+    function animate(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.filter='blur(35px)';const t=beams.length;beams.forEach((b,i)=>{b.y-=b.speed;b.pulse+=b.pulseSpeed;if(b.y+b.length<-100)reset(b,i,t);draw(b);});animId=requestAnimationFrame(animate);}
+    resize();window.addEventListener('resize',resize);animate();
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(animId);else animate();});
+}());
+
+const obs=new IntersectionObserver((entries)=>{entries.forEach((e,i)=>{if(e.isIntersecting)setTimeout(()=>e.target.classList.add('visible'),i*70);});},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+
+function updateNavBg(){const isLight=document.documentElement.classList.contains('light'),scrolled=window.scrollY>60;document.querySelector('nav').style.background=scrolled?(isLight?'rgba(247,247,248,0.97)':'rgba(5,5,5,0.95)'):(isLight?'rgba(247,247,248,0.82)':'rgba(5,5,5,0.75)');}
+window.addEventListener('scroll',updateNavBg,{passive:true});
+
+(function(){
+    const html=document.documentElement,btn=document.getElementById('theme-toggle');
+    if(localStorage.getItem('theme')==='light')html.classList.add('light');
+    btn.textContent=html.classList.contains('light')?'☀️':'🌙';
+    btn.addEventListener('click',()=>{html.classList.toggle('light');const l=html.classList.contains('light');localStorage.setItem('theme',l?'light':'dark');btn.textContent=l?'☀️':'🌙';updateNavBg();});
+}());
+</script>
+</body>
+</html>

@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "OrgaShift Dev Server",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "3000"],
+      "runtimeExecutable": "/opt/homebrew/bin/node",
+      "runtimeArgs": ["/opt/homebrew/bin/npm", "run", "dev"],
       "port": 3000
     }
   ]

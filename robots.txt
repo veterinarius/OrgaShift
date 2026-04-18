@@ -1,0 +1,38 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /pricing.html
+Allow: /datenschutz.html
+Allow: /agb.html
+Allow: /impressum.html
+
+# KI-Crawler und spezialisierte Crawler
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Crawl-Delay für Ressourcenschonung
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://orgashift.de/sitemap.xml

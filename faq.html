@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – FAQ | Häufig gestellte Fragen zur KI-Schichtplanung</title>
+    <meta name="description" content="Fragen & Antworten zu OrgaShift: Kosten, Sicherheit, Integration, Features und Support für KI-gestützte Schichtplanung.">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="OrgaShift – FAQ">
+    <meta property="og:description" content="Häufig gestellte Fragen zur KI-Schichtplanungssoftware">
+    <meta property="og:url" content="https://orgashift.de/faq.html">
+    <meta property="og:type" content="website">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://orgashift.de/faq.html">
+
+    <!-- FAQPage Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was ist OrgaShift?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "OrgaShift ist eine Schichtplanungssoftware."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie viel kostet OrgaShift?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Preise richten sich nach der Größe deines Unternehmens und den benötigten Features. Kontaktiere uns für ein individuelles Angebot oder starte kostenlos mit unserer Demo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist OrgaShift sicher? Wie werden meine Daten geschützt?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, OrgaShift nutzt Verschlüsselung auf höchstem Niveau und hält DSGVO sowie deutsche Datenschutzstandards ein. Alle Daten werden in sicheren europäischen Rechenzentren gespeichert."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann OrgaShift mit meiner bestehenden Software integriert werden?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, OrgaShift bietet APIs und Integrationen mit gängigen HR- und Zeiterfassungssystemen an. Kontaktiere unseren Support für spezifische Integrationswünsche."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie lange dauert die Einführung?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Grundeinrichtung dauert typischerweise 1–2 Tage. Unser Onboarding-Team unterstützt dich während des gesamten Prozesses kostenlos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Gibt es einen kostenlosen Test?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, du kannst OrgaShift kostenlos mit Demodaten testen. Es ist keine Kreditkarte erforderlich. Du erhältst sofortigen Zugang zum vollständigen Feature-Set."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bietet OrgaShift technischen Support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, wir bieten umfassenden Support per E-Mail, Chat und Telefon. Premium-Kunden erhalten 24/7 Support und einen dedizierten Account Manager."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Funktioniert OrgaShift auf mobilen Geräten?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, OrgaShift ist vollständig responsive und funktioniert optimal auf Smartphones, Tablets und Desktops. Es gibt auch native Mobile Apps für iOS und Android."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black:          #050505;
+            --black-dim:      #080810;
+            --border:         #27272a;
+            --border-glass:   rgba(255,255,255,0.07);
+            --text:           #ffffff;
+            --text-sec:       rgba(255,255,255,0.6);
+            --text-muted:     rgba(255,255,255,0.3);
+            --accent:         #007AFF;
+            --surface:        rgba(255,255,255,0.04);
+            --surface-hover:  rgba(255,255,255,0.07);
+            --nav-bg:         rgba(5,5,5,0.75);
+            --nav-bg-solid:   rgba(5,5,5,0.95);
+            --footer-bg:      #020204;
+        }
+        html.light {
+            --black:          #f7f7f8;
+            --black-dim:      #eeeef3;
+            --border:         #dcdce0;
+            --border-glass:   rgba(0,0,0,0.07);
+            --text:           #0a0a0a;
+            --text-sec:       rgba(0,0,0,0.58);
+            --text-muted:     rgba(0,0,0,0.35);
+            --surface:        rgba(0,0,0,0.04);
+            --surface-hover:  rgba(0,0,0,0.07);
+            --nav-bg:         rgba(247,247,248,0.82);
+            --nav-bg-solid:   rgba(247,247,248,0.97);
+            --footer-bg:      #f0f0f5;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            transition: background 0.35s ease, color 0.35s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--black);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ── NAV ──────────────────────────────────────────── */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            transition: background 0.35s ease, border-color 0.35s ease;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo {
+            font-size: 22px; font-weight: 700; color: var(--text);
+            text-decoration: none; letter-spacing: -0.02em;
+        }
+        .logo-dot { color: var(--accent); }
+        .nav-links { display: flex; list-style: none; gap: 28px; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-sec); font-size: 0.9rem; transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-buttons { display: flex; gap: 10px; align-items: center; }
+        .login-btn {
+            color: var(--text-sec); text-decoration: none; font-size: 0.88rem;
+            padding: 8px 16px; border-radius: 8px; transition: all 0.2s;
+        }
+        .login-btn:hover { color: var(--text); background: var(--surface); }
+        .signup-btn {
+            background: var(--text); color: var(--black); text-decoration: none;
+            font-weight: 600; font-size: 0.88rem; padding: 9px 20px;
+            border-radius: 25px; transition: all 0.2s; white-space: nowrap;
+        }
+        .signup-btn:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+        html.light .signup-btn:hover { background: rgba(0,0,0,0.82); }
+
+        /* ── BEAMS ─────────────────────────────────────────────── */
+        #beams-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; display: block; z-index: 0;
+            filter: blur(15px);
+        }
+        .beams-overlay {
+            position: fixed; inset: 0; z-index: 0;
+            background: rgba(10,10,10,0.05);
+            animation: overlayPulse 10s ease-in-out infinite;
+            backdrop-filter: blur(50px);
+            pointer-events: none;
+        }
+        @keyframes overlayPulse {
+            0%, 100% { opacity: 0.05; }
+            50%       { opacity: 0.15; }
+        }
+
+        /* ── CONTENT SECTION ─────────────────────────────────── */
+        .content-section {
+            position: relative; z-index: 1;
+            padding: 128px 0 80px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .content-wrap { max-width: 820px; margin: 0 auto; }
+
+        .section-tag {
+            display: inline-block; padding: 4px 14px; border-radius: 20px;
+            background: rgba(0,122,255,0.1); border: 1px solid rgba(0,122,255,0.2);
+            color: var(--accent); font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
+        }
+
+        .card-outer {
+            border: 1px solid var(--border); padding: 8px;
+        }
+        .card-inner {
+            border: 1px solid var(--border); padding: 52px;
+            position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.02);
+        }
+        html.light .card-inner { background: rgba(0,0,0,0.02); }
+        .card-inner::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+        }
+        html.light .card-inner::before {
+            background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+        }
+
+        .card-inner h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
+            color: var(--text); margin-bottom: 8px;
+        }
+        .card-inner .subtitle {
+            font-size: 0.95rem; color: var(--text-sec);
+            margin-bottom: 40px; line-height: 1.6;
+        }
+
+        /* ── FAQ ITEMS ──────────────────────────────────────────── */
+        .faq-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .faq-item {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 8px;
+            transition: background 0.2s, border-color 0.2s;
+            overflow: hidden;
+        }
+        .faq-item:hover { background: var(--surface-hover); border-color: rgba(0,122,255,0.3); }
+        .faq-item.active { border-color: rgba(0,122,255,0.4); }
+
+        .faq-question {
+            padding: 18px 20px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+            font-size: 0.95rem; font-weight: 600; color: var(--text);
+            user-select: none;
+            list-style: none;
+        }
+        .faq-question::-webkit-details-marker { display: none; }
+
+        .toggle-icon {
+            flex-shrink: 0;
+            width: 20px; height: 20px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: var(--accent);
+            transition: transform 0.3s ease, border-color 0.2s;
+        }
+        .faq-item.active .toggle-icon { transform: rotate(180deg); border-color: rgba(0,122,255,0.5); }
+
+        .faq-answer {
+            padding: 0 20px 18px;
+            font-size: 0.92rem; color: var(--text-sec);
+            line-height: 1.75;
+            display: none;
+        }
+        .faq-item.active .faq-answer { display: block; }
+
+        /* ── FOOTER ────────────────────────────────────────────── */
+        footer {
+            background: var(--footer-bg); border-top: 1px solid var(--border);
+            padding: 64px 0 32px; transition: background 0.35s ease;
+            position: relative; z-index: 1;
+        }
+        .footer-content {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 40px; margin-bottom: 48px;
+        }
+        .footer-section h4 { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin-bottom: 8px; }
+        .footer-section ul li a {
+            color: var(--text-sec); text-decoration: none; font-size: 0.85rem; transition: color 0.2s;
+        }
+        .footer-section ul li a:hover { color: var(--text); }
+        .footer-bottom {
+            border-top: 1px solid var(--border); padding-top: 24px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+        }
+        .footer-bottom p { color: var(--text-muted); font-size: 0.82rem; }
+        .footer-logo { font-size: 16px; font-weight: 700; color: var(--text-sec); }
+
+        /* ── THEME TOGGLE ──────────────────────────────────────── */
+        .theme-toggle {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--surface);
+            color: var(--text-sec); cursor: pointer; display: flex;
+            align-items: center; justify-content: center; font-size: 16px;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
+
+        /* ── FADE-IN ────────────────────────────────────────────── */
+        .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fi.visible { opacity: 1; transform: none; }
+
+        /* ── RESPONSIVE ─────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .card-inner { padding: 36px 28px; }
+        }
+        @media (max-width: 480px) {
+            .card-outer { border: none; padding: 0; }
+            .card-inner { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Glass SVG filter -->
+<svg style="display:none" aria-hidden="true">
+    <defs>
+        <filter id="container-glass" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05 0.05" numOctaves="1" seed="1" result="turbulence"/>
+            <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise"/>
+            <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="70" xChannelSelector="R" yChannelSelector="B" result="displaced"/>
+            <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur"/>
+            <feComposite in="finalBlur" in2="finalBlur" operator="over"/>
+        </filter>
+    </defs>
+</svg>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#about">Über uns</a></li>
+            <li><a href="pricing.html">Preise</a></li>
+            <li><a href="index.html#contact">Kontakt</a></li>
+        </ul>
+        <div class="nav-buttons">
+            <button class="theme-toggle" id="theme-toggle" title="Theme wechseln">🌙</button>
+            <a href="login.html" class="login-btn">Login</a>
+            <a href="pricing.html" class="signup-btn">Kostenlos starten</a>
+        </div>
+    </div>
+</nav>
+
+<!-- BEAMS BACKGROUND -->
+<canvas id="beams-canvas"></canvas>
+<div class="beams-overlay"></div>
+
+<!-- MAIN CONTENT -->
+<section class="content-section">
+    <div class="container">
+        <div class="content-wrap">
+            <div class="fi">
+                <div class="section-tag">FAQ</div>
+            </div>
+            <div class="card-outer fi">
+                <div class="card-inner">
+                    <h1>Häufig gestellte Fragen</h1>
+                    <p class="subtitle">Alles Wichtige über OrgaShift – Schichtplanung</p>
+
+                    <div class="faq-list">
+
+                        <div class="faq-item active">
+                            <div class="faq-question">
+                                Was ist OrgaShift?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                OrgaShift ist eine Schichtplanungssoftware.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Wie viel kostet OrgaShift?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Die Preise richten sich nach der Größe deines Unternehmens und den benötigten Features. Kontaktiere uns für ein individuelles Angebot oder starte kostenlos mit unserer Demo.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Ist OrgaShift sicher? Wie werden meine Daten geschützt?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, OrgaShift nutzt Verschlüsselung auf höchstem Niveau und hält DSGVO sowie deutsche Datenschutzstandards ein. Alle Daten werden in sicheren europäischen Rechenzentren gespeichert.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Wie lange dauert die Einführung?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Die Grundeinrichtung dauert typischerweise 1–2 Tage.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Gibt es einen kostenlosen Test?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, du kannst OrgaShift kostenlos mit Demodaten testen. Es ist keine Kreditkarte erforderlich. Du erhältst sofortigen Zugang zum vollständigen Feature-Set.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Bietet OrgaShift technischen Support?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, wir bieten umfassenden Support per E-Mail, Chat und Telefon. Premium-Kunden erhalten 24/7 Support und einen dedizierten Account Manager.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Funktioniert OrgaShift auf mobilen Geräten?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, OrgaShift ist vollständig responsive und funktioniert optimal auf Smartphones, Tablets und Desktops. Es gibt auch native Mobile Apps für iOS und Android.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>OrgaShift</h4>
+                <ul>
+                    <li><a href="index.html#about">Über uns</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Produkt</h4>
+                <ul>
+                    <li><a href="index.html#features">Features</a></li>
+                    <li><a href="pricing.html">Preise</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Hilfe</a></li>
+                    <li><a href="#">Dokumentation</a></li>
+                    <li><a href="index.html#contact">Kontakt</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Rechtliches</h4>
+                <ul>
+                    <li><a href="datenschutz.html">Datenschutz</a></li>
+                    <li><a href="agb.html">AGB</a></li>
+                    <li><a href="impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 OrgaShift. Alle Rechte vorbehalten.</p>
+            <span class="footer-logo">OrgaShift</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+// ── BEAMS BACKGROUND ───────────────────────────────────────────────────────────────────────
+(function () {
+    const canvas = document.getElementById('beams-canvas');
+    const ctx = canvas.getContext('2d');
+    const MINIMUM_BEAMS = 20;
+    const intensity = 1.0;
+    let beams = [];
+    let animId;
+
+    function createBeam(width, height) {
+        const angle = -35 + Math.random() * 10;
+        return {
+            x: Math.random() * width * 1.5 - width * 0.25,
+            y: Math.random() * height * 1.5 - height * 0.25,
+            width: 30 + Math.random() * 60,
+            length: height * 2.5,
+            angle,
+            speed: 0.6 + Math.random() * 1.2,
+            opacity: 0.12 + Math.random() * 0.16,
+            hue: 190 + Math.random() * 70,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.02 + Math.random() * 0.03,
+        };
+    }
+
+    function updateCanvasSize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(dpr, dpr);
+        const total = Math.floor(MINIMUM_BEAMS * 1.5);
+        beams = Array.from({ length: total }, () => createBeam(window.innerWidth, window.innerHeight));
+    }
+
+    function resetBeam(beam, index, total) {
+        const col = index % 3;
+        const spacing = window.innerWidth / 3;
+        beam.y = window.innerHeight + 100;
+        beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+        beam.width = 100 + Math.random() * 100;
+        beam.speed = 0.5 + Math.random() * 0.4;
+        beam.hue = 190 + (index * 70) / total;
+        beam.opacity = 0.2 + Math.random() * 0.1;
+    }
+
+    function drawBeam(beam) {
+        ctx.save();
+        ctx.translate(beam.x, beam.y);
+        ctx.rotate(beam.angle * Math.PI / 180);
+        const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * intensity;
+        const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
+        gradient.addColorStop(0,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        gradient.addColorStop(0.1, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(0.4, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.6, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.9, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(1,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+        ctx.restore();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.filter = 'blur(35px)';
+        const total = beams.length;
+        beams.forEach((beam, i) => {
+            beam.y -= beam.speed;
+            beam.pulse += beam.pulseSpeed;
+            if (beam.y + beam.length < -100) resetBeam(beam, i, total);
+            drawBeam(beam);
+        });
+        animId = requestAnimationFrame(animate);
+    }
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    animate();
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+    });
+}());
+
+// ── SCROLL ANIMATIONS ──────────────────────────────────────────────────────────────────
+const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+        if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 70);
+    });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+
+// ── NAV SCROLL ─────────────────────────────────────────────────────────────────
+function updateNavBg() {
+    const isLight = document.documentElement.classList.contains('light');
+    const scrolled = window.scrollY > 60;
+    document.querySelector('nav').style.background = scrolled
+        ? (isLight ? 'rgba(247,247,248,0.97)' : 'rgba(5,5,5,0.95)')
+        : (isLight ? 'rgba(247,247,248,0.82)' : 'rgba(5,5,5,0.75)');
+}
+window.addEventListener('scroll', updateNavBg, { passive: true });
+
+// ── THEME TOGGLE ───────────────────────────────────────────────────────────────
+(function () {
+    const html = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    if (localStorage.getItem('theme') === 'light') html.classList.add('light');
+    btn.textContent = html.classList.contains('light') ? '☀️' : '🌙';
+    btn.addEventListener('click', () => {
+        html.classList.toggle('light');
+        const isLight = html.classList.contains('light');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        btn.textContent = isLight ? '☀️' : '🌙';
+        updateNavBg();
+    });
+}());
+
+// ── FAQ ACCORDION ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.faq-question').forEach(question => {
+    question.addEventListener('click', () => {
+        const item = question.closest('.faq-item');
+        item.classList.toggle('active');
+    });
+});
+</script>
+</body>
+</html>

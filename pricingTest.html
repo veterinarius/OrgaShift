@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrgaShift Pricing</title>
+<script src="https://js.stripe.com/v3/"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Inter;background:#0f1222;color:#fff}
+.container{max-width:1100px;margin:0 auto;padding:60px 20px;text-align:center}
+h1{font-size:36px;margin-bottom:10px}
+p.subtitle{color:#aaa;margin-bottom:40px}
+.pricing{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+.card{background:#161a2e;border-radius:16px;padding:30px;width:300px;border:1px solid rgba(255,255,255,0.08);position:relative}
+.card.popular{transform:scale(1.05);border:2px solid #6c8cff}
+.badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#6c8cff;padding:5px 10px;border-radius:20px;font-size:12px}
+.price{font-size:40px;margin:20px 0}
+ul{list-style:none;padding:0;text-align:left}
+ul li{margin:10px 0;color:#ccc}
+button{margin-top:20px;width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+.btn-free{background:#2a2f5a;color:#fff}
+.btn-main{background:linear-gradient(135deg,#6c8cff,#7c4dff);color:#fff}
+.btn-pro{background:#1d2240;color:#fff}
+.footer{margin-top:40px;color:#aaa;font-size:14px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Einfacher planen. Weniger zahlen.</h1>
+<p class="subtitle">Keine Kosten pro Mitarbeiter. Ein Preis für dein ganzes Team.</p>
+
+<div class="pricing">
+
+<div class="card">
+<h2>Free</h2>
+<div class="price">0€</div>
+<ul>
+<li>Bis 5 Mitarbeiter</li>
+<li>Wochenplan</li>
+<li>Board & Tabelle</li>
+<li>Basis Funktionen</li>
+</ul>
+<button class="btn-free">Kostenlos starten</button>
+</div>
+
+<div class="card popular">
+<div class="badge">Beliebt</div>
+<h2>Starter</h2>
+<div class="price">29€</div>
+<ul>
+<li>Unbegrenzte Mitarbeiter</li>
+<li>Alle Views</li>
+<li>Drag & Drop</li>
+<li>Auto-Plan (Basic)</li>
+<li>Mobile Nutzung</li>
+</ul>
+<button class="btn-main" onclick="checkout('starter')">14 Tage kostenlos testen</button>
+</div>
+
+<div class="card">
+<h2>Pro</h2>
+<div class="price">59€</div>
+<ul>
+<li>Alles aus Starter</li>
+<li>Intelligenter Auto-Plan</li>
+<li>Regeln & Logik</li>
+<li>Export & Integrationen</li>
+<li>Priorisierter Support</li>
+</ul>
+<button class="btn-pro" onclick="checkout('pro')">Upgrade</button>
+</div>
+
+</div>
+
+<div class="footer">
+<p>✔ Kein Preis pro Mitarbeiter</p>
+<p>✔ Jederzeit kündbar</p>
+<p>✔ 14 Tage kostenlos testen</p>
+</div>
+
+</div>
+
+<script>
+const stripe = Stripe('pk_test_DEIN_PUBLIC_KEY'); // ersetzen!
+
+async function checkout(plan){
+  const response = await fetch('/create-checkout-session', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({plan})
+  });
+
+  const session = await response.json();
+
+  const result = await stripe.redirectToCheckout({
+    sessionId: session.id
+  });
+
+  if(result.error){
+    alert(result.error.message);
+  }
+}
+</script>
+
+</body>
+</html>

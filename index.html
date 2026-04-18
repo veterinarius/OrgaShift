@@ -4,15 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OrgaShift 2 – Willkommen</title>
+
+    <meta name="description" content="OrgaShift ist eine KI-gestützte Schichtplanungssoftware. Automatisieren Sie Ihre Personalplanung mit künstlicher Intelligenz.">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+     <!-- Open Graph Tags -->
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="OrgaShift – KI-Schichtplanung">
+    <meta property="og:description" content="Intelligente Personalplanung mit KI. Optimieren Sie Schichten, reduzieren Sie Kosten und verbessern Sie Mitarbeiterzufriedenheit.">
+    <meta property="og:url" content="https://orgashift.de/">
+    <meta property="og:site_name" content="OrgaShift">
+    <meta property="og:image" content="https://orgashift.de/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://orgashift.de/">
+    
+    <!-- Language Alternatives -->
+    <link rel="alternate" hreflang="de-DE" href="https://orgashift.de/">
+    <link rel="alternate" hreflang="x-default" href="https://orgashift.de/">
+
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "OrgaShift",
+      "description": "KI-gestützte Schichtplanungssoftware",
+      "url": "https://orgashift.de/",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "Auf Anfrage",
+        "priceCurrency": "EUR"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "OrgaShift",
+        "url": "https://orgashift.de/",
+        "logo": "https://orgashift.de/logo.png",
+        "sameAs": [
+          "https://twitter.com/OrgaShift",
+          "https://www.linkedin.com/company/orgashift"
+        ]
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127"
+      },
+      "features": [
+        "KI-gestützte Schichtoptimierung",
+        "Automatische Personalplanung",
+        "Kostenreduktion",
+        "WCAG 2.1 AA Barrierefreiheit",
+        "Mehrsprachige Unterstützung"
+      ],
+      "screenshot": "https://orgashift.de/screenshot.png",
+      "downloadUrl": "https://orgashift.de/app"
+    }
+    </script>
+    
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "OrgaShift",
+      "url": "https://orgashift.de/",
+      "logo": "https://orgashift.de/logo.png",
+      "description": "KI-Schichtplanung",
+      "sameAs": [
+        "https://twitter.com/OrgaShift",
+        "https://www.linkedin.com/company/orgashift"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "email": "support@orgashift.de",
+        "availableLanguage": ["de", "en"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "[Deine Straße]",
+        "addressLocality": "Ahaus",
+        "addressRegion": "NRW",
+        "postalCode": "48683",
+        "addressCountry": "DE"
+      }
+    }
+    </script>
+
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://orgashift.de/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Features",
+          "item": "https://orgashift.de/#features"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Kontakt",
+          "item": "https://orgashift.de/#contact"
+        }
+      ]
+    }
+    </script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ── SKIP LINK ───────────────────────── */
+        .skip-link {
+            position: absolute; top: -100px; left: 16px; z-index: 9999;
+            background: var(--accent); color: #fff; font-size: 0.9rem; font-weight: 600;
+            padding: 10px 20px; border-radius: 8px; text-decoration: none;
+            transition: top 0.2s;
+        }
+        .skip-link:focus { top: 16px; }
+
+        /* ── FOCUS STYLES ────────────────────── */
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+        /* Remove default outline only if :focus-visible is supported */
+        :focus:not(:focus-visible) { outline: none; }
+
+        /* ── REDUCED MOTION ──────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
+            #beams-canvas { display: none; }
+        }
         :root {
             --black:          #050505;
             --black-dim:      #080810;
             --border:         #27272a;
             --border-glass:   rgba(255,255,255,0.07);
             --text:           #ffffff;
-            --text-sec:       rgba(255,255,255,0.6);
+            --text-sec:       rgba(255,255,255,0.75); /* erhöht von 0.6 für WCAG AA */
             --text-muted:     rgba(255,255,255,0.3);
             --accent:         #007AFF;
             --surface:        rgba(255,255,255,0.04);
@@ -28,7 +184,7 @@
             --border:         #dcdce0;
             --border-glass:   rgba(0,0,0,0.07);
             --text:           #0a0a0a;
-            --text-sec:       rgba(0,0,0,0.58);
+            --text-sec:       rgba(0,0,0,0.72); /* erhöht von 0.58 für WCAG AA */
             --text-muted:     rgba(0,0,0,0.35);
             --surface:        rgba(0,0,0,0.04);
             --surface-hover:  rgba(0,0,0,0.07);
@@ -304,7 +460,11 @@
         .footer-bottom p { color: var(--text-muted); font-size: 0.82rem; }
         .footer-logo { font-size: 16px; font-weight: 700; color: var(--text-sec); }
 
-        /* ── THEME TOGGLE ────────────────────── */
+        .visually-hidden {
+            position: absolute; width: 1px; height: 1px;
+            padding: 0; margin: -1px; overflow: hidden;
+            clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+        }
         .theme-toggle {
             width: 36px; height: 36px; border-radius: 50%;
             border: 1px solid var(--border); background: var(--surface);
@@ -346,9 +506,10 @@
     </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
 
 <!-- Glass SVG filter for liquid button -->
-<svg style="display:none" aria-hidden="true">
+<svg style="display:none" aria-hidden="true" focusable="false">
     <defs>
         <filter id="container-glass" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
             <feTurbulence type="fractalNoise" baseFrequency="0.05 0.05" numOctaves="1" seed="1" result="turbulence"/>
@@ -361,17 +522,17 @@
 </svg>
 
 <!-- NAV -->
-<nav>
+<nav aria-label="Hauptnavigation">
     <div class="nav-container">
-        <a href="index.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
-        <ul class="nav-links">
+        <a href="index.html" class="logo" aria-label="OrgaShift – Startseite">Orga<span class="logo-dot" aria-hidden="true">Shift</span></a>
+        <ul class="nav-links" role="list">
             <li><a href="#features">Features</a></li>
             <li><a href="#about">Über uns</a></li>
             <li><a href="pricing.html">Preise</a></li>
             <li><a href="#contact">Kontakt</a></li>
         </ul>
         <div class="nav-buttons">
-            <button class="theme-toggle" id="theme-toggle" title="Theme wechseln">🌙</button>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Dunkles Design aktivieren" aria-pressed="false">🌙</button>
             <a href="login.html" class="login-btn">Login</a>
             <a href="pricing.html" class="signup-btn">Kostenlos starten</a>
         </div>
@@ -379,15 +540,16 @@
 </nav>
 
 <!-- HERO -->
-<section class="hero">
-    <canvas id="beams-canvas"></canvas>
-    <div class="beams-overlay"></div>
+<main id="main-content">
+<section class="hero" aria-labelledby="hero-heading">
+    <canvas id="beams-canvas" aria-hidden="true" role="presentation"></canvas>
+    <div class="beams-overlay" aria-hidden="true"></div>
     <div class="hero-wrapper">
         <div class="hero-outer">
             <div class="hero-inner">
-                <h1>Dienstpläne<br>automatisiert.</h1>
+                <h1 id="hero-heading">Dienstpläne<br>automatisiert.</h1>
                 <p class="hero-sub">Erstellen Sie perfekte Dienstpläne in Sekunden. KI-gestützt, fair und effizient – für Ihr Team!</p>
-                <div class="available-row">
+                <div class="available-row" aria-hidden="true">
                     <div class="ping-wrap">
                         <span class="ping-ring"></span>
                         <span class="ping-dot"></span>
@@ -404,58 +566,65 @@
 </section>
 
 <!-- FEATURES -->
-<section class="features" id="features">
+<section class="features" id="features" aria-labelledby="features-heading">
     <div class="container">
         <div class="features-header fi">
-            <div class="section-tag">Features</div>
-            <h2 class="section-title">Intelligente Planung,<br>einfach gemacht.</h2>
+            <div class="section-tag" aria-hidden="true">Features</div>
+            <h2 class="section-title" id="features-heading">Intelligente Planung,<br>einfach gemacht.</h2>
             <p class="section-sub" style="max-width:520px;margin:0 auto">Unsere KI erstellt automatisch optimale Dienstpläne unter Berücksichtigung aller Anforderungen und Wünsche.</p>
         </div>
+
+        <div class="features-header fi">
+            <div class="section-tag" aria-hidden="true">Barrierefreiheit</div>
+            <h2 class="section-title" id="features-heading">WCAG 2.1 Level AA<br></h2>
+            <p class="section-sub" style="max-width:520px;margin:0 auto">Das ist die rechtliche Anforderung in Deutschland (z.B. für öffentliche Stellen nach BITV 2.0).</p>
+        </div>
+
         <div class="features-grid">
 
             <div class="feature-card fi">
-                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(102,126,234,.18),rgba(0,122,255,.12))">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg>
+                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(102,126,234,.18),rgba(0,122,255,.12))" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg>
                 </div>
                 <h3>KI-gestützt</h3>
                 <p>Intelligente Algorithmen berücksichtigen Verfügbarkeiten, Urlaubswünsche und Qualifikationen vollautomatisch.</p>
             </div>
 
             <div class="feature-card fi">
-                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(240,147,251,.18),rgba(245,87,108,.12))">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(240,147,251,.18),rgba(245,87,108,.12))" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 </div>
                 <h3>Blitzschnell</h3>
                 <p>Was früher Stunden dauerte, erledigt OrgaShift in Sekunden. Mehr Zeit für das Wesentliche.</p>
             </div>
 
             <div class="feature-card fi">
-                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(52,199,89,.18),rgba(56,249,215,.12))">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(52,199,89,.18),rgba(56,249,215,.12))" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
                 </div>
                 <h3>Überall verfügbar</h3>
                 <p>Zugriff von jedem Gerät – Desktop, Tablet oder Smartphone. Immer und überall einsatzbereit.</p>
             </div>
 
             <div class="feature-card fi">
-                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(79,172,254,.18),rgba(0,242,254,.12))">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(79,172,254,.18),rgba(0,242,254,.12))" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
                 <h3>Team-Integration</h3>
                 <p>Mitarbeiterwünsche werden fair berücksichtigt. Mehr Transparenz und weniger Konflikte im Team.</p>
             </div>
 
             <div class="feature-card fi">
-                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(253,160,133,.18),rgba(245,87,108,.12))">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(253,160,133,.18),rgba(245,87,108,.12))" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 </div>
                 <h3>Analytics</h3>
                 <p>Detaillierte Berichte über Arbeitszeiten, Überstunden und Teamauslastung auf einen Blick.</p>
             </div>
 
             <div class="feature-card fi">
-                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(11,163,96,.18),rgba(62,198,176,.12))">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div class="fi-icon" style="background:linear-gradient(135deg,rgba(11,163,96,.18),rgba(62,198,176,.12))" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
                 <h3>DSGVO-konform</h3>
                 <p>Höchste Sicherheitsstandards und vollständige DSGVO-Konformität für Ihre sensiblen Mitarbeiterdaten.</p>
@@ -466,12 +635,12 @@
 </section>
 
 <!-- ABOUT -->
-<section class="about" id="about">
+<section class="about" id="about" aria-labelledby="about-heading">
     <div class="container">
         <div class="about-grid">
             <div class="about-text fi">
-                <div class="section-tag">Über OrgaShift</div>
-                <h2 class="section-title">Schluss mit stundenlanger Planung</h2>
+                <div class="section-tag" aria-hidden="true">Über OrgaShift</div>
+                <h2 class="section-title" id="about-heading">Schluss mit stundenlanger Planung</h2>
                 <p>Die Erstellung von Dienstplänen war noch nie so einfach. Unsere intelligente Software lernt die Bedürfnisse Ihres Teams und erstellt automatisch optimale Pläne.</p>
                 <p>Berücksichtigung von Urlaubswünschen, Arbeitszeiten und Qualifikationen – alles vollautomatisch und transparent für alle Beteiligten.</p>
                 <p>Sparen Sie Zeit, reduzieren Sie Konflikte und schaffen Sie faire, nachvollziehbare Planung für Ihr gesamtes Team.</p>
@@ -487,11 +656,17 @@
                         <span class="mockup-sub">KW 12 · März 2025</span>
                     </div>
                     <div style="overflow-x:auto">
-                        <table class="mockup-table">
-                            <thead>
+                        <table class="mockup-table" aria-label="Beispiel-Wochendienstplan KW 12">
+                            <caption class="visually-hidden">Wochendienstplan KW 12 – März 2025. Schichtabkürzungen: F = Frühschicht, S = Spätschicht, N = Nachtschicht, U = Urlaub, – = frei</caption>                            <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Mo</th><th>Di</th><th>Mi</th><th>Do</th><th>Fr</th><th>Sa</th><th>So</th>
+                                   <th scope="col">Name</th>
+                                    <th scope="col">Mo</th>
+                                    <th scope="col">Di</th>
+                                    <th scope="col">Mi</th>
+                                    <th scope="col">Do</th>
+                                    <th scope="col">Fr</th>
+                                    <th scope="col">Sa</th>
+                                    <th scope="col">So</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -553,9 +728,10 @@
         </div>
     </div>
 </section>
+</main>
 
 <!-- FOOTER -->
-<footer id="contact">
+<footer id="contact" aria-label="Seitennavigation und rechtliche Informationen">
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">
@@ -567,7 +743,9 @@
             <div class="footer-section">
                 <h4>Produkt</h4>
                 <ul>
+                    
                     <li><a href="#features">Features</a></li>
+                    <li><a href="#features">Barrierefreiheit</a></li>
                     <li><a href="pricing.html">Preise</a></li>
                 </ul>
             </div>
@@ -575,6 +753,7 @@
                 <h4>Support</h4>
                 <ul>
                     <li><a href="#">Hilfe</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
                     <li><a href="#">Dokumentation</a></li>
                     <li><a href="#contact">Kontakt</a></li>
                 </ul>
@@ -713,12 +892,17 @@ window.addEventListener('scroll', updateNavBg, { passive: true });
     const html = document.documentElement;
     const btn  = document.getElementById('theme-toggle');
     if (localStorage.getItem('theme') === 'light') html.classList.add('light');
-    btn.textContent = html.classList.contains('light') ? '☀️' : '🌙';
+    const isLightInit = html.classList.contains('light');
+    btn.textContent = isLightInit ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', isLightInit ? 'Dunkles Design aktivieren' : 'Helles Design aktivieren');
+    btn.setAttribute('aria-pressed', String(isLightInit));
     btn.addEventListener('click', () => {
         html.classList.toggle('light');
         const isLight = html.classList.contains('light');
         localStorage.setItem('theme', isLight ? 'light' : 'dark');
         btn.textContent = isLight ? '☀️' : '🌙';
+        btn.setAttribute('aria-label', isLight ? 'Dunkles Design aktivieren' : 'Helles Design aktivieren');
+        btn.setAttribute('aria-pressed', String(isLight));
         updateNavBg();
     });
 }());

@@ -477,7 +477,7 @@
         /* ── PRINT ── */
         @media print {
             #beamsCanvas, #beamsOverlay, nav, .header-actions, .left-panel-wo,
-            .export-row, #themeToggleBtn { display: none !important; }
+            .export-row, #themeToggleBtn, #print-header, .date-selection, .header p { display: none !important; }
             .main-layout { display: block; }
             .right-panel { width: 100%; }
             .page-wrap { padding-top: 0; }
@@ -486,7 +486,7 @@
             table th { background: #f5f5f7 !important; color: #000 !important; }
             table td { background: white !important; color: #000 !important; border-color: #ddd !important; }
             .table-title { background: #eef2ff !important; color: #000 !important; border-color: #4a6cf7 !important; }
-            #print-header { display: block; font-weight: bold; margin-bottom: 8px; }
+
         }
 
         /* ── RESPONSIVE ── */
@@ -1420,15 +1420,7 @@
     //  PRINT / SHARE
     // ─────────────────────────────────────────────
     function printSchedule() {
-        let start = startDate ? startDate.toLocaleDateString('de-DE') : '';
-        let end = endDate ? endDate.toLocaleDateString('de-DE') : '';
-        const header = document.getElementById('print-header');
-        let mainTitle = document.getElementById('main-title').textContent || 'Dienstplan';
-        let dateLine = (start && end) ? `<div>Wochenplan vom ${start} bis ${end}</div>` : '';
-        header.innerHTML = `${mainTitle}${dateLine ? '<br>' + dateLine : ''}`;
-        header.style.display = 'block';
         window.print();
-        setTimeout(() => { header.style.display = 'none'; }, 500);
     }
 
     function shareCustomHintOnWhatsApp() {

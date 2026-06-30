@@ -100,13 +100,17 @@ function updateEmployeeList() {
         if (!aDr && bDr) return 1;
         return 0;
     });
-    
+
+    // Hole aktuelle dayNames und shiftNames aus globalem Scope, falls vorhanden
+    const dayNames = (typeof window.dayNames !== 'undefined') ? window.dayNames : (data.dayNames || []);
+    const shiftNames = (typeof window.shiftNames !== 'undefined') ? window.shiftNames : (data.shiftNames || []);
+
     sortedEmployees.forEach(employee => {
         const tag = document.createElement('div');
         tag.className = 'employee-tag';
         tag.draggable = true;
         tag.dataset.employee = employee;
-        
+
         if (employee.includes('Dr.')) {
             tag.style.backgroundColor = '#e3f2fd';
             tag.style.borderColor = '#2196f3';
@@ -114,27 +118,28 @@ function updateEmployeeList() {
             tag.style.backgroundColor = '#e8f5e8';
             tag.style.borderColor = '#4caf50';
         }
-        
+
         const prefs = data.preferences[employee] || {};
         let prefCount = 0;
-        Object.entries(prefs).forEach(([key, dayPrefs]) => {
-            if (key !== 'extra' && Array.isArray(dayPrefs) && dayPrefs.length > 0 && data.dayNames.includes(key)) {
-                prefCount += dayPrefs.length;
+        // Nur Präferenzen für aktuelle Tage und Schichten zählen
+        dayNames.forEach(day => {
+            const dayPrefs = prefs[day] || [];
+            if (Array.isArray(dayPrefs) && dayPrefs.length > 0) {
+                // Nur Schichten zählen, die in shiftNames vorkommen
+                prefCount += dayPrefs.filter(shift => shiftNames.includes(shift)).length;
             }
         });
-        
+
         const editButton = `<button onclick="editEmployeeName('${employee}')" title="Mitarbeitername bearbeiten">✏️</button>`;
-        const prefButton = prefCount > 0 ? 
-            `<button onclick="showPreferences('${employee}')" title="Präferenzen bearbeiten">⚙️ (${prefCount})</button>` :
-            `<button onclick="showPreferences('${employee}')" title="Präferenzen bearbeiten">⚙️</button>`;
-        
+        const prefButton = `<button onclick="showPreferences('${employee}')" title="Präferenzen bearbeiten">⚙️</button>`;
+
         tag.innerHTML = `
             <span class="employee-name-span">${employee}</span>
             ${editButton}
             ${prefButton}
             <button onclick="removeEmployee('${employee}')" title="Mitarbeiter entfernen">✕</button>
         `;
-        
+
         // Drag & Drop Event Listeners
         tag.addEventListener('dragstart', handleDragStart);
         tag.addEventListener('dragend', handleDragEnd);
@@ -142,10 +147,10 @@ function updateEmployeeList() {
         tag.addEventListener('drop', handleDrop);
         tag.addEventListener('dragenter', handleDragEnter);
         tag.addEventListener('dragleave', handleDragLeave);
-        
+
         container.appendChild(tag);
     });
-    
+
     updateExtraPrefEmployeeSelect();
     displayExtraPreferences();
 }

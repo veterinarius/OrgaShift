@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nordlicht</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--aurora1:#00ffd5;--aurora2:#0055ff;--aurora3:#aa00ff;--aurora4:#00ff88;--deep:#020818}
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--deep);font-family:'Cormorant Garamond',serif;cursor:none}
+
+    canvas#stars{position:fixed;inset:0;z-index:0}
+    .aurora-wrap{position:fixed;inset:0;z-index:1;pointer-events:none;filter:blur(60px)}
+    .aurora-band{position:absolute;width:180%;height:55%;left:-40%;border-radius:50%;mix-blend-mode:screen;opacity:0;animation:ripple 12s ease-in-out infinite}
+    .a1{top:5%;background:radial-gradient(ellipse at 50% 50%,#00ffd566,transparent 70%);animation-delay:0s;animation-duration:14s}
+    .a2{top:12%;background:radial-gradient(ellipse at 40% 60%,#0055ff55,transparent 65%);animation-delay:-4s;animation-duration:18s}
+    .a3{top:20%;background:radial-gradient(ellipse at 60% 40%,#aa00ff44,transparent 60%);animation-delay:-8s;animation-duration:22s}
+    .a4{top:8%;background:radial-gradient(ellipse at 55% 55%,#00ff8844,transparent 65%);animation-delay:-2s;animation-duration:16s}
+    @keyframes ripple{0%{opacity:0;transform:scaleX(1) scaleY(1) translateY(0)}20%{opacity:.9}50%{opacity:.6;transform:scaleX(1.08) scaleY(1.1) translateY(-3%)}80%{opacity:.8}100%{opacity:0;transform:scaleX(.95) scaleY(.95) translateY(2%)}}
+
+    .mountains{position:fixed;bottom:0;width:100%;z-index:2;pointer-events:none}
+    .trees{position:fixed;bottom:0;width:100%;z-index:3;pointer-events:none}
+
+    .ui{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;justify-content:center;align-items:center}
+    .label{font-family:'Bebas Neue',sans-serif;font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.5em;color:var(--aurora1);opacity:.7;text-transform:uppercase;animation:fadeIn 2s ease .5s both;transition:opacity .35s}
+    h1{font-size:clamp(5rem,18vw,18rem);font-weight:300;letter-spacing:-.02em;line-height:.85;color:#fff;text-shadow:0 0 40px #00ffd588,0 0 120px #0055ff44;animation:fadeSlide 1.8s cubic-bezier(.16,1,.3,1) .2s both,glowPulse 6s ease-in-out 2s infinite}
+    h1 em{font-style:italic;color:var(--aurora1);text-shadow:0 0 30px #00ffd5cc,0 0 80px #00ffd566}
+    .subtitle{margin-top:1.5rem;font-size:clamp(.9rem,2vw,1.3rem);font-weight:300;font-style:italic;color:rgba(255,255,255,.55);letter-spacing:.08em;animation:fadeIn 2s ease 1s both;transition:opacity .35s}
+
+    .coords{position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:3rem;animation:fadeIn 2.5s ease 1.5s both}
+    .coord-item{text-align:center}
+    .coord-item .val{font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,2.5vw,1.8rem);color:#fff;letter-spacing:.1em;transition:opacity .3s}
+    .coord-item .key{font-size:.6rem;letter-spacing:.4em;color:var(--aurora1);opacity:.6;text-transform:uppercase}
+
+    /* ── LOC BUTTON ── */
+    #loc-btn{position:fixed;top:1.8rem;right:2rem;z-index:100;background:rgba(0,255,213,.08);border:1px solid rgba(0,255,213,.3);color:var(--aurora1);font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.35em;padding:.55rem 1.2rem;border-radius:2px;cursor:none;transition:background .25s,border-color .25s,box-shadow .25s}
+    #loc-btn:hover{background:rgba(0,255,213,.16);border-color:var(--aurora1);box-shadow:0 0 20px rgba(0,255,213,.2)}
+
+    /* ── PANEL ── */
+    #loc-panel{position:fixed;inset:0;z-index:50;background:rgba(2,8,24,.93);backdrop-filter:blur(18px);display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:1rem;opacity:0;pointer-events:none;transition:opacity .4s ease;overflow-y:auto;padding:2.5rem 0 2rem}
+    #loc-panel.open{opacity:1;pointer-events:all}
+    #loc-panel h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,4vw,2.8rem);color:#fff;letter-spacing:.35em}
+    .panel-sub{font-size:.75rem;color:rgba(255,255,255,.3);letter-spacing:.3em;text-transform:uppercase}
+
+    /* ── GRID ── */
+    .loc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.8rem;max-width:780px;width:90%}
+    .loc-card{border:1px solid rgba(0,255,213,.12);border-radius:3px;padding:1rem 1.2rem;cursor:none;transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+    .loc-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,#00ffd5,transparent 70%);opacity:0;transition:opacity .3s}
+    .loc-card:hover::before{opacity:.05}
+    .loc-card:hover{border-color:rgba(0,255,213,.4);transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,255,213,.07)}
+    .loc-card.active{border-color:var(--aurora1);background:rgba(0,255,213,.06);box-shadow:0 0 18px rgba(0,255,213,.12)}
+    .loc-card .loc-name{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.2em;color:#fff;padding-right:1.4rem}
+    .loc-card .loc-coords{font-size:.6rem;letter-spacing:.28em;color:var(--aurora1);opacity:.5;margin-top:.18rem}
+    .loc-card .loc-desc{font-size:.75rem;font-style:italic;color:rgba(255,255,255,.35);margin-top:.4rem;line-height:1.3}
+    .loc-card.custom-card{border-style:dashed;border-color:rgba(0,255,213,.22)}
+    .loc-card.custom-card.active{border-style:solid}
+    .del-btn{position:absolute;top:.45rem;right:.55rem;background:none;border:none;color:rgba(255,80,80,.35);font-size:.8rem;cursor:none;transition:color .2s;line-height:1;padding:0}
+    .del-btn:hover{color:rgba(255,80,80,.9)}
+
+    .divider{width:90%;max-width:780px;border:none;border-top:1px solid rgba(0,255,213,.1)}
+
+    /* ── CUSTOM FORM ── */
+    .add-section{width:90%;max-width:780px}
+    .add-title{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:.4em;color:rgba(0,255,213,.45);text-transform:uppercase;margin-bottom:.6rem}
+    .add-row{display:flex;gap:.55rem;flex-wrap:wrap;align-items:stretch}
+    .add-row input{background:rgba(255,255,255,.03);border:1px solid rgba(0,255,213,.15);border-radius:2px;color:#fff;font-family:'Cormorant Garamond',serif;font-size:.95rem;padding:.45rem .7rem;outline:none;transition:border-color .2s,background .2s;flex:1;min-width:120px}
+    .add-row input::placeholder{color:rgba(255,255,255,.18)}
+    .add-row input:focus{border-color:var(--aurora1);background:rgba(0,255,213,.04)}
+    #add-btn{background:rgba(0,255,213,.1);border:1px solid rgba(0,255,213,.35);color:var(--aurora1);font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.3em;padding:.45rem 1.1rem;border-radius:2px;cursor:none;transition:background .2s,box-shadow .2s;white-space:nowrap}
+    #add-btn:hover{background:rgba(0,255,213,.2);box-shadow:0 0 14px rgba(0,255,213,.15)}
+    #add-btn:disabled{opacity:.4;pointer-events:none}
+    .add-hint{font-size:.68rem;color:rgba(255,255,255,.25);letter-spacing:.12em;margin-top:.35rem;font-style:italic}
+    .add-error{font-size:.68rem;color:#ff7070;letter-spacing:.15em;margin-top:.3rem;min-height:1em}
+
+    /* loading spinner on card */
+    .loc-card .loading-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--aurora1);animation:blink .8s ease-in-out infinite;margin-left:.3rem;vertical-align:middle}
+    @keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+    #loc-close{font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.4em;color:rgba(255,255,255,.22);background:none;border:none;cursor:none;transition:color .2s;margin-top:.3rem}
+    #loc-close:hover{color:rgba(255,255,255,.65)}
+
+    /* ── CURSOR ── */
+    #cursor{position:fixed;width:10px;height:10px;background:var(--aurora1);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;box-shadow:0 0 15px var(--aurora1)}
+    #cursor-trail{position:fixed;width:30px;height:30px;border:1px solid var(--aurora1);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);opacity:.4;transition:all .12s ease;mix-blend-mode:screen}
+
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes glowPulse{0%,100%{text-shadow:0 0 40px #00ffd588,0 0 120px #0055ff44}50%{text-shadow:0 0 80px #00ffd5cc,0 0 200px #0055ff66,0 0 300px #aa00ff22}}
+    .shoot{position:fixed;width:2px;height:80px;background:linear-gradient(to bottom,transparent,#fff,transparent);border-radius:2px;opacity:0;z-index:5;animation:shoot 1.2s ease-out forwards;pointer-events:none}
+    @keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(30deg)}10%{opacity:1}100%{opacity:0;transform:translate(200px,300px) rotate(30deg)}}
+    .text-fade{opacity:0!important}
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="aurora-wrap">
+  <div class="aurora-band a1"></div><div class="aurora-band a2"></div>
+  <div class="aurora-band a3"></div><div class="aurora-band a4"></div>
+</div>
+<svg class="mountains" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#020c1a" d="M0,320 L0,200 L80,160 L160,210 L240,130 L320,170 L420,90 L520,150 L600,80 L700,140 L800,60 L900,130 L1000,100 L1100,160 L1200,80 L1300,150 L1380,120 L1440,160 L1440,320 Z"/>
+  <path fill="#010a14" d="M0,320 L0,240 L100,210 L200,250 L310,190 L430,230 L540,200 L660,240 L760,185 L880,230 L980,200 L1100,245 L1200,210 L1320,240 L1440,220 L1440,320 Z"/>
+</svg>
+<svg class="trees" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#010810" d="M0,200 L0,180 L20,100 L30,150 L50,80 L60,140 L80,60 L90,130 L110,90 L120,150 L140,70 L150,130 L170,50 L180,120 L200,80 L210,150 L230,60 L240,130 L260,90 L270,160 L300,55 L310,130 L330,70 L340,150 L360,40 L370,120 L390,80 L400,155 L420,60 L430,140 L450,50 L460,130 L480,90 L490,160 L510,70 L520,145 L540,55 L550,130 L570,85 L580,155 L600,65 L610,140 L630,50 L640,125 L660,75 L670,150 L690,55 L700,135 L720,70 L730,148 L750,50 L760,130 L780,85 L790,155 L810,60 L820,140 L840,50 L850,125 L870,75 L880,148 L900,55 L910,135 L930,70 L940,148 L960,55 L970,130 L990,80 L1000,155 L1020,60 L1030,140 L1050,50 L1060,130 L1080,85 L1090,155 L1110,65 L1120,140 L1140,55 L1150,130 L1170,80 L1180,152 L1200,60 L1210,138 L1230,55 L1240,132 L1260,72 L1270,148 L1290,58 L1300,135 L1320,70 L1330,148 L1350,52 L1360,130 L1380,80 L1390,155 L1410,60 L1420,140 L1440,55 L1440,200 Z"/>
+</svg>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+<button id="loc-btn">📍 Ort wählen</button>
+
+<!-- ── PANEL ── -->
+<div id="loc-panel">
+  <h2>Ort wählen</h2>
+  <p class="panel-sub">Wo möchtest du das Nordlicht erleben?</p>
+  <div class="loc-grid" id="loc-grid"></div>
+  <hr class="divider"/>
+  <div class="add-section">
+    <div class="add-title">✦ Eigenen Ort hinzufügen</div>
+    <div class="add-row">
+      <input id="inp-name" type="text" placeholder="Stadtname (z.B. Murmansk, Kangerlussuaq…)" autocomplete="off"/>
+      <button id="add-btn">+ Hinzufügen</button>
+    </div>
+    <div class="add-hint">Temperatur &amp; Aurora-Index werden automatisch aus dem Internet geladen.</div>
+    <div class="add-error" id="add-error"></div>
+  </div>
+  <button id="loc-close">✕ &nbsp; Schließen</button>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="ui">
+  <span class="label" id="ui-label">69°N &nbsp;·&nbsp; 18°E &nbsp;·&nbsp; Tromsø</span>
+  <h1>Nord<br><em>licht</em></h1>
+  <p class="subtitle" id="ui-sub">Eine stille Nacht über dem Polarkreis</p>
+</div>
+
+<div class="coords">
+  <div class="coord-item"><div class="val" id="time">--:--</div><div class="key">Lokalzeit</div></div>
+  <div class="coord-item"><div class="val" id="temp">-22°C</div><div class="key">Temperatur</div></div>
+  <div class="coord-item"><div class="val" id="kp">KP 7</div><div class="key">Aurora Index</div></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   DATA
+══════════════════════════════════════════ */
+const DEFAULTS = [
+  { id:'tromso',      name:'Tromsø',      coords:'69°N · 18°E',  tz:'Europe/Oslo',        temp:'-22°C', kp:'KP 7', desc:'Tor zur Arktis',       label:'69°N · 18°E · Tromsø',      sub:'Eine stille Nacht über dem Polarkreis'  },
+  { id:'reykjavik',   name:'Reykjavík',   coords:'64°N · 22°W',  tz:'Atlantic/Reykjavik', temp:'-8°C',  kp:'KP 5', desc:'Feuer & Eis, Island',   label:'64°N · 22°W · Reykjavík',   sub:'Zwischen Vulkanen und endlosem Himmel'  },
+  { id:'fairbanks',   name:'Fairbanks',   coords:'65°N · 148°W', tz:'America/Anchorage',  temp:'-31°C', kp:'KP 8', desc:'Alaska, USA',           label:'65°N · 148°W · Fairbanks',  sub:'Tiefe Kälte unter tanzenden Lichtern'   },
+  { id:'rovaniemi',   name:'Rovaniemi',   coords:'66°N · 26°E',  tz:'Europe/Helsinki',    temp:'-18°C', kp:'KP 6', desc:'Lappland, Finnland',    label:'66°N · 26°E · Rovaniemi',   sub:'Im Reich des Weihnachtsmanns'           },
+  { id:'abisko',      name:'Abisko',      coords:'68°N · 19°E',  tz:'Europe/Stockholm',   temp:'-20°C', kp:'KP 6', desc:'Nordschweden',          label:'68°N · 19°E · Abisko',      sub:'Kristallklare Nächte in Skandinavien'  },
+  { id:'yellowknife', name:'Yellowknife', coords:'62°N · 114°W', tz:'America/Edmonton',   temp:'-27°C', kp:'KP 7', desc:'Kanada',                label:'62°N · 114°W · Yellowknife',sub:'Nordlichter über dem Großen Sklavensee'},
+];
+
+let customLocations = [];
+let active = DEFAULTS[0];
+let currentTZ = active.tz;
+
+/* ══════════════════════════════════════════
+   LIVE DATA FETCHING
+══════════════════════════════════════════ */
+
+// 1. Geocoding: city name → lat/lon + timezone via Open-Meteo geocoding
+async function geocode(city) {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=de&format=json`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if (!d.results || !d.results.length) throw new Error('Ort nicht gefunden.');
+  return d.results[0]; // { name, latitude, longitude, timezone, country }
+}
+
+// 2. Current temperature via Open-Meteo (free, no key)
+async function fetchTemp(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&wind_speed_unit=ms`;
+  const r = await fetch(url);
+  const d = await r.json();
+  return d.current?.temperature_2m ?? null;
+}
+
+// 3. KP index via NOAA Space Weather API (free, no key)
+async function fetchKp() {
+  try {
+    const url = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
+    const r = await fetch(url);
+    const d = await r.json();
+    // last entry: [time, kp]
+    const last = d[d.length - 1];
+    const kp = parseFloat(last[1]);
+    return isNaN(kp) ? null : kp;
+  } catch { return null; }
+}
+
+// Format lat/lon to coords string
+function fmtCoords(lat, lon) {
+  const ns = lat >= 0 ? 'N' : 'S';
+  const ew = lon >= 0 ? 'E' : 'W';
+  return `${Math.abs(lat).toFixed(0)}°${ns} · ${Math.abs(lon).toFixed(0)}°${ew}`;
+}
+
+/* ══════════════════════════════════════════
+   GRID RENDERING
+══════════════════════════════════════════ */
+function allLocations() { return [...DEFAULTS, ...customLocations]; }
+const grid = document.getElementById('loc-grid');
+
+function renderGrid() {
+  grid.innerHTML = '';
+  allLocations().forEach(loc => {
+    const isCustom = customLocations.includes(loc);
+    const card = document.createElement('div');
+    card.className = 'loc-card' + (isCustom ? ' custom-card' : '') + (loc.id === active.id ? ' active' : '');
+    card.dataset.id = loc.id;
+    const loadingDot = loc._loading ? '<span class="loading-dot"></span>' : '';
+    card.innerHTML = `
+      <div class="loc-name">${loc.name}${loadingDot}</div>
+      <div class="loc-coords">${loc.coords || ''}</div>
+      <div class="loc-desc">${loc.desc || ''}</div>
+      ${isCustom ? `<button class="del-btn" data-id="${loc.id}" title="Entfernen">✕</button>` : ''}
+    `;
+    card.addEventListener('click', e => {
+      if (e.target.classList.contains('del-btn')) return;
+      selectLocation(loc);
+    });
+    if (isCustom) {
+      card.querySelector('.del-btn').addEventListener('click', e => {
+        e.stopPropagation(); deleteCustom(loc.id);
+      });
+    }
+    grid.appendChild(card);
+  });
+}
+
+function deleteCustom(id) {
+  const idx = customLocations.findIndex(l => l.id === id);
+  if (idx !== -1) customLocations.splice(idx, 1);
+  if (active.id === id) selectLocation(DEFAULTS[0]);
+  else renderGrid();
+}
+
+/* ══════════════════════════════════════════
+   SELECT LOCATION
+══════════════════════════════════════════ */
+function selectLocation(loc) {
+  active = loc;
+  renderGrid();
+  const ids = ['ui-label','ui-sub','temp','kp'];
+  const els = ids.map(i => document.getElementById(i));
+  els.forEach(el => el.classList.add('text-fade'));
+  setTimeout(() => {
+    document.getElementById('ui-label').textContent = loc.label || loc.name;
+    document.getElementById('ui-sub').textContent   = loc.sub   || '';
+    document.getElementById('temp').textContent     = loc._loading ? '…' : (loc.temp || '—');
+    document.getElementById('kp').textContent       = loc._loading ? '…' : (loc.kp   || '—');
+    currentTZ = loc.tz || 'UTC';
+    updateTime();
+    els.forEach(el => el.classList.remove('text-fade'));
+  }, 360);
+  closePanel();
+}
+
+renderGrid();
+
+/* ══════════════════════════════════════════
+   ADD CUSTOM LOCATION
+══════════════════════════════════════════ */
+document.getElementById('add-btn').addEventListener('click', addCustom);
+document.getElementById('inp-name').addEventListener('keydown', e => { if (e.key === 'Enter') addCustom(); });
+
+async function addCustom() {
+  const nameInput = document.getElementById('inp-name').value.trim();
+  const err = document.getElementById('add-error');
+  const btn = document.getElementById('add-btn');
+  if (!nameInput) { err.textContent = '⚠ Bitte einen Stadtnamen eingeben.'; return; }
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  try {
+    // 1. Geocode
+    const geo = await geocode(nameInput);
+    const { name, latitude: lat, longitude: lon, timezone, country } = geo;
+    const coords = fmtCoords(lat, lon);
+
+    // 2. Fetch temp + KP in parallel
+    const [tempRaw, kpRaw] = await Promise.all([fetchTemp(lat, lon), fetchKp()]);
+    const tempStr = tempRaw !== null ? `${Math.round(tempRaw)}°C` : '—';
+    const kpStr   = kpRaw  !== null ? `KP ${kpRaw.toFixed(1)}`   : '—';
+
+    const id = 'custom_' + Date.now();
+    const loc = {
+      id, name, desc: country || '',
+      coords, tz: timezone || 'UTC',
+      temp: tempStr, kp: kpStr,
+      label: `${coords} · ${name}`,
+      sub: `Aktuelle Daten für ${name}, ${country || ''}`,
+      _loading: false,
+    };
+
+    customLocations.push(loc);
+    renderGrid();
+    document.getElementById('inp-name').value = '';
+    selectLocation(loc);
+
+  } catch(e) {
+    err.textContent = `⚠ ${e.message || 'Fehler beim Laden der Daten.'}`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '+ Hinzufügen';
+  }
+}
+
+/* ══════════════════════════════════════════
+   PANEL
+══════════════════════════════════════════ */
+const panel = document.getElementById('loc-panel');
+document.getElementById('loc-btn').addEventListener('click', () => panel.classList.add('open'));
+document.getElementById('loc-close').addEventListener('click', closePanel);
+panel.addEventListener('click', e => { if (e.target === panel) closePanel(); });
+function closePanel() { panel.classList.remove('open'); }
+
+/* ══════════════════════════════════════════
+   STARS
+══════════════════════════════════════════ */
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [];
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  stars = Array.from({length:320}, () => ({
+    x:Math.random()*W, y:Math.random()*H*.75,
+    r:Math.random()*1.4+.3, a:Math.random(),
+    speed:Math.random()*.008+.003, phase:Math.random()*Math.PI*2
+  }));
+}
+function drawStars(t) {
+  ctx.clearRect(0,0,W,H);
+  stars.forEach(s => {
+    const alpha = s.a*(.6+.4*Math.sin(t*s.speed+s.phase));
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${alpha})`; ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', resize);
+resize();
+requestAnimationFrame(drawStars);
+
+/* ══════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════ */
+const cur   = document.getElementById('cursor');
+const trail = document.getElementById('cursor-trail');
+document.addEventListener('mousemove', e => {
+  cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px';
+  setTimeout(()=>{ trail.style.left=e.clientX+'px'; trail.style.top=e.clientY+'px'; }, 80);
+});
+
+/* ══════════════════════════════════════════
+   CLOCK
+══════════════════════════════════════════ */
+function updateTime() {
+  try {
+    document.getElementById('time').textContent =
+      new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',timeZone:currentTZ});
+  } catch { document.getElementById('time').textContent='--:--'; }
+}
+updateTime();
+setInterval(updateTime, 10000);
+
+/* ══════════════════════════════════════════
+   SHOOTING STARS
+══════════════════════════════════════════ */
+function spawnShoot() {
+  const el = document.createElement('div');
+  el.className='shoot';
+  el.style.left=(Math.random()*80+10)+'%';
+  el.style.top=(Math.random()*30)+'%';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1300);
+  setTimeout(spawnShoot,Math.random()*8000+4000);
+}
+setTimeout(spawnShoot,3000);
+</script>
+</body>
+</html>

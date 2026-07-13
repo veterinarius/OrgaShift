@@ -3,7 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrgaShift 2 – Impressum</title>
+    <title>OrgaShift 2 – FAQ | Häufig gestellte Fragen zur KI-Schichtplanung</title>
+    <meta name="description" content="Fragen & Antworten zu OrgaShift: Kosten, Sicherheit, Integration, Features und Support für KI-gestützte Schichtplanung.">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="OrgaShift – FAQ">
+    <meta property="og:description" content="Häufig gestellte Fragen zur KI-Schichtplanungssoftware">
+    <meta property="og:url" content="https://orgashift.de/faq.html">
+    <meta property="og:type" content="website">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://orgashift.de/faq.html">
+
+    <!-- FAQPage Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was ist OrgaShift?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "OrgaShift ist eine Schichtplanungssoftware."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie viel kostet OrgaShift?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Preise richten sich nach der Größe deines Unternehmens und den benötigten Features. Kontaktiere uns für ein individuelles Angebot oder starte kostenlos mit unserer Demo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist OrgaShift sicher? Wie werden meine Daten geschützt?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, OrgaShift nutzt Verschlüsselung auf höchstem Niveau und hält DSGVO sowie deutsche Datenschutzstandards ein. Alle Daten werden in sicheren europäischen Rechenzentren gespeichert."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann OrgaShift mit meiner bestehenden Software integriert werden?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, OrgaShift bietet APIs und Integrationen mit gängigen HR- und Zeiterfassungssystemen an. Kontaktiere unseren Support für spezifische Integrationswünsche."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie lange dauert die Einführung?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Grundeinrichtung dauert typischerweise 1–2 Tage. Unser Onboarding-Team unterstützt dich während des gesamten Prozesses kostenlos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Gibt es einen kostenlosen Test?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, du kannst OrgaShift kostenlos mit Demodaten testen. Es ist keine Kreditkarte erforderlich. Du erhältst sofortigen Zugang zum vollständigen Feature-Set."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Bietet OrgaShift technischen Support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, wir bieten umfassenden Support per E-Mail, Chat und Telefon. Premium-Kunden erhalten 24/7 Support und einen dedizierten Account Manager."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Funktioniert OrgaShift auf mobilen Geräten?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, OrgaShift ist vollständig responsive und funktioniert optimal auf Smartphones, Tablets und Desktops. Es gibt auch native Mobile Apps für iOS und Android."
+          }
+        }
+      ]
+    }
+    </script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -45,7 +131,7 @@
             line-height: 1.6;
         }
 
-        /* ── NAV ──────────────────────────────────── */
+        /* ── NAV ──────────────────────────────────────────── */
         nav {
             position: fixed; top: 0; width: 100%;
             background: var(--nav-bg);
@@ -82,7 +168,7 @@
         .signup-btn:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
         html.light .signup-btn:hover { background: rgba(0,0,0,0.82); }
 
-        /* ── BEAMS ───────────────────────────────────── */
+        /* ── BEAMS ─────────────────────────────────────────────── */
         #beams-canvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; display: block; z-index: 0;
@@ -100,14 +186,14 @@
             50%       { opacity: 0.15; }
         }
 
-        /* ── IMPRINT SECTION ─────────────────────────── */
-        .imprint-section {
+        /* ── CONTENT SECTION ─────────────────────────────────── */
+        .content-section {
             position: relative; z-index: 1;
             padding: 128px 0 80px;
             min-height: 100vh;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-        .imprint-wrap { max-width: 820px; margin: 0 auto; }
+        .content-wrap { max-width: 820px; margin: 0 auto; }
 
         .section-tag {
             display: inline-block; padding: 4px 14px; border-radius: 20px;
@@ -116,51 +202,76 @@
             text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
         }
 
-        .imprint-card-outer {
+        .card-outer {
             border: 1px solid var(--border); padding: 8px;
         }
-        .imprint-card-inner {
+        .card-inner {
             border: 1px solid var(--border); padding: 52px;
             position: relative; overflow: hidden;
             background: rgba(255,255,255,0.02);
         }
-        html.light .imprint-card-inner {
-            background: rgba(0,0,0,0.02);
-        }
-        .imprint-card-inner::before {
+        html.light .card-inner { background: rgba(0,0,0,0.02); }
+        .card-inner::before {
             content: '';
             position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
         }
-        html.light .imprint-card-inner::before {
+        html.light .card-inner::before {
             background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
         }
 
-        .imprint-card-inner h1 {
+        .card-inner h1 {
             font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
-            color: var(--text); margin-bottom: 40px;
+            color: var(--text); margin-bottom: 8px;
         }
-        .imprint-card-inner h2 {
+        .card-inner .subtitle {
+            font-size: 0.95rem; color: var(--text-sec);
+            margin-bottom: 40px; line-height: 1.6;
+        }
+
+        /* ── FAQ ITEMS ──────────────────────────────────────────── */
+        .faq-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .faq-item {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 8px;
+            transition: background 0.2s, border-color 0.2s;
+            overflow: hidden;
+        }
+        .faq-item:hover { background: var(--surface-hover); border-color: rgba(0,122,255,0.3); }
+        .faq-item.active { border-color: rgba(0,122,255,0.4); }
+
+        .faq-question {
+            padding: 18px 20px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
             font-size: 0.95rem; font-weight: 600; color: var(--text);
-            margin-top: 2em; margin-bottom: 0.6em; letter-spacing: -0.01em;
+            user-select: none;
+            list-style: none;
         }
-        .imprint-card-inner p,
-        .imprint-card-inner address {
+        .faq-question::-webkit-details-marker { display: none; }
+
+        .toggle-icon {
+            flex-shrink: 0;
+            width: 20px; height: 20px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: var(--accent);
+            transition: transform 0.3s ease, border-color 0.2s;
+        }
+        .faq-item.active .toggle-icon { transform: rotate(180deg); border-color: rgba(0,122,255,0.5); }
+
+        .faq-answer {
+            padding: 0 20px 18px;
             font-size: 0.92rem; color: var(--text-sec);
-            line-height: 1.75; font-style: normal; margin-bottom: 0.4em;
+            line-height: 1.75;
+            display: none;
         }
-        .imprint-card-inner strong { color: var(--text); font-weight: 600; }
-        .imprint-card-inner .small { font-size: 0.86rem; color: var(--text-muted); }
-        .imprint-card-inner a { color: var(--accent); text-decoration: none; }
-        .imprint-card-inner a:hover { text-decoration: underline; }
+        .faq-item.active .faq-answer { display: block; }
 
-        .divider {
-            height: 1px; background: var(--border);
-            margin: 32px 0; opacity: 0.6;
-        }
-
-        /* ── FOOTER ──────────────────────────────────── */
+        /* ── FOOTER ────────────────────────────────────────────── */
         footer {
             background: var(--footer-bg); border-top: 1px solid var(--border);
             padding: 64px 0 32px; transition: background 0.35s ease;
@@ -184,7 +295,7 @@
         .footer-bottom p { color: var(--text-muted); font-size: 0.82rem; }
         .footer-logo { font-size: 16px; font-weight: 700; color: var(--text-sec); }
 
-        /* ── THEME TOGGLE ────────────────────────────── */
+        /* ── THEME TOGGLE ──────────────────────────────────────── */
         .theme-toggle {
             width: 36px; height: 36px; border-radius: 50%;
             border: 1px solid var(--border); background: var(--surface);
@@ -195,18 +306,18 @@
         }
         .theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
 
-        /* ── FADE-IN ─────────────────────────────────── */
+        /* ── FADE-IN ────────────────────────────────────────────── */
         .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .fi.visible { opacity: 1; transform: none; }
 
-        /* ── RESPONSIVE ──────────────────────────────── */
+        /* ── RESPONSIVE ─────────────────────────────────────────── */
         @media (max-width: 768px) {
             .nav-links { display: none; }
-            .imprint-card-inner { padding: 36px 28px; }
+            .card-inner { padding: 36px 28px; }
         }
         @media (max-width: 480px) {
-            .imprint-card-outer { border: none; padding: 0; }
-            .imprint-card-inner { padding: 28px 20px; }
+            .card-outer { border: none; padding: 0; }
+            .card-inner { padding: 28px 20px; }
         }
     </style>
 </head>
@@ -247,68 +358,91 @@
 <canvas id="beams-canvas"></canvas>
 <div class="beams-overlay"></div>
 
-<!-- IMPRESSUM CONTENT -->
-<section class="imprint-section">
+<!-- MAIN CONTENT -->
+<section class="content-section">
     <div class="container">
-        <div class="imprint-wrap">
+        <div class="content-wrap">
             <div class="fi">
-                <div class="section-tag">Rechtliches</div>
+                <div class="section-tag">FAQ</div>
             </div>
-            <div class="imprint-card-outer fi">
-                <div class="imprint-card-inner">
-                    <h1>Impressum</h1>
+            <div class="card-outer fi">
+                <div class="card-inner">
+                    <h1>Häufig gestellte Fragen</h1>
+                    <p class="subtitle">Alles Wichtige über OrgaShift – Schichtplanung</p>
 
-                    <h2>Angaben gemäß § 5 TMG</h2>
-                    <address>
-                        Max Mustermann<br>
-                        Musterstr. 93<br>
-                        Musterstadt<br>
-                        Deutschland
-                    </address>
-                    <p><strong>Vertreten durch:</strong><br>
-                    Max Mustermann</p>
+                    <div class="faq-list">
 
-                    <div class="divider"></div>
+                        <div class="faq-item active">
+                            <div class="faq-question">
+                                Was ist OrgaShift?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                OrgaShift ist eine Schichtplanungssoftware.
+                            </div>
+                        </div>
 
-                    <h2>Kontakt</h2>
-                    <p>
-                        Telefon: 01234 / 567890<br>
-                        E-Mail: <a href="mailto:info@example.com">info@example.com</a>
-                    </p>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Wie viel kostet OrgaShift?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Die Preise richten sich nach der Größe deines Unternehmens und den benötigten Features. Kontaktiere uns für ein individuelles Angebot oder starte kostenlos mit unserer Demo.
+                            </div>
+                        </div>
 
-                    <div class="divider"></div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Ist OrgaShift sicher? Wie werden meine Daten geschützt?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, OrgaShift nutzt Verschlüsselung auf höchstem Niveau und hält DSGVO sowie deutsche Datenschutzstandards ein. Alle Daten werden in sicheren europäischen Rechenzentren gespeichert.
+                            </div>
+                        </div>
 
-                    <h2>Umsatzsteuer-ID</h2>
-                    <p>
-                        Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br>
-                        DE123456789
-                    </p>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Wie lange dauert die Einführung?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Die Grundeinrichtung dauert typischerweise 1–2 Tage.
+                            </div>
+                        </div>
 
-                    <div class="divider"></div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Gibt es einen kostenlosen Test?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, du kannst OrgaShift kostenlos mit Demodaten testen. Es ist keine Kreditkarte erforderlich. Du erhältst sofortigen Zugang zum vollständigen Feature-Set.
+                            </div>
+                        </div>
 
-                    <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
-                    <address>
-                        Max Mustermann<br>
-                        Musterstraße 1<br>
-                        12345 Musterstadt<br>
-                        Deutschland
-                    </address>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Bietet OrgaShift technischen Support?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, wir bieten umfassenden Support per E-Mail, Chat und Telefon. Premium-Kunden erhalten 24/7 Support und einen dedizierten Account Manager.
+                            </div>
+                        </div>
 
-                    <div class="divider"></div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                Funktioniert OrgaShift auf mobilen Geräten?
+                                <span class="toggle-icon">▾</span>
+                            </div>
+                            <div class="faq-answer">
+                                Ja, OrgaShift ist vollständig responsive und funktioniert optimal auf Smartphones, Tablets und Desktops. Es gibt auch native Mobile Apps für iOS und Android.
+                            </div>
+                        </div>
 
-                    <h2>Haftungsausschluss</h2>
-                    <p class="small">
-                        Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
-                    </p>
-
-                    <div class="divider"></div>
-
-                    <h2>Streitschlichtung</h2>
-                    <p class="small">
-                        Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-                        <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>.<br>
-                        Unsere E-Mail-Adresse finden Sie oben im Impressum.
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -357,7 +491,7 @@
 </footer>
 
 <script>
-// ── BEAMS BACKGROUND ───────────────────────────────────────────────────
+// ── BEAMS BACKGROUND ───────────────────────────────────────────────────────────────────────
 (function () {
     const canvas = document.getElementById('beams-canvas');
     const ctx = canvas.getContext('2d');
@@ -444,7 +578,7 @@
     });
 }());
 
-// ── SCROLL ANIMATIONS ──────────────────────────────────────────────────
+// ── SCROLL ANIMATIONS ──────────────────────────────────────────────────────────────────
 const obs = new IntersectionObserver((entries) => {
     entries.forEach((e, i) => {
         if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 70);
@@ -453,7 +587,7 @@ const obs = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fi').forEach(el => obs.observe(el));
 
-// ── NAV SCROLL ─────────────────────────────────────────────────────────
+// ── NAV SCROLL ─────────────────────────────────────────────────────────────────
 function updateNavBg() {
     const isLight = document.documentElement.classList.contains('light');
     const scrolled = window.scrollY > 60;
@@ -463,7 +597,7 @@ function updateNavBg() {
 }
 window.addEventListener('scroll', updateNavBg, { passive: true });
 
-// ── THEME TOGGLE ───────────────────────────────────────────────────────
+// ── THEME TOGGLE ───────────────────────────────────────────────────────────────
 (function () {
     const html = document.documentElement;
     const btn  = document.getElementById('theme-toggle');
@@ -477,6 +611,14 @@ window.addEventListener('scroll', updateNavBg, { passive: true });
         updateNavBg();
     });
 }());
+
+// ── FAQ ACCORDION ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.faq-question').forEach(question => {
+    question.addEventListener('click', () => {
+        const item = question.closest('.faq-item');
+        item.classList.toggle('active');
+    });
+});
 </script>
 </body>
 </html>

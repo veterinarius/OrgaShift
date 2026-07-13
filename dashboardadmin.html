@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – Dashboard Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+  const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
+  const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+</script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black:   #050505;
+            --border:  #27272a;
+            --text:    #ffffff;
+            --text-sec: rgba(255,255,255,0.6);
+            --text-muted: rgba(255,255,255,0.3);
+            --accent:  #007AFF;
+            --surface: rgba(255,255,255,0.05);
+            --nav-bg:  rgba(5,5,5,0.82);
+        }
+        html[data-theme="light"] {
+            --black:      #f5f4f2;
+            --border:     #e4e4e7;
+            --text:       #0a0a0b;
+            --text-sec:   rgba(10,10,11,0.55);
+            --text-muted: rgba(10,10,11,0.28);
+            --accent:     #007AFF;
+            --surface:    rgba(0,0,0,0.04);
+            --nav-bg:     rgba(245,244,242,0.85);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--black);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ── BEAMS BACKGROUND ── */
+        #beams-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; display: block;
+            filter: blur(15px); z-index: 0; pointer-events: none;
+        }
+        .beams-overlay {
+            position: fixed; inset: 0; z-index: 1;
+            background: rgba(10,10,10,0.05);
+            animation: overlayPulse 10s ease-in-out infinite;
+            backdrop-filter: blur(50px); pointer-events: none;
+        }
+        @keyframes overlayPulse {
+            0%, 100% { opacity: 0.05; }
+            50%       { opacity: 0.15; }
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--nav-bg); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+        .logo-dot { color: var(--accent); }
+        .nav-links { display: flex; list-style: none; gap: 28px; }
+        .nav-links a { text-decoration: none; color: var(--text-sec); font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        .login-btn { color: var(--text-sec); text-decoration: none; font-size: 0.88rem; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+        .login-btn:hover { color: var(--text); background: var(--surface); }
+        .signup-btn {
+            background: var(--text); color: var(--black); text-decoration: none;
+            font-weight: 600; font-size: 0.88rem; padding: 9px 20px;
+            border-radius: 25px; transition: all 0.2s;
+        }
+        .signup-btn:hover { background: rgba(255,255,255,0.88); }
+        .theme-toggle {
+            background: none; border: 1px solid var(--border); border-radius: 50%;
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: var(--surface); }
+        .btn-logout {
+            background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.25);
+            color: #ff3b30; padding: 7px 14px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,59,48,0.22); border-color: rgba(255,59,48,0.4); }
+
+        /* PAGE */
+        .page { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 88px 24px 60px; }
+
+        /* HEADER */
+        .page-header {
+            border: 1px solid var(--border); padding: 32px 40px; margin-bottom: 40px;
+            position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        html[data-theme="light"] .page-header::before {
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+        }
+        .page-header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+        .page-header p  { color: var(--text-sec); font-size: 0.95rem; }
+
+        /* GRID */
+        .cards-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1px; background: var(--border); border: 1px solid var(--border);
+        }
+
+        /* CARD */
+        .card {
+            background: var(--black); padding: 36px 32px; text-decoration: none;
+            color: var(--text); display: flex; flex-direction: column; gap: 14px;
+            transition: background 0.2s; position: relative; overflow: hidden;
+        }
+        .card:hover { background: rgba(255,255,255,0.025); }
+        html[data-theme="light"] .card:hover { background: rgba(0,0,0,0.025); }
+        .card-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .card-body { flex: 1; }
+        .card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+        .card p  { font-size: 0.88rem; color: var(--text-sec); line-height: 1.6; }
+        .card-arrow {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.82rem; font-weight: 500; color: var(--text-muted);
+            margin-top: 4px; transition: color 0.2s;
+        }
+        .card:hover .card-arrow { color: var(--text-sec); }
+        .card-arrow svg { transition: transform 0.2s; }
+        .card:hover .card-arrow svg { transform: translateX(3px); }
+
+        /* ACCOUNT CARD */
+        .account-rows { display: flex; flex-direction: column; margin-top: 8px; }
+        .account-row {
+            display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+            padding: 7px 0; font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .account-row:last-child { border-bottom: none; }
+        .account-row .label { color: var(--text-muted); flex-shrink: 0; }
+        .account-row .value { color: var(--text); text-align: right; word-break: break-word; min-width: 0; }
+        .account-badge {
+            display: inline-block; padding: 2px 10px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 600;
+            background: rgba(0,122,255,0.14); color: var(--accent);
+            border: 1px solid rgba(0,122,255,0.3);
+        }
+        .account-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+        .account-btn {
+            flex: 1; min-width: 130px; text-align: center; text-decoration: none;
+            cursor: pointer; padding: 9px 14px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 500; font-family: inherit;
+            border: 1px solid var(--border); background: var(--surface); color: var(--text);
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .account-btn:hover { border-color: var(--accent); }
+        .account-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .account-btn.primary:hover { background: #0066d6; }
+
+        /* PASSWORT-MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 2000;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--black); border: 1px solid var(--border); border-radius: 14px;
+            padding: 28px; width: 100%; max-width: 420px;
+        }
+        .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+        .modal .modal-sub { font-size: 0.85rem; color: var(--text-sec); margin-bottom: 20px; }
+        .modal label { display: block; font-size: 0.82rem; color: var(--text-sec); margin: 14px 0 6px; }
+        .modal input[type="password"] {
+            width: 100%; padding: 11px 14px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--surface);
+            color: var(--text); font-size: 0.95rem; font-family: inherit; outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal input[type="password"]:focus { border-color: var(--accent); }
+        .modal-msg {
+            display: none; margin-top: 14px; padding: 10px 14px; border-radius: 8px;
+            font-size: 0.84rem; line-height: 1.5;
+        }
+        .modal-msg.error   { display: block; background: rgba(255,59,48,0.12);  border: 1px solid rgba(255,59,48,0.3);  color: #ff6b61; }
+        .modal-msg.success { display: block; background: rgba(52,199,89,0.12);  border: 1px solid rgba(52,199,89,0.3);  color: #34c759; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons .account-btn { flex: 1; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .page-header { padding: 24px 20px; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .card { padding: 28px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="beams-canvas"></canvas>
+<div class="beams-overlay"></div>
+
+<nav>
+    <div class="nav-container">
+        <a href="dashboardadmin.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="#contact">Kontakt</a></li>
+            <li><a href="pricing.html">Upgrade</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle" title="Farbschema wechseln">🌙</button>
+            <button class="btn-logout" onclick="logout()">Abmelden</button>
+        </div>
+    </div>
+</nav>
+
+<main class="page">
+    <div class="page-header">
+        <h1>Willkommen bei OrgaShift</h1>
+        <p>Ihre intelligente Lösung für Dienstplanung und Urlaubsverwaltung. Wählen Sie einen Bereich.</p>
+    </div>
+
+    <div class="cards-grid">
+
+        <a href="wochenplan.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(102,126,234,.2),rgba(0,122,255,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Wochenplan</h3>
+                <p>Schichten zuweisen und Wochendienstpläne für das gesamte Team verwalten.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="monatsplan.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(240,147,251,.2),rgba(245,87,108,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Monatsplan</h3>
+                <p>Detaillierte Monatsübersicht mit allen Schichten und Terminen auf einen Blick.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="urlaubALLE.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(79,172,254,.2),rgba(0,242,254,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Urlaub Übersicht</h3>
+                <p>Komplette Teamübersicht aller Urlaubsanträge mit Überschneidungserkennung.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="urlaubMA.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(52,199,89,.2),rgba(56,249,215,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Mein Urlaub</h3>
+                <p>Persönliche Urlaubsverwaltung – Anträge stellen und Resturlaub im Überblick.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="personal.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(253,160,133,.2),rgba(245,87,108,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Personal</h3>
+                <p>Mitarbeiterdaten verwalten – bis zu 20 Personen mit Rollen und Farben.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="pause.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(253,160,133,.2),rgba(245,87,108,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Mach mal Pause!</h3>
+                <p>AUSZEIT!</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <div class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(0,122,255,.2),rgba(94,92,230,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M6.2 18.7a6.5 6.5 0 0 1 11.6 0"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Mein Account</h3>
+                <div class="account-rows">
+                    <div class="account-row"><span class="label">Name</span><span class="value" id="accName">–</span></div>
+                    <div class="account-row"><span class="label">E-Mail</span><span class="value" id="accEmail">–</span></div>
+                    <div class="account-row"><span class="label">Rolle</span><span class="value" id="accRole">–</span></div>
+                    <div class="account-row"><span class="label">Organisation</span><span class="value" id="accOrg">–</span></div>
+                    <div class="account-row"><span class="label">Tarif</span><span class="value"><span class="account-badge" id="accTier">–</span></span></div>
+                    <div class="account-row"><span class="label">Mitglied seit</span><span class="value" id="accSince">–</span></div>
+                </div>
+                <div class="account-actions">
+                    <a href="pricing.html" class="account-btn primary">Tarif verwalten</a>
+                    <button type="button" class="account-btn" onclick="openPwModal()">Passwort ändern</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div class="modal-overlay" id="pwModal">
+    <div class="modal">
+        <h3>Passwort ändern</h3>
+        <p class="modal-sub">Legen Sie ein neues Passwort für Ihren Account fest.</p>
+        <form id="pwForm" novalidate>
+            <label for="pwNew">Neues Passwort</label>
+            <input type="password" id="pwNew" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" required>
+            <label for="pwConfirm">Passwort bestätigen</label>
+            <input type="password" id="pwConfirm" autocomplete="new-password" placeholder="Passwort wiederholen" required>
+            <div class="modal-msg" id="pwMsg"></div>
+            <div class="modal-buttons">
+                <button type="button" class="account-btn" onclick="closePwModal()">Abbrechen</button>
+                <button type="submit" class="account-btn primary" id="pwSubmit">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+/* ── THEME TOGGLE ── */
+(function() {
+    var html = document.documentElement;
+    var btn  = document.getElementById('themeToggle');
+    function applyTheme(t) {
+        html.setAttribute('data-theme', t);
+        btn.textContent = t === 'light' ? '☀️' : '🌙';
+        try { localStorage.setItem('theme', t); } catch(e) {}
+    }
+    var stored = null;
+    try { stored = localStorage.getItem('theme'); } catch(e) {}
+    if (stored === 'light' || stored === 'dark') {
+        applyTheme(stored);
+    } else {
+        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    btn.addEventListener('click', function() {
+        applyTheme(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+})();
+
+/* ── BEAMS BACKGROUND ── */
+(function () {
+    const canvas = document.getElementById('beams-canvas');
+    const ctx = canvas.getContext('2d');
+    const MINIMUM_BEAMS = 20;
+    const intensity = 1.0;
+    let beams = [];
+    let animId;
+
+    function createBeam(width, height) {
+        const angle = -35 + Math.random() * 10;
+        return {
+            x: Math.random() * width * 1.5 - width * 0.25,
+            y: Math.random() * height * 1.5 - height * 0.25,
+            width: 30 + Math.random() * 60,
+            length: height * 2.5,
+            angle,
+            speed: 0.6 + Math.random() * 1.2,
+            opacity: 0.12 + Math.random() * 0.16,
+            hue: 190 + Math.random() * 70,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.02 + Math.random() * 0.03,
+        };
+    }
+
+    function updateCanvasSize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(dpr, dpr);
+        const total = Math.floor(MINIMUM_BEAMS * 1.5);
+        beams = Array.from({ length: total }, () => createBeam(window.innerWidth, window.innerHeight));
+    }
+
+    function resetBeam(beam, index, total) {
+        const col = index % 3;
+        const spacing = window.innerWidth / 3;
+        beam.y = window.innerHeight + 100;
+        beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+        beam.width = 100 + Math.random() * 100;
+        beam.speed = 0.5 + Math.random() * 0.4;
+        beam.hue = 190 + (index * 70) / total;
+        beam.opacity = 0.2 + Math.random() * 0.1;
+    }
+
+    function drawBeam(beam) {
+        ctx.save();
+        ctx.translate(beam.x, beam.y);
+        ctx.rotate(beam.angle * Math.PI / 180);
+        const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * intensity;
+        const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
+        gradient.addColorStop(0,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        gradient.addColorStop(0.1, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(0.4, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.6, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.9, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(1,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+        ctx.restore();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.filter = 'blur(35px)';
+        const total = beams.length;
+        beams.forEach((beam, i) => {
+            beam.y -= beam.speed;
+            beam.pulse += beam.pulseSpeed;
+            if (beam.y + beam.length < -100) resetBeam(beam, i, total);
+            drawBeam(beam);
+        });
+        animId = requestAnimationFrame(animate);
+    }
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    animate();
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+    });
+}());
+
+async function logout() {
+    await sbClient.auth.signOut();
+    window.location.href = 'login.html?logout=1';
+}
+
+sbClient.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) { window.location.href = 'login.html'; return; }
+    loadAccountInfo(session);
+});
+
+/* ── ACCOUNT-KARTE ── */
+async function loadAccountInfo(session) {
+    const TIER_LABELS = { free: 'Free Trial', basic: 'Basic', premium: 'Premium' };
+    const ROLE_LABELS = { admin: 'Administrator', user: 'Mitarbeiter' };
+    const set = (id, val) => { document.getElementById(id).textContent = val || '–'; };
+
+    const user = session.user;
+    set('accName',  user.user_metadata?.full_name);
+    set('accEmail', user.email);
+    if (user.created_at) {
+        set('accSince', new Date(user.created_at).toLocaleDateString('de-DE', {
+            day: '2-digit', month: 'long', year: 'numeric'
+        }));
+    }
+
+    const { data: profile } = await sbClient
+        .from('profiles').select('role, tier, organization_id')
+        .eq('id', user.id).maybeSingle();
+    if (!profile) return;
+
+    set('accRole', ROLE_LABELS[profile.role] || profile.role);
+
+    let tier = profile.tier || 'free';
+    if (profile.organization_id) {
+        const { data: org } = await sbClient
+            .from('organizations').select('name, tier')
+            .eq('id', profile.organization_id).maybeSingle();
+        if (org) {
+            set('accOrg', org.name);
+            tier = org.tier || tier;
+        }
+    } else if (user.user_metadata?.company) {
+        set('accOrg', user.user_metadata.company);
+    }
+    set('accTier', TIER_LABELS[tier] || tier);
+}
+
+/* ── PASSWORT-MODAL ── */
+const pwModal = document.getElementById('pwModal');
+const pwMsg   = document.getElementById('pwMsg');
+
+function showPwMessage(message, type) {
+    pwMsg.className   = 'modal-msg ' + type;
+    pwMsg.textContent = message;
+}
+
+function openPwModal() {
+    document.getElementById('pwForm').reset();
+    pwMsg.className = 'modal-msg';
+    pwModal.classList.add('open');
+    document.getElementById('pwNew').focus();
+}
+
+function closePwModal() {
+    pwModal.classList.remove('open');
+}
+
+pwModal.addEventListener('click', (e) => { if (e.target === pwModal) closePwModal(); });
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && pwModal.classList.contains('open')) closePwModal();
+});
+
+/* Leak-Check (HIBP k-Anonymity: nur die ersten 5 Zeichen
+   des SHA-1-Hashes verlassen den Browser, nie das Passwort) */
+async function isPasswordPwned(pw) {
+    try {
+        const digest = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(pw));
+        const hex = Array.from(new Uint8Array(digest))
+            .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+        const res = await fetch('https://api.pwnedpasswords.com/range/' + hex.slice(0, 5));
+        if (!res.ok) return false;
+        return (await res.text()).includes(hex.slice(5));
+    } catch (_) {
+        return false; // Bei Netzwerkfehlern das Speichern nicht blockieren
+    }
+}
+
+document.getElementById('pwForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const pw  = document.getElementById('pwNew').value;
+    const pw2 = document.getElementById('pwConfirm').value;
+    const btn = document.getElementById('pwSubmit');
+
+    if (pw.length < 8) {
+        showPwMessage('Das Passwort muss mindestens 8 Zeichen lang sein.', 'error');
+        return;
+    }
+    if (pw !== pw2) {
+        showPwMessage('Die Passwörter stimmen nicht überein.', 'error');
+        return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Wird gespeichert…';
+
+    if (await isPasswordPwned(pw)) {
+        showPwMessage('Dieses Passwort ist aus Datenlecks bekannt. Bitte wählen Sie ein anderes.', 'error');
+        btn.disabled    = false;
+        btn.textContent = 'Speichern';
+        return;
+    }
+
+    const { error } = await sbClient.auth.updateUser({ password: pw });
+
+    if (error) {
+        showPwMessage(error.message === 'New password should be different from the old password.'
+            ? 'Das neue Passwort muss sich vom alten unterscheiden.'
+            : 'Fehler: ' + error.message, 'error');
+        btn.disabled    = false;
+        btn.textContent = 'Speichern';
+        return;
+    }
+
+    showPwMessage('Passwort erfolgreich geändert.', 'success');
+    btn.textContent = 'Speichern';
+    setTimeout(() => { closePwModal(); btn.disabled = false; }, 1500);
+});
+</script>
+</body>
+</html>

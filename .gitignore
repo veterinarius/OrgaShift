@@ -1,0 +1,6 @@
+# Zugangsdaten / sensible Nutzerdaten – niemals committen
+OrgaShift_Benutzer.xlsx
+*.xlsx
+
+# macOS
+.DS_Store

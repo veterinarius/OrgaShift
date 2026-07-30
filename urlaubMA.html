@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrgaShift 2 – Mein Urlaub</title>
+    <title>OrgaShift 2 – Urlaubsanträge</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+        const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
+        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
+        const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+    </script>
     <style>
         /* ── DESIGN TOKENS ── */
         :root {
@@ -322,8 +328,8 @@
 <main class="page">
     <div class="page-header">
         <div>
-            <h1 class="page-title">Mein Urlaub</h1>
-            <p class="page-subtitle">Urlaub beantragen und Urlaubstage im Überblick</p>
+            <h1 class="page-title">Urlaubsanträge</h1>
+            <p class="page-subtitle">Urlaubsanträge der Mitarbeiter genehmigen und im Überblick behalten</p>
         </div>
         <div class="emp-select-wrap">
             <label for="empSelect">Mitarbeiter:</label>
@@ -358,49 +364,12 @@
     </div>
 
     <div id="mainContent" style="display:none">
-        <div class="grid">
-            <!-- Antrag -->
-            <div class="card">
-                <h2 class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Urlaub beantragen
-                </h2>
-                <div class="progress-bar-wrap" id="progressWrap">
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
-                    <div class="progress-label"><span>Verbraucht</span><span id="progressLabel">0 / 30 Tage</span></div>
-                </div>
-                <form id="vacForm" novalidate>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fieldFrom">Von <span class="req" aria-hidden="true">*</span></label>
-                            <input type="date" id="fieldFrom" class="form-control" required>
-                            <div class="field-error" id="errFrom">Pflichtfeld.</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="fieldTo">Bis <span class="req" aria-hidden="true">*</span></label>
-                            <input type="date" id="fieldTo" class="form-control" required>
-                            <div class="field-error" id="errTo">Muss nach dem Startdatum liegen.</div>
-                        </div>
-                    </div>
-                    <div id="daysPreview" class="days-preview"></div>
-                    <div class="form-group" style="margin-top:12px">
-                        <label for="fieldNote">Notiz (optional)</label>
-                        <input type="text" id="fieldNote" class="form-control" placeholder="z.B. Familienurlaub">
-                    </div>
-                    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px">
-                        Antrag einreichen
-                    </button>
-                </form>
-            </div>
-
-            <!-- Liste -->
-            <div class="card">
-                <h2 class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Meine Anträge
-                </h2>
-                <div class="vacation-list" id="vacationList"></div>
-            </div>
+        <div class="card">
+            <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Urlaubsanträge
+            </h2>
+            <div class="vacation-list" id="vacationList"></div>
         </div>
     </div>
 </main>
@@ -507,22 +476,12 @@
     })();
 
     // ─────────────────────────────────────────
-    //  URLAUB FUNKTIONALITÄT
+    //  URLAUB FUNKTIONALITÄT (Supabase, organisationsweit)
     // ─────────────────────────────────────────
-    const VAC_KEY         = 'orgashift_vacation';
-    const PERS_KEY        = 'orgashift_personal';
-    const ENTITLEMENT_KEY = 'orgashift_entitlement';
-
-    function getEntitlement(empId) {
-        try { const d = JSON.parse(localStorage.getItem(ENTITLEMENT_KEY) || '{}'); return d[empId] ?? 30; } catch { return 30; }
-    }
-    function setEntitlement(empId, days) {
-        try { const d = JSON.parse(localStorage.getItem(ENTITLEMENT_KEY) || '{}'); d[empId] = days; localStorage.setItem(ENTITLEMENT_KEY, JSON.stringify(d)); } catch {}
-    }
-
-    function loadEmp() { try { return JSON.parse(localStorage.getItem(PERS_KEY))||[]; } catch{return[];} }
-    function loadVac() { try { return JSON.parse(localStorage.getItem(VAC_KEY))||[]; } catch{return[];} }
-    function saveVac(v) { localStorage.setItem(VAC_KEY, JSON.stringify(v)); }
+    let orgId = null;
+    let currentUserId = null;
+    let employees = [];   // [{id, name, vacation_days_per_year}] – aus public.employees
+    let vacations = [];   // Anträge des aktuell ausgewählten Mitarbeiters
 
     function countDays(from, to) {
         const f = new Date(from), t = new Date(to);
@@ -540,10 +499,30 @@
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     function getSelectedEmpId() { return document.getElementById('empSelect').value; }
+    function currentEmployee(empId) { return employees.find(e => e.id === empId); }
+
+    async function loadEmployees() {
+        const { data, error } = await sbClient
+            .from('employees')
+            .select('id, name, vacation_days_per_year')
+            .order('name');
+        if (error) { console.error('[urlaub] Mitarbeiter laden fehlgeschlagen:', error.message); employees = []; return; }
+        employees = data || [];
+    }
+
+    async function loadVacations(empId) {
+        const { data, error } = await sbClient
+            .from('vacations')
+            .select('id, from_date, to_date, note, status')
+            .eq('employee_id', empId)
+            .order('from_date', { ascending: false });
+        if (error) { console.error('[urlaub] Anträge laden fehlgeschlagen:', error.message); vacations = []; return; }
+        vacations = (data || []).map(v => ({ id: v.id, from: v.from_date, to: v.to_date, note: v.note, status: v.status }));
+    }
 
     function updateStats(empId) {
-        const TOTAL     = getEntitlement(empId);
-        const vacations = loadVac().filter(v => v.employeeId === empId);
+        const emp   = currentEmployee(empId);
+        const TOTAL = emp ? emp.vacation_days_per_year : 30;
         const approved  = vacations.filter(v => v.status === 'approved');
         const pending   = vacations.filter(v => v.status === 'pending');
         const usedDays  = approved.reduce((s,v) => s + countDays(v.from, v.to), 0);
@@ -554,10 +533,6 @@
         document.getElementById('statUsed').textContent    = usedDays;
         document.getElementById('statPending').textContent = pendDays;
         document.getElementById('statLeft').textContent    = leftDays;
-
-        const pct = Math.min(100, Math.round(usedDays / TOTAL * 100));
-        document.getElementById('progressFill').style.width = pct + '%';
-        document.getElementById('progressLabel').textContent = `${usedDays} / ${TOTAL} Tage (${pct}%)`;
     }
 
     function editEntitlement() {
@@ -565,7 +540,8 @@
         if (!empId) return;
         const statEl = document.getElementById('statTotal');
         if (!statEl || statEl.tagName === 'INPUT') return;
-        const current = getEntitlement(empId);
+        const emp = currentEmployee(empId);
+        const current = emp ? emp.vacation_days_per_year : 30;
         const input = document.createElement('input');
         input.type = 'number'; input.min = 1; input.max = 365; input.value = current;
         input.style.cssText = 'width:72px;font-size:2rem;font-weight:700;color:inherit;background:rgba(0,122,255,0.15);border:1.5px solid var(--color-accent);border-radius:6px;text-align:center;outline:none;padding:0 4px;font-family:inherit;';
@@ -573,10 +549,12 @@
         input.id = 'statTotal';
         input.focus(); input.select();
         let saved = false;
-        function save() {
+        async function save() {
             if (saved) return; saved = true;
             const val = Math.max(1, Math.min(365, parseInt(input.value) || current));
-            setEntitlement(empId, val);
+            const { error } = await sbClient.from('employees').update({ vacation_days_per_year: val }).eq('id', empId);
+            if (error) { console.error('[urlaub] Anspruch speichern fehlgeschlagen:', error.message); }
+            else if (emp) { emp.vacation_days_per_year = val; }
             const span = document.createElement('div');
             span.id = 'statTotal'; span.className = 'stat-num';
             span.style.cssText = 'border-bottom:1px dotted rgba(255,255,255,0.35);display:inline-block';
@@ -591,8 +569,7 @@
         });
     }
 
-    function renderList(empId) {
-        const vacations = loadVac().filter(v => v.employeeId === empId).sort((a,b) => new Date(b.from)-new Date(a.from));
+    function renderList() {
         const list = document.getElementById('vacationList');
         if (vacations.length === 0) { list.innerHTML = '<div class="empty-list">Noch keine Urlaubsanträge.</div>'; return; }
 
@@ -616,30 +593,30 @@
         }).join('');
     }
 
-    function approveVac(id) {
-        const vacs = loadVac();
-        const idx = vacs.findIndex(v => v.id === id);
-        if (idx >= 0) { vacs[idx].status = 'approved'; saveVac(vacs); }
+    async function approveVac(id) {
+        const { error } = await sbClient.from('vacations').update({ status: 'approved', decided_by: currentUserId }).eq('id', id);
+        if (error) { alert('Genehmigen fehlgeschlagen: ' + error.message); return; }
         const empId = getSelectedEmpId();
-        updateStats(empId); renderList(empId);
+        await loadVacations(empId);
+        updateStats(empId); renderList();
     }
 
-    function deleteVac(id) {
+    async function deleteVac(id) {
         if (!confirm('Diesen Urlaubsantrag wirklich löschen?')) return;
-        const vacs = loadVac().filter(v => v.id !== id);
-        saveVac(vacs);
+        const { error } = await sbClient.from('vacations').delete().eq('id', id);
+        if (error) { alert('Löschen fehlgeschlagen: ' + error.message); return; }
         const empId = getSelectedEmpId();
-        updateStats(empId); renderList(empId);
+        await loadVacations(empId);
+        updateStats(empId); renderList();
     }
 
     function populateSelect() {
-        const employees = loadEmp();
         const sel = document.getElementById('empSelect');
         sel.innerHTML = '<option value="">-- Auswählen --</option>' +
-            employees.map(e => `<option value="${e.id}">${escHtml(e.name)}</option>`).join('');
+            employees.map(e => `<option value="${e.id}">${escHtml(e.name || '(ohne Namen)')}</option>`).join('');
     }
 
-    document.getElementById('empSelect').addEventListener('change', function() {
+    document.getElementById('empSelect').addEventListener('change', async function() {
         const empId = this.value;
         if (!empId) {
             document.getElementById('statsRow').style.display = 'none';
@@ -650,60 +627,28 @@
         document.getElementById('noEmpMsg').style.display = 'none';
         document.getElementById('statsRow').style.display = 'grid';
         document.getElementById('mainContent').style.display = 'block';
-        updateStats(empId); renderList(empId);
-    });
-
-    function updatePreview() {
-        const from = document.getElementById('fieldFrom').value;
-        const to   = document.getElementById('fieldTo').value;
-        const preview = document.getElementById('daysPreview');
-        if (from && to && new Date(to) >= new Date(from)) {
-            const d = countDays(from, to);
-            preview.textContent = `= ${d} Arbeitstag${d !== 1 ? 'e' : ''}`;
-        } else { preview.textContent = ''; }
-    }
-    document.getElementById('fieldFrom').addEventListener('change', updatePreview);
-    document.getElementById('fieldTo').addEventListener('change', updatePreview);
-    document.getElementById('fieldFrom').addEventListener('blur', () => {
-        const v = document.getElementById('fieldFrom').value;
-        document.getElementById('fieldFrom').classList.toggle('error', !v);
-        document.getElementById('errFrom').classList.toggle('show', !v);
-    });
-    document.getElementById('fieldTo').addEventListener('blur', () => {
-        const from = document.getElementById('fieldFrom').value;
-        const to   = document.getElementById('fieldTo').value;
-        const ok = !!to && (!from || new Date(to) >= new Date(from));
-        document.getElementById('fieldTo').classList.toggle('error', !ok);
-        document.getElementById('errTo').classList.toggle('show', !ok);
-    });
-
-    document.getElementById('vacForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const from  = document.getElementById('fieldFrom').value;
-        const to    = document.getElementById('fieldTo').value;
-        const note  = document.getElementById('fieldNote').value.trim();
-        const empId = getSelectedEmpId();
-
-        let ok = true;
-        if (!from) { document.getElementById('fieldFrom').classList.add('error'); document.getElementById('errFrom').classList.add('show'); ok = false; }
-        if (!to || new Date(to) < new Date(from)) { document.getElementById('fieldTo').classList.add('error'); document.getElementById('errTo').classList.add('show'); ok = false; }
-        if (!ok) return;
-
-        const vacs = loadVac();
-        vacs.push({ id: Date.now().toString(), employeeId: empId, from, to, note, status: 'pending' });
-        saveVac(vacs);
-        document.getElementById('vacForm').reset();
-        document.getElementById('daysPreview').textContent = '';
-        updateStats(empId); renderList(empId);
+        await loadVacations(empId);
+        updateStats(empId); renderList();
     });
 
     // Init
-    populateSelect();
-    const emps = loadEmp();
-    if (emps.length === 1) {
-        document.getElementById('empSelect').value = emps[0].id;
-        document.getElementById('empSelect').dispatchEvent(new Event('change'));
+    async function init() {
+        const { data: { session } } = await sbClient.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return; }
+        currentUserId = session.user.id;
+
+        const { data: profile } = await sbClient
+            .from('profiles').select('organization_id').eq('id', currentUserId).single();
+        orgId = profile?.organization_id || null;
+
+        await loadEmployees();
+        populateSelect();
+        if (employees.length === 1) {
+            document.getElementById('empSelect').value = employees[0].id;
+            document.getElementById('empSelect').dispatchEvent(new Event('change'));
+        }
     }
+    init();
 </script>
 </body>
 </html>

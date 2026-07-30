@@ -668,6 +668,10 @@
                         <label for="startDate">Eintrittsdatum</label>
                         <input type="date" id="startDate" name="startDate">
                     </div>
+                    <div class="form-group">
+                        <label for="vacationDays">Urlaubsanspruch (Tage/Jahr)</label>
+                        <input type="number" id="vacationDays" name="vacationDays" min="0" max="365" value="30">
+                    </div>
                 </div>
 
                 <div class="form-group remarks-group">
@@ -699,6 +703,10 @@
                     Die eingeladene Person registriert sich als Administrator und gibt dabei diesen Code ein –
                     sie erhält damit Zugriff auf die Mitarbeitenden und Pläne Ihrer Organisation.
                     Jeder Code ist einmalig verwendbar.
+                </div>
+                <div class="code-hint" style="margin-top:6px;">
+                    Zusätzliche Admins sind kostenpflichtig (Basic: +4&nbsp;€/Monat, Premium: +2&nbsp;€/Monat je Admin)
+                    und werden über den Kontoinhaber abgerechnet. Im Free Trial sind keine zusätzlichen Admins möglich.
                 </div>
             </div>
             <div id="adminInviteList"></div>
@@ -1081,6 +1089,7 @@
                 street:               fd.get('street') || null,
                 house_number:         fd.get('houseNumber') || null,
                 remarks:              fd.get('remarks') || null,
+                vacation_days_per_year: parseInt(fd.get('vacationDays'), 10) || 30,
                 must_change_password: true,
             }).select().single();
 
@@ -1192,6 +1201,10 @@
                     <input type="date" class="edit-input" id="edit-startDate-${id}" value="${emp.start_date || ''}">
                 </div>
                 <div class="detail-item">
+                    <div class="detail-label">Urlaubsanspruch (Tage/Jahr)</div>
+                    <input type="number" class="edit-input" id="edit-vacationDays-${id}" min="0" max="365" value="${emp.vacation_days_per_year ?? 30}">
+                </div>
+                <div class="detail-item">
                     <div class="detail-label">Straße</div>
                     <input type="text" class="edit-input" id="edit-street-${id}" value="${emp.street || ''}">
                 </div>
@@ -1245,6 +1258,7 @@
                 phone:        document.getElementById(`edit-phone-${id}`).value || null,
                 birth_date:   document.getElementById(`edit-birthDate-${id}`).value || null,
                 start_date:   document.getElementById(`edit-startDate-${id}`).value || null,
+                vacation_days_per_year: parseInt(document.getElementById(`edit-vacationDays-${id}`).value, 10) || 30,
                 street:       document.getElementById(`edit-street-${id}`).value || null,
                 house_number: document.getElementById(`edit-houseNumber-${id}`).value || null,
                 postal_code:  document.getElementById(`edit-postalCode-${id}`).value || null,
@@ -1309,6 +1323,7 @@
                         ${emp.phone      ? `<div class="detail-item"><div class="detail-label">Telefon</div><div class="detail-value">${emp.phone}</div></div>` : ''}
                         ${emp.birth_date ? `<div class="detail-item"><div class="detail-label">Geburtsdatum</div><div class="detail-value">${formatDate(emp.birth_date)} (${calculateAge(emp.birth_date)} J.)</div></div>` : ''}
                         ${emp.start_date ? `<div class="detail-item"><div class="detail-label">Eintrittsdatum</div><div class="detail-value">${formatDate(emp.start_date)} (${calculateYearsOfService(emp.start_date)} J.)</div></div>` : ''}
+                        <div class="detail-item"><div class="detail-label">Urlaubsanspruch</div><div class="detail-value">${emp.vacation_days_per_year ?? 30} Tage/Jahr</div></div>
                         ${(emp.street || emp.city) ? `<div class="detail-item"><div class="detail-label">Adresse</div><div class="detail-value">${emp.street || ''} ${emp.house_number || ''}<br>${emp.postal_code || ''} ${emp.city || ''}</div></div>` : ''}
                         ${emp.remarks    ? `<div class="detail-item"><div class="detail-label">Bemerkungen</div><div class="detail-value">${emp.remarks}</div></div>` : ''}
                     </div>

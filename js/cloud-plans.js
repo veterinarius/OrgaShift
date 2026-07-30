@@ -2,21 +2,28 @@
 // ===================================================================
 // Speichert den Wochen-/Monatsplan als JSONB-Snapshot in der Tabelle
 // "plans" (eine Zeile pro Organisation und Plantyp), sodass alle
-// Admins einer Organisation auf dieselben Pläne zugreifen.
+// Admins einer Organisation auf dieselben Pläne zugreifen UND Mitarbeiter
+// (Rolle "user") ihn lesend abrufen können – in jedem Tarif, denn ohne
+// das könnten Mitarbeiter den vom Admin erstellten Plan nie sehen.
 //
 // Einbindung: am ENDE des <body>, NACH dem Inline-Script der Seite
-// (damit saveDataToLocalStorage bereits definiert ist).
+// (damit saveDataToLocalStorage auf Admin-Seiten bereits definiert ist).
+// Auf den *user.html-Seiten gibt es kein saveDataToLocalStorage – das ist
+// unkritisch, siehe hookSave().
 //
 // Verhalten:
-//  - Ohne Login oder im Free-Tarif passiert nichts (rein lokal).
-//  - Beim Laden wird der Cloud-Stand geholt; ist er neuer als der
-//    zuletzt übernommene, werden die localStorage-Keys ersetzt und
-//    die Seite einmalig neu geladen. Liegen lokal ungespeicherte
-//    Änderungen vor, wird vorher nachgefragt.
-//  - Das Hochladen erfolgt BEWUSST über das Badge unten rechts
-//    („☁ Änderungen speichern"). Lokale Änderungen markieren den
-//    Plan nur als ungespeichert; beim Verlassen der Seite mit
-//    ungespeicherten Änderungen warnt der Browser.
+//  - Ohne Login passiert nichts (rein lokal).
+//  - Admins: Beim Laden wird der Cloud-Stand geholt; ist er neuer als der
+//    zuletzt übernommene, werden die localStorage-Keys ersetzt und die
+//    Seite einmalig neu geladen. Liegen lokal ungespeicherte Änderungen
+//    vor, wird vorher nachgefragt. Das Hochladen erfolgt BEWUSST über das
+//    Badge unten rechts („☁ Änderungen speichern"). Lokale Änderungen
+//    markieren den Plan nur als ungespeichert; beim Verlassen der Seite
+//    mit ungespeicherten Änderungen warnt der Browser.
+//  - Mitarbeiter (Rolle "user"): nur lesend – der Cloud-Stand wird beim
+//    Laden übernommen (kein Badge, kein Speichern-Button, keine
+//    Verlassen-Warnung), damit sie den vom Admin veröffentlichten Plan
+//    sehen.
 // ===================================================================
 
 (function () {
@@ -40,11 +47,11 @@
     var sb = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
     var orgId = null;
     var userId = null;
-    var enabled = false;
+    var isAdmin = false; // steuert Schreibrechte (Badge/Speichern/Verlassen-Warnung)
     var saving = false;
     var badge = null;
 
-    // ---------- Ungespeicherte Änderungen ----------
+    // ---------- Ungespeicherte Änderungen (nur relevant für Admins) ----------
     function isDirty() { return localStorage.getItem(DIRTY_KEY) === '1'; }
     function setDirty(on) {
         if (on) localStorage.setItem(DIRTY_KEY, '1');
@@ -52,6 +59,7 @@
     }
 
     // ---------- Status-Badge (bei Änderungen klickbar = Speichern-Button) ----------
+    // Wird nur für Admins angezeigt – Mitarbeiter haben keinen Speichern-Button.
     function showBadge(text, opts) {
         opts = opts || {};
         if (!badge) {
@@ -75,7 +83,7 @@
     }
 
     function updateBadge() {
-        if (!enabled) return;
+        if (!isAdmin) return; // Mitarbeiter bekommen keinen Sync-Status angezeigt
         if (isDirty()) showBadge('☁ Änderungen speichern', { clickable: true });
         else showBadge('☁ Synchron', { muted: true });
     }
@@ -99,7 +107,7 @@
         });
     }
 
-    // ---------- Cloud lesen (automatisch beim Öffnen) ----------
+    // ---------- Cloud lesen (automatisch beim Öffnen, für Admins UND Mitarbeiter) ----------
     function pullFromCloud() {
         return sb.from('plans')
             .select('data, updated_at')
@@ -110,9 +118,11 @@
                 if (res.error) { console.warn('[cloud-plans] Laden fehlgeschlagen:', res.error.message); return; }
 
                 if (!res.data) {
-                    // Noch kein Cloud-Stand: vorhandene lokale Daten als speicherbar markieren
+                    // Noch kein Cloud-Stand. Nur Admins können ihn erzeugen: vorhandene
+                    // lokale Daten als speicherbar markieren. Mitarbeiter haben ohnehin
+                    // keinen Speichern-Button, für sie gibt es hier nichts zu tun.
                     sessionStorage.removeItem(RELOAD_GUARD);
-                    if (Object.keys(collectSnapshot()).length > 0) setDirty(true);
+                    if (isAdmin && Object.keys(collectSnapshot()).length > 0) setDirty(true);
                     updateBadge();
                     return;
                 }
@@ -123,8 +133,9 @@
                     return;
                 }
 
-                // Cloud ist neuer. Bei lokalen ungespeicherten Änderungen nachfragen.
-                if (isDirty() && localStorage.getItem(MARKER_KEY)) {
+                // Cloud ist neuer. Bei lokalen ungespeicherten Änderungen (nur Admins
+                // können welche haben) nachfragen.
+                if (isAdmin && isDirty() && localStorage.getItem(MARKER_KEY)) {
                     var takeCloud = window.confirm(
                         'In der Cloud liegt eine neuere Version dieses Plans ' +
                         '(von einem anderen Admin oder Gerät gespeichert).\n\n' +
@@ -153,9 +164,9 @@
             });
     }
 
-    // ---------- Cloud schreiben (nur über das Badge / manuell) ----------
+    // ---------- Cloud schreiben (nur Admins, über das Badge / manuell) ----------
     function pushToCloud() {
-        if (!enabled || saving) return;
+        if (!isAdmin || saving) return;
         saving = true;
         showBadge('☁ Speichert…', { muted: true });
 
@@ -182,7 +193,9 @@
             });
     }
 
-    // saveDataToLocalStorage der Seite umhüllen: markiert nur als ungespeichert
+    // saveDataToLocalStorage der Seite umhüllen: markiert nur als ungespeichert.
+    // Auf den *user.html-Seiten existiert diese Funktion nicht (rein lesend) –
+    // dann passiert hier nichts.
     function hookSave() {
         var original = window.saveDataToLocalStorage;
         if (typeof original !== 'function') return;
@@ -194,9 +207,9 @@
         };
     }
 
-    // Beim Verlassen mit ungespeicherten Änderungen warnen
+    // Beim Verlassen mit ungespeicherten Änderungen warnen (nur Admins)
     window.addEventListener('beforeunload', function (e) {
-        if (enabled && isDirty()) {
+        if (isAdmin && isDirty()) {
             e.preventDefault();
             e.returnValue = '';
         }
@@ -210,32 +223,16 @@
         userId = session.user.id;
 
         return sb.from('profiles')
-            .select('organization_id, role, tier')
+            .select('organization_id, role')
             .eq('id', userId)
             .single()
             .then(function (p) {
-                if (p.error || !p.data) return null;
-                return sb.from('tier_limits').select('can_cloud_save').eq('tier', p.data.tier).single()
-                    .then(function (t) {
-                        return {
-                            organization_id: p.data.organization_id,
-                            role: p.data.role,
-                            can_cloud_save: !!(t.data && t.data.can_cloud_save)
-                        };
-                    });
-            })
-            .then(function (info) {
-                if (!info || !info.organization_id) return;
-                orgId = info.organization_id;
+                if (p.error || !p.data || !p.data.organization_id) return;
 
-                if (!info.can_cloud_save) {
-                    showBadge('☁ Nur lokal – Cloud-Speicherung ab Basic-Tarif', { muted: true });
-                    return;
-                }
+                orgId = p.data.organization_id;
+                isAdmin = p.data.role === 'admin';
 
-                enabled = info.role === 'admin';
-                if (!enabled) return;
-                hookSave();
+                if (isAdmin) hookSave();
                 return pullFromCloud();
             });
     }).catch(function (e) {

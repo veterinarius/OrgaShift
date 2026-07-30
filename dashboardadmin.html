@@ -155,6 +155,12 @@
         .account-row:last-child { border-bottom: none; }
         .account-row .label { color: var(--text-muted); flex-shrink: 0; }
         .account-row .value { color: var(--text); text-align: right; word-break: break-word; min-width: 0; }
+        .org-edit-btn {
+            background: none; border: none; cursor: pointer; color: var(--text-muted);
+            font-size: 0.85rem; padding: 2px 5px; margin-left: 6px; border-radius: 6px;
+            line-height: 1; vertical-align: middle; display: none;
+        }
+        .org-edit-btn:hover { color: var(--accent); background: rgba(0,122,255,0.08); }
         .account-badge {
             display: inline-block; padding: 2px 10px; border-radius: 20px;
             font-size: 0.78rem; font-weight: 600;
@@ -187,13 +193,15 @@
         .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
         .modal .modal-sub { font-size: 0.85rem; color: var(--text-sec); margin-bottom: 20px; }
         .modal label { display: block; font-size: 0.82rem; color: var(--text-sec); margin: 14px 0 6px; }
-        .modal input[type="password"] {
+        .modal input[type="password"],
+        .modal input[type="text"] {
             width: 100%; padding: 11px 14px; border-radius: 8px;
             border: 1px solid var(--border); background: var(--surface);
             color: var(--text); font-size: 0.95rem; font-family: inherit; outline: none;
             transition: border-color 0.2s;
         }
-        .modal input[type="password"]:focus { border-color: var(--accent); }
+        .modal input[type="password"]:focus,
+        .modal input[type="text"]:focus { border-color: var(--accent); }
         .modal-msg {
             display: none; margin-top: 14px; padding: 10px 14px; border-radius: 8px;
             font-size: 0.84rem; line-height: 1.5;
@@ -221,7 +229,7 @@
     <div class="nav-container">
         <a href="dashboardadmin.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
         <ul class="nav-links">
-            <li><a href="#contact">Kontakt</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
             <li><a href="pricing.html">Upgrade</a></li>
         </ul>
         <div class="nav-right">
@@ -286,8 +294,8 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
             </div>
             <div class="card-body">
-                <h3>Mein Urlaub</h3>
-                <p>Persönliche Urlaubsverwaltung – Anträge stellen und Resturlaub im Überblick.</p>
+                <h3>Urlaubsanträge</h3>
+                <p>Urlaubsanträge der Mitarbeiter verwalten, genehmigen und Resturlaub im Überblick behalten.</p>
             </div>
             <div class="card-arrow">
                 Öffnen
@@ -333,7 +341,7 @@
                     <div class="account-row"><span class="label">Name</span><span class="value" id="accName">–</span></div>
                     <div class="account-row"><span class="label">E-Mail</span><span class="value" id="accEmail">–</span></div>
                     <div class="account-row"><span class="label">Rolle</span><span class="value" id="accRole">–</span></div>
-                    <div class="account-row"><span class="label">Organisation</span><span class="value" id="accOrg">–</span></div>
+                    <div class="account-row"><span class="label">Organisation</span><span class="value"><span id="accOrg">–</span><button type="button" class="org-edit-btn" id="orgEditBtn" onclick="openOrgModal()" title="Organisationsname ändern" aria-label="Organisationsname ändern">✎</button></span></div>
                     <div class="account-row"><span class="label">Tarif</span><span class="value"><span class="account-badge" id="accTier">–</span></span></div>
                     <div class="account-row"><span class="label">Mitglied seit</span><span class="value" id="accSince">–</span></div>
                 </div>
@@ -360,6 +368,23 @@
             <div class="modal-buttons">
                 <button type="button" class="account-btn" onclick="closePwModal()">Abbrechen</button>
                 <button type="submit" class="account-btn primary" id="pwSubmit">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="orgModal">
+    <div class="modal">
+        <h3>Organisationsname ändern</h3>
+        <p class="modal-sub">Dieser Name wird allen Mitgliedern Ihrer Organisation und eingeladenen Admins angezeigt.
+            Er ist unabhängig von Ihrem Tarif – den Plan ändern Sie unter „Tarif verwalten".</p>
+        <form id="orgForm" novalidate>
+            <label for="orgNameNew">Organisationsname</label>
+            <input type="text" id="orgNameNew" maxlength="120" autocomplete="organization" placeholder="z.B. Tierarztpraxis Dr. Mustermann" required>
+            <div class="modal-msg" id="orgMsg"></div>
+            <div class="modal-buttons">
+                <button type="button" class="account-btn" onclick="closeOrgModal()">Abbrechen</button>
+                <button type="submit" class="account-btn primary" id="orgSubmit">Speichern</button>
             </div>
         </form>
     </div>
@@ -514,12 +539,71 @@ async function loadAccountInfo(session) {
         if (org) {
             set('accOrg', org.name);
             tier = org.tier || tier;
+            accOrgId   = profile.organization_id;
+            accOrgName = org.name || '';
+            document.getElementById('orgEditBtn').style.display = 'inline-block';
         }
     } else if (user.user_metadata?.company) {
         set('accOrg', user.user_metadata.company);
+        accOrgName = user.user_metadata.company;
+        document.getElementById('orgEditBtn').style.display = 'inline-block';
     }
     set('accTier', TIER_LABELS[tier] || tier);
 }
+
+/* ── ORGANISATIONSNAME-MODAL ── */
+let accOrgId   = null; // organizations.id – falls null, liegt der Name nur in user_metadata.company
+let accOrgName = '';
+
+const orgModal = document.getElementById('orgModal');
+const orgMsg   = document.getElementById('orgMsg');
+
+function openOrgModal() {
+    document.getElementById('orgNameNew').value = accOrgName;
+    orgMsg.className = 'modal-msg';
+    orgModal.classList.add('open');
+    document.getElementById('orgNameNew').focus();
+}
+
+function closeOrgModal() {
+    orgModal.classList.remove('open');
+}
+
+orgModal.addEventListener('click', (e) => { if (e.target === orgModal) closeOrgModal(); });
+
+document.getElementById('orgForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('orgNameNew').value.trim();
+    const btn  = document.getElementById('orgSubmit');
+
+    if (!name) {
+        orgMsg.className   = 'modal-msg error';
+        orgMsg.textContent = 'Bitte geben Sie einen Organisationsnamen ein.';
+        return;
+    }
+    if (name === accOrgName) { closeOrgModal(); return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Wird gespeichert…';
+
+    const { error } = accOrgId
+        ? await sbClient.from('organizations').update({ name }).eq('id', accOrgId)
+        : await sbClient.auth.updateUser({ data: { company: name } });
+
+    btn.disabled    = false;
+    btn.textContent = 'Speichern';
+
+    if (error) {
+        orgMsg.className   = 'modal-msg error';
+        orgMsg.textContent = 'Fehler beim Speichern: ' + error.message;
+        return;
+    }
+
+    accOrgName = name;
+    document.getElementById('accOrg').textContent = name;
+    closeOrgModal();
+});
 
 /* ── PASSWORT-MODAL ── */
 const pwModal = document.getElementById('pwModal');
@@ -543,7 +627,8 @@ function closePwModal() {
 
 pwModal.addEventListener('click', (e) => { if (e.target === pwModal) closePwModal(); });
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && pwModal.classList.contains('open')) closePwModal();
+    if (e.key === 'Escape' && pwModal.classList.contains('open'))  closePwModal();
+    if (e.key === 'Escape' && orgModal.classList.contains('open')) closeOrgModal();
 });
 
 /* Leak-Check (HIBP k-Anonymity: nur die ersten 5 Zeichen

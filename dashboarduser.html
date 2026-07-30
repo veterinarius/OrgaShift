@@ -256,6 +256,21 @@
             background: rgba(0,122,255,0.05);
         }
         .form-group input::placeholder { color: var(--color-text-muted); opacity: 0.6; }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 44px; }
+        .password-toggle {
+            position: absolute;
+            top: 50%; right: 6px;
+            transform: translateY(-50%);
+            display: flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px;
+            background: none; border: none;
+            border-radius: 8px;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .password-toggle:hover { color: var(--color-text); }
 
         .pw-message {
             font-size: 0.83rem; min-height: 20px;
@@ -511,15 +526,69 @@
             <div class="section-title">Passwort ändern</div>
             <div class="form-group">
                 <label for="currentPassword">Aktuelles Passwort</label>
-                <input type="password" id="currentPassword" placeholder="Dein aktuelles Passwort" autocomplete="current-password">
+                <div class="password-wrapper">
+                    <input type="password" id="currentPassword" placeholder="Dein aktuelles Passwort" autocomplete="current-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('currentPassword', this)"
+                            aria-label="Passwort anzeigen" tabindex="-1">
+                        <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             style="display:none">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="newPassword">Neues Passwort</label>
-                <input type="password" id="newPassword" placeholder="Mindestens 6 Zeichen" autocomplete="new-password">
+                <div class="password-wrapper">
+                    <input type="password" id="newPassword" placeholder="Mindestens 6 Zeichen" autocomplete="new-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('newPassword', this)"
+                            aria-label="Passwort anzeigen" tabindex="-1">
+                        <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             style="display:none">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="confirmPassword">Passwort bestätigen</label>
-                <input type="password" id="confirmPassword" placeholder="Passwort wiederholen" autocomplete="new-password">
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" placeholder="Passwort wiederholen" autocomplete="new-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', this)"
+                            aria-label="Passwort anzeigen" tabindex="-1">
+                        <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             style="display:none">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div id="pwMessage" class="pw-message"></div>
             <button class="btn-save" id="btnSavePw" onclick="changePassword()">Passwort speichern</button>
@@ -595,6 +664,15 @@
             document.body.style.overflow = '';
         }
     });
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const show  = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.querySelector('.icon-eye').style.display     = show ? 'none' : '';
+        btn.querySelector('.icon-eye-off').style.display = show ? '' : 'none';
+        btn.setAttribute('aria-label', show ? 'Passwort verbergen' : 'Passwort anzeigen');
+    }
 
     async function changePassword() {
         const oldPw = document.getElementById('currentPassword').value;

@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OrgaShift 2 – Jahresplaner</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+        const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
+        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
+        const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+    </script>
     <style>
         /* ── DESIGN TOKENS ── */
         :root {
@@ -329,9 +335,6 @@
             font-size: 0.9rem;
         }
 
-        /* ── FILE INPUT ── */
-        .file-input { display: none; }
-
         /* ── RESPONSIVE ── */
         @media(max-width: 900px) {
             .nav-links { display: none; }
@@ -357,7 +360,7 @@
             <li><a href="wochenplan.html">Wochenplan</a></li>
             <li><a href="monatsplan.html">Monatsplan</a></li>
             <li><a href="personal.html">Personal</a></li>
-            <li><a href="urlaubMA.html">Team Urlaub</a></li>
+            <li><a href="urlaubMA.html">Urlaubsanträge</a></li>
         </ul>
         <div class="nav-right">
             <button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button>
@@ -381,11 +384,6 @@
     <!-- Controls -->
     <div class="controls">
         <div class="control-group">
-            <label>Mitarbeiter:</label>
-            <input type="text" id="employeeName" placeholder="Name eingeben">
-            <button class="btn btn-primary" onclick="addEmployee()">+ Hinzufügen</button>
-        </div>
-        <div class="control-group">
             <label>Eintrag:</label>
             <select id="employeeSelect">
                 <option value="">Mitarbeiter wählen...</option>
@@ -397,12 +395,6 @@
                 <option value="sick">Krankheit</option>
             </select>
             <button class="btn btn-secondary" onclick="addEntry()">Eintragen</button>
-        </div>
-        <div class="control-group">
-            <button class="btn btn-success" onclick="exportData()">↓ Export</button>
-            <input type="file" id="fileInput" class="file-input" accept=".json" onchange="importData(this)">
-            <button class="btn btn-success" onclick="document.getElementById('fileInput').click()">↑ Import</button>
-            <button class="btn btn-danger" onclick="clearAllData()">Alle Daten löschen</button>
         </div>
     </div>
 
@@ -499,59 +491,20 @@
     })();
 
     // ─────────────────────────────────────────
-    //  JAHRESPLANER FUNKTIONALITÄT
+    //  JAHRESPLANER FUNKTIONALITÄT (Supabase, organisationsweit)
     // ─────────────────────────────────────────
-    const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
     const monthsShort = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
     let currentYear = new Date().getFullYear();
-    let employees = [];
-    let entries = {};
+    let orgId = null;
+    let currentUserId = null;
+    let employees = [];   // [{id, name}] – aus public.employees
+    let entries = {};     // { [employeeId]: [{id, start, end, type}] } – aus vacations + sick_leave
 
     function isLeapYear(year) { return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0); }
     function getDaysInMonth(year) { return [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; }
-
-    const EMPLOYEES_KEY = 'jahresplaner_employees';
-    function entriesKey(year) { return `jahresplaner_entries_${year}`; }
-
-    function saveData() {
-        localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
-        localStorage.setItem(entriesKey(currentYear), JSON.stringify(entries));
-        showSaveStatus();
-    }
-
-    function loadData() {
-        try {
-            const oldData = localStorage.getItem('jahresplaner_data');
-            if (oldData && !localStorage.getItem(EMPLOYEES_KEY)) {
-                const data = JSON.parse(oldData);
-                employees = data.employees || [];
-                entries = data.entries || {};
-                localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
-                localStorage.setItem(entriesKey(currentYear), JSON.stringify(entries));
-                localStorage.removeItem('jahresplaner_data');
-            } else {
-                const savedEmployees = localStorage.getItem(EMPLOYEES_KEY);
-                if (savedEmployees) employees = JSON.parse(savedEmployees);
-                const savedEntries = localStorage.getItem(entriesKey(currentYear));
-                entries = savedEntries ? JSON.parse(savedEntries) : {};
-            }
-            updateEmployeeSelect();
-            generateTable();
-        } catch (error) { console.error('Fehler beim Laden der Daten:', error); }
-    }
-
-    function changeYear(delta) {
-        saveData();
-        currentYear += delta;
-        document.getElementById('yearDisplay').textContent = currentYear;
-        try {
-            const savedEntries = localStorage.getItem(entriesKey(currentYear));
-            entries = savedEntries ? JSON.parse(savedEntries) : {};
-            employees.forEach(emp => { if (!entries[emp]) entries[emp] = []; });
-        } catch (e) { entries = {}; }
-        generateTable();
-    }
+    function isWeekend(date) { const day = date.getDay(); return day === 0 || day === 6; }
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     function showSaveStatus() {
         const status = document.getElementById('saveStatus');
@@ -559,77 +512,78 @@
         setTimeout(() => { status.classList.remove('show'); }, 2000);
     }
 
-    function exportData() {
-        const data = { employees, entries, year: currentYear, exportDate: new Date().toISOString(), version: '2.0' };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `jahresplaner_${currentYear}_backup_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    }
-
-    function importData(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (confirm('Importierte Daten mit aktuellen zusammenführen oder ersetzen?\n\nOK = Ersetzen\nAbbrechen = Zusammenführen')) {
-                    employees = data.employees || []; entries = data.entries || {};
-                } else {
-                    const importedEmployees = data.employees || [];
-                    const importedEntries = data.entries || {};
-                    importedEmployees.forEach(emp => { if (!employees.includes(emp)) employees.push(emp); });
-                    Object.keys(importedEntries).forEach(emp => {
-                        if (!entries[emp]) entries[emp] = [];
-                        entries[emp] = [...entries[emp], ...importedEntries[emp]];
-                    });
-                }
-                employees.sort(); updateEmployeeSelect(); generateTable(); saveData();
-                alert('Daten wurden erfolgreich importiert!');
-            } catch (error) { alert('Fehler beim Importieren der Datei.'); console.error('Import error:', error); }
-        };
-        reader.readAsText(file); input.value = '';
-    }
-
-    function isWeekend(date) { const day = date.getDay(); return day === 0 || day === 6; }
-
-    function addEmployee() {
-        const name = document.getElementById('employeeName').value.trim();
-        if (!name) { alert('Bitte geben Sie einen Namen ein.'); return; }
-        if (employees.includes(name)) { alert('Dieser Mitarbeiter existiert bereits.'); return; }
-        employees.push(name); employees.sort(); entries[name] = [];
-        document.getElementById('employeeName').value = '';
-        updateEmployeeSelect(); generateTable(); saveData();
+    async function loadEmployees() {
+        const { data, error } = await sbClient.from('employees').select('id, name').order('name');
+        if (error) { console.error('[jahresplaner] Mitarbeiter laden fehlgeschlagen:', error.message); employees = []; return; }
+        employees = data || [];
     }
 
     function updateEmployeeSelect() {
         const select = document.getElementById('employeeSelect');
-        select.innerHTML = '<option value="">Mitarbeiter wählen...</option>';
-        [...employees].sort().forEach(emp => {
-            const option = document.createElement('option');
-            option.value = emp; option.textContent = emp; select.appendChild(option);
+        select.innerHTML = '<option value="">Mitarbeiter wählen...</option>' +
+            employees.map(e => `<option value="${e.id}">${escHtml(e.name || '(ohne Namen)')}</option>`).join('');
+    }
+
+    async function loadEntries(year) {
+        const yearStart = `${year}-01-01`;
+        const yearEnd = `${year}-12-31`;
+        const [vacRes, sickRes] = await Promise.all([
+            sbClient.from('vacations').select('id, employee_id, from_date, to_date')
+                .eq('status', 'approved').lte('from_date', yearEnd).gte('to_date', yearStart),
+            sbClient.from('sick_leave').select('id, employee_id, from_date, to_date')
+                .lte('from_date', yearEnd).gte('to_date', yearStart)
+        ]);
+        if (vacRes.error) console.error('[jahresplaner] Urlaub laden fehlgeschlagen:', vacRes.error.message);
+        if (sickRes.error) console.error('[jahresplaner] Krankheit laden fehlgeschlagen:', sickRes.error.message);
+
+        entries = {};
+        employees.forEach(e => { entries[e.id] = []; });
+        (vacRes.data || []).forEach(v => {
+            (entries[v.employee_id] || (entries[v.employee_id] = [])).push({ id: v.id, start: v.from_date, end: v.to_date, type: 'vacation' });
+        });
+        (sickRes.data || []).forEach(s => {
+            (entries[s.employee_id] || (entries[s.employee_id] = [])).push({ id: s.id, start: s.from_date, end: s.to_date, type: 'sick' });
         });
     }
 
-    function addEntry() {
-        const employee = document.getElementById('employeeSelect').value;
+    async function changeYear(delta) {
+        currentYear += delta;
+        document.getElementById('yearDisplay').textContent = currentYear;
+        await loadEntries(currentYear);
+        generateTable();
+    }
+
+    async function addEntry() {
+        const employeeId = document.getElementById('employeeSelect').value;
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
         const type = document.getElementById('entryType').value;
-        if (!employee || !startDate || !endDate) { alert('Bitte füllen Sie alle Felder aus.'); return; }
+        if (!employeeId || !startDate || !endDate) { alert('Bitte füllen Sie alle Felder aus.'); return; }
         if (new Date(startDate) > new Date(endDate)) { alert('Das Startdatum muss vor dem Enddatum liegen.'); return; }
-        if (!entries[employee]) entries[employee] = [];
-        if (type === 'clear') {
-            const start = new Date(startDate), end = new Date(endDate);
-            entries[employee] = entries[employee].filter(entry => !(new Date(entry.start) <= end && new Date(entry.end) >= start));
-        } else {
-            entries[employee].push({ start: startDate, end: endDate, type });
-        }
+
+        const error = await insertEntry(employeeId, startDate, endDate, type);
+        if (error) { alert('Eintragen fehlgeschlagen: ' + error.message); return; }
+
         document.getElementById('startDate').value = '';
         document.getElementById('endDate').value = '';
-        generateTable(); saveData();
+        await loadEntries(currentYear);
+        generateTable();
+        showSaveStatus();
+    }
+
+    async function insertEntry(employeeId, startDate, endDate, type) {
+        if (type === 'sick') {
+            const { error } = await sbClient.from('sick_leave').insert({
+                organization_id: orgId, employee_id: employeeId,
+                from_date: startDate, to_date: endDate, created_by: currentUserId
+            });
+            return error;
+        }
+        const { error } = await sbClient.from('vacations').insert({
+            organization_id: orgId, employee_id: employeeId,
+            from_date: startDate, to_date: endDate, status: 'approved', decided_by: currentUserId
+        });
+        return error;
     }
 
     function isDateInRange(date, start, end) {
@@ -637,9 +591,10 @@
         return checkDate >= new Date(start) && checkDate <= new Date(end);
     }
 
-    function getEntryForDate(employee, dateStr) {
-        if (!entries[employee]) return null;
-        for (let entry of entries[employee]) {
+    function getEntryForDate(employeeId, dateStr) {
+        const list = entries[employeeId];
+        if (!list) return null;
+        for (const entry of list) {
             if (isDateInRange(dateStr, entry.start, entry.end)) return entry.type;
         }
         return null;
@@ -650,7 +605,7 @@
         const daysInMonth = getDaysInMonth(currentYear);
 
         if (employees.length === 0) {
-            table.innerHTML = `<tr><td class="no-employees" colspan="100%">Noch keine Mitarbeiter hinzugefügt.</td></tr>`;
+            table.innerHTML = `<tr><td class="no-employees" colspan="100%">Noch keine Mitarbeiter hinterlegt. <a href="personal.html">Jetzt in Personal anlegen</a></td></tr>`;
             updateStats(); return;
         }
 
@@ -666,18 +621,18 @@
         }
         html += '</tr></thead><tbody>';
 
-        [...employees].sort().forEach(employee => {
-            html += `<tr><td>${employee}</td>`;
+        employees.forEach(employee => {
+            html += `<tr><td>${escHtml(employee.name || '(ohne Namen)')}</td>`;
             for (let month = 0; month < 12; month++) {
                 for (let day = 1; day <= daysInMonth[month]; day++) {
                     const dateStr = `${currentYear}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                     const date = new Date(currentYear, month, day);
-                    const entryType = getEntryForDate(employee, dateStr);
+                    const entryType = getEntryForDate(employee.id, dateStr);
                     let cls = '', content = '';
                     if (entryType === 'vacation') { cls = 'vacation'; content = 'U'; }
                     else if (entryType === 'sick')  { cls = 'sick';     content = 'K'; }
                     else if (isWeekend(date))       { cls = 'weekend';  content = '·'; }
-                    html += `<td class="${cls}" data-employee="${employee}" data-date="${dateStr}">${content}</td>`;
+                    html += `<td class="${cls}" data-employee="${employee.id}" data-date="${dateStr}">${content}</td>`;
                 }
             }
             html += '</tr>';
@@ -687,30 +642,42 @@
 
         table.querySelectorAll('td:not(:first-child)').forEach(cell => {
             cell.addEventListener('click', function() {
-                const employee = this.dataset.employee;
+                const employeeId = this.dataset.employee;
                 const date = this.dataset.date;
                 if (this.textContent && this.textContent !== '·' && !this.classList.contains('weekend')) {
-                    deleteSingleDay(employee, date);
+                    deleteSingleDay(employeeId, date);
                 }
             });
         });
         updateStats();
     }
 
-    function deleteSingleDay(employee, dateStr) {
-        if (!entries[employee]) return;
-        const newEntries = []; let dayDeleted = false;
-        entries[employee].forEach(entry => {
-            if (isDateInRange(dateStr, entry.start, entry.end)) {
-                dayDeleted = true;
-                if (entry.start === entry.end) return;
-                if (dateStr === entry.start) { newEntries.push({ start: addDays(dateStr, 1), end: entry.end, type: entry.type }); }
-                else if (dateStr === entry.end) { newEntries.push({ start: entry.start, end: addDays(dateStr, -1), type: entry.type }); }
-                else { newEntries.push({ start: entry.start, end: addDays(dateStr, -1), type: entry.type }); newEntries.push({ start: addDays(dateStr, 1), end: entry.end, type: entry.type }); }
-            } else { newEntries.push(entry); }
-        });
-        entries[employee] = newEntries;
-        if (dayDeleted) { generateTable(); saveData(); }
+    async function deleteSingleDay(employeeId, dateStr) {
+        const list = entries[employeeId] || [];
+        const match = list.find(entry => isDateInRange(dateStr, entry.start, entry.end));
+        if (!match) return;
+
+        const table = match.type === 'sick' ? 'sick_leave' : 'vacations';
+        const { error: delError } = await sbClient.from(table).delete().eq('id', match.id);
+        if (delError) { alert('Löschen fehlgeschlagen: ' + delError.message); return; }
+
+        if (match.start !== match.end) {
+            const pieces = [];
+            if (dateStr === match.start) pieces.push({ start: addDays(dateStr, 1), end: match.end });
+            else if (dateStr === match.end) pieces.push({ start: match.start, end: addDays(dateStr, -1) });
+            else {
+                pieces.push({ start: match.start, end: addDays(dateStr, -1) });
+                pieces.push({ start: addDays(dateStr, 1), end: match.end });
+            }
+            for (const p of pieces) {
+                const error = await insertEntry(employeeId, p.start, p.end, match.type);
+                if (error) { alert('Speichern fehlgeschlagen: ' + error.message); }
+            }
+        }
+
+        await loadEntries(currentYear);
+        generateTable();
+        showSaveStatus();
     }
 
     function addDays(dateStr, days) {
@@ -723,36 +690,36 @@
         const statsContainer = document.getElementById('statsContainer');
         if (employees.length === 0) { statsContainer.innerHTML = ''; return; }
         let totalVacation = 0, totalSick = 0;
-        const statsHtml = [...employees].sort().map(employee => {
+        const statsHtml = employees.map(employee => {
             let vacationDays = 0, sickDays = 0;
-            if (entries[employee]) {
-                entries[employee].forEach(entry => {
-                    const start = new Date(entry.start), end = new Date(entry.end);
-                    const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                    if (entry.type === 'vacation') vacationDays += days;
-                    else if (entry.type === 'sick') sickDays += days;
-                });
-            }
+            (entries[employee.id] || []).forEach(entry => {
+                const start = new Date(entry.start), end = new Date(entry.end);
+                const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                if (entry.type === 'vacation') vacationDays += days;
+                else if (entry.type === 'sick') sickDays += days;
+            });
             totalVacation += vacationDays; totalSick += sickDays;
-            return `<div class="stat-card"><h4>${employee}</h4><div>Urlaub: <span class="stat-value">${vacationDays}</span> Tage</div><div>Krank: <span class="stat-value">${sickDays}</span> Tage</div></div>`;
+            return `<div class="stat-card"><h4>${escHtml(employee.name || '(ohne Namen)')}</h4><div>Urlaub: <span class="stat-value">${vacationDays}</span> Tage</div><div>Krank: <span class="stat-value">${sickDays}</span> Tage</div></div>`;
         }).join('');
         statsContainer.innerHTML = statsHtml + `<div class="stat-card"><h4>Gesamt</h4><div>Urlaub: <span class="stat-value">${totalVacation}</span> Tage</div><div>Krank: <span class="stat-value">${totalSick}</span> Tage</div></div>`;
     }
 
-    function clearAllData() {
-        if (confirm('Möchten Sie wirklich alle Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
-            employees = []; entries = {};
-            Object.keys(localStorage).filter(key => key.startsWith('jahresplaner_')).forEach(key => localStorage.removeItem(key));
-            updateEmployeeSelect(); generateTable();
-        }
-    }
+    async function init() {
+        const { data: { session } } = await sbClient.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return; }
+        currentUserId = session.user.id;
 
-    window.addEventListener('load', function() {
+        const { data: profile } = await sbClient
+            .from('profiles').select('organization_id').eq('id', currentUserId).single();
+        orgId = profile?.organization_id || null;
+
         document.getElementById('yearDisplay').textContent = currentYear;
-        loadData();
-        if (employees.length === 0) generateTable();
-    });
-    window.addEventListener('beforeunload', function() { if (employees.length > 0) saveData(); });
+        await loadEmployees();
+        updateEmployeeSelect();
+        await loadEntries(currentYear);
+        generateTable();
+    }
+    init();
 </script>
 </body>
 </html>

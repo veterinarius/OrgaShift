@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrgaShift 2 – Impressum</title>
+    <title>OrgaShift 2 – Über uns</title>
+    <meta name="description" content="Warum es OrgaShift gibt: die Geschichte hinter der KI-gestützten Schichtplanungssoftware und die Mission, Dienstplanung fair und einfach zu machen.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -68,6 +69,7 @@
             text-decoration: none; color: var(--text-sec); font-size: 0.9rem; transition: color 0.2s;
         }
         .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--text); }
         .nav-buttons { display: flex; gap: 10px; align-items: center; }
         .login-btn {
             color: var(--text-sec); text-decoration: none; font-size: 0.88rem;
@@ -100,15 +102,9 @@
             50%       { opacity: 0.15; }
         }
 
-        /* ── IMPRINT SECTION ─────────────────────────── */
-        .imprint-section {
-            position: relative; z-index: 1;
-            padding: 128px 0 80px;
-            min-height: 100vh;
-        }
+        /* ── PAGE COMMON ─────────────────────────────── */
+        section { position: relative; z-index: 1; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-        .imprint-wrap { max-width: 820px; margin: 0 auto; }
-
         .section-tag {
             display: inline-block; padding: 4px 14px; border-radius: 20px;
             background: rgba(0,122,255,0.1); border: 1px solid rgba(0,122,255,0.2);
@@ -116,48 +112,135 @@
             text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
         }
 
-        .imprint-card-outer {
+        /* ── HERO / STORY ─────────────────────────────── */
+        .about-hero {
+            padding: 128px 0 0;
+        }
+        .about-wrap { max-width: 780px; margin: 0 auto; text-align: center; }
+        .about-hero h1 {
+            font-size: clamp(2.2rem, 6vw, 3.6rem);
+            font-weight: 800; letter-spacing: -0.04em; line-height: 1.08;
+            color: var(--text); margin-bottom: 22px;
+        }
+        .about-hero .lead {
+            font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-sec);
+            max-width: 620px; margin: 0 auto; line-height: 1.7;
+        }
+
+        .story-section {
+            padding: 72px 0 128px;
+        }
+        .story-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+            max-width: 1000px; margin: 0 auto;
+        }
+        .story-text p { font-size: 0.97rem; color: var(--text-sec); margin-bottom: 16px; line-height: 1.8; }
+        .story-text strong { color: var(--text); font-weight: 600; }
+
+        .founder-card {
             border: 1px solid var(--border); padding: 8px;
         }
-        .imprint-card-inner {
-            border: 1px solid var(--border); padding: 52px;
+        .founder-card-inner {
+            border: 1px solid var(--border); padding: 40px 32px;
             position: relative; overflow: hidden;
             background: rgba(255,255,255,0.02);
+            text-align: center;
         }
-        html.light .imprint-card-inner {
-            background: rgba(0,0,0,0.02);
-        }
-        .imprint-card-inner::before {
+        html.light .founder-card-inner { background: rgba(0,0,0,0.02); }
+        .founder-card-inner::before {
             content: '';
             position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
         }
-        html.light .imprint-card-inner::before {
+        html.light .founder-card-inner::before {
             background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
         }
+        .founder-avatar {
+            width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 18px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, rgba(0,122,255,0.25), rgba(102,126,234,0.18));
+            font-size: 1.5rem; font-weight: 700; color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .founder-card-inner h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .founder-card-inner .role { font-size: 0.82rem; color: var(--accent); font-weight: 600; margin-bottom: 16px; }
+        .founder-card-inner p { font-size: 0.88rem; color: var(--text-sec); line-height: 1.7; }
+        .founder-meta {
+            margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; text-align: center;
+        }
+        .founder-meta div span { display: block; }
+        .founder-meta .num { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+        .founder-meta .lbl { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
-        .imprint-card-inner h1 {
-            font-size: clamp(2rem, 5vw, 3rem);
-            font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
-            color: var(--text); margin-bottom: 40px;
+        /* ── VALUES ───────────────────────────────────── */
+        .values {
+            padding: 96px 0 128px;
+            background: var(--black-dim);
+            border-top: 1px solid var(--border);
         }
-        .imprint-card-inner h2 {
-            font-size: 0.95rem; font-weight: 600; color: var(--text);
-            margin-top: 2em; margin-bottom: 0.6em; letter-spacing: -0.01em;
+        .values-header { text-align: center; margin-bottom: 56px; }
+        .section-title {
+            font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 800;
+            letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 14px;
         }
-        .imprint-card-inner p,
-        .imprint-card-inner address {
-            font-size: 0.92rem; color: var(--text-sec);
-            line-height: 1.75; font-style: normal; margin-bottom: 0.4em;
+        .section-sub { font-size: 0.97rem; color: var(--text-sec); line-height: 1.7; }
+        .values-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--border);
         }
-        .imprint-card-inner strong { color: var(--text); font-weight: 600; }
-        .imprint-card-inner .small { font-size: 0.86rem; color: var(--text-muted); }
-        .imprint-card-inner a { color: var(--accent); text-decoration: none; }
-        .imprint-card-inner a:hover { text-decoration: underline; }
+        .value-card {
+            background: var(--black-dim); padding: 34px 28px;
+            border-right: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+        .value-card:last-child { border-right: none; }
+        .value-card:hover { background: rgba(255,255,255,0.02); }
+        html.light .value-card:hover { background: rgba(0,0,0,0.02); }
+        .value-icon {
+            width: 42px; height: 42px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+            background: linear-gradient(135deg, rgba(0,122,255,0.18), rgba(102,126,234,0.1));
+        }
+        .value-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        .value-card p { font-size: 0.86rem; color: var(--text-sec); line-height: 1.6; }
 
-        .divider {
-            height: 1px; background: var(--border);
-            margin: 32px 0; opacity: 0.6;
+        /* ── CTA ──────────────────────────────────────── */
+        .about-cta {
+            padding: 96px 0 128px; text-align: center;
+        }
+        .about-cta h2 {
+            font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 800;
+            letter-spacing: -0.03em; margin-bottom: 14px;
+        }
+        .about-cta p { color: var(--text-sec); margin-bottom: 32px; font-size: 0.97rem; }
+
+        .liquid-btn {
+            position: relative; display: inline-flex; align-items: center; justify-content: center;
+            padding: 14px 40px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.14);
+            background: transparent; color: var(--text); font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; cursor: pointer; backdrop-filter: blur(12px);
+            box-shadow:
+                0 0 8px rgba(0,0,0,0.04),
+                0 2px 8px rgba(0,0,0,0.1),
+                inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09),
+                inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.75),
+                inset 1px 1px 1px -0.5px rgba(255,255,255,0.55),
+                inset -1px -1px 1px -0.5px rgba(255,255,255,0.55),
+                inset 0 0 6px 6px rgba(255,255,255,0.10),
+                inset 0 0 2px 2px rgba(255,255,255,0.05),
+                0 0 14px rgba(0,0,0,0.18);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            min-height: 50px; letter-spacing: 0.01em;
+        }
+        .liquid-btn:hover { transform: scale(1.04); }
+        html.light .liquid-btn {
+            border-color: rgba(0,0,0,0.14);
+            box-shadow:
+                0 0 8px rgba(0,0,0,0.04),
+                0 2px 8px rgba(0,0,0,0.08),
+                inset 0 0 6px 6px rgba(0,0,0,0.04),
+                0 0 14px rgba(0,0,0,0.08);
         }
 
         /* ── FOOTER ──────────────────────────────────── */
@@ -200,30 +283,23 @@
         .fi.visible { opacity: 1; transform: none; }
 
         /* ── RESPONSIVE ──────────────────────────────── */
+        @media (max-width: 900px) {
+            .values-grid { grid-template-columns: repeat(2, 1fr); }
+            .value-card:nth-child(2n) { border-right: none; }
+            .value-card:nth-child(1), .value-card:nth-child(2) { border-bottom: 1px solid var(--border); }
+        }
         @media (max-width: 768px) {
             .nav-links { display: none; }
-            .imprint-card-inner { padding: 36px 28px; }
+            .story-grid { grid-template-columns: 1fr; gap: 48px; }
         }
         @media (max-width: 480px) {
-            .imprint-card-outer { border: none; padding: 0; }
-            .imprint-card-inner { padding: 28px 20px; }
+            .values-grid { grid-template-columns: 1fr; }
+            .value-card { border-right: none !important; border-bottom: 1px solid var(--border); }
+            .value-card:last-child { border-bottom: none; }
         }
     </style>
 </head>
 <body>
-
-<!-- Glass SVG filter -->
-<svg style="display:none" aria-hidden="true">
-    <defs>
-        <filter id="container-glass" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="0.05 0.05" numOctaves="1" seed="1" result="turbulence"/>
-            <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise"/>
-            <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="70" xChannelSelector="R" yChannelSelector="B" result="displaced"/>
-            <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur"/>
-            <feComposite in="finalBlur" in2="finalBlur" operator="over"/>
-        </filter>
-    </defs>
-</svg>
 
 <!-- NAV -->
 <nav>
@@ -231,7 +307,7 @@
         <a href="index.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
         <ul class="nav-links">
             <li><a href="index.html#features">Features</a></li>
-            <li><a href="ueberuns.html">Über uns</a></li>
+            <li><a href="ueberuns.html" class="active">Über uns</a></li>
             <li><a href="pricing.html">Preise</a></li>
             <li><a href="kontakt.html">Kontakt</a></li>
         </ul>
@@ -247,70 +323,94 @@
 <canvas id="beams-canvas"></canvas>
 <div class="beams-overlay"></div>
 
-<!-- IMPRESSUM CONTENT -->
-<section class="imprint-section">
+<!-- STORY HERO -->
+<section class="about-hero">
     <div class="container">
-        <div class="imprint-wrap">
-            <div class="fi">
-                <div class="section-tag">Rechtliches</div>
+        <div class="about-wrap fi">
+            <div class="section-tag">Über uns</div>
+            <h1>Aus dem Excel-Chaos<br>entstanden.</h1>
+            <p class="lead">OrgaShift wurde nicht am Reißbrett entworfen, sondern in echten Nachtschichten der Planung geboren — von jemandem, der genau wusste, wie mühsam gute Dienstpläne zu bauen sind.</p>
+        </div>
+    </div>
+</section>
+
+<!-- STORY -->
+<section class="story-section">
+    <div class="container">
+        <div class="story-grid">
+            <div class="story-text fi">
+                <p>OrgaShift wurde <strong>2026</strong> von <strong>Stephan Wegmann</strong> in Ahaus gegründet — nicht aus einer abstrakten Marktanalyse heraus, sondern aus eigener Erfahrung als Planer und Führungskraft.</p>
+                <p>Jahrelang hieß Dienstplanung: Excel-Tabellen, endlose Abstimmungen und der ständige Balanceakt zwischen Urlaubswünschen, Qualifikationen und gesetzlichen Vorgaben. Was auf dem Papier nach ein paar Klicks aussah, kostete in Wirklichkeit Stunden — jede Woche aufs Neue.</p>
+                <p>Aus dieser Frustration entstand die Idee zu OrgaShift: eine Software, die genau die Probleme löst, die man nur kennt, wenn man selbst schon einmal einen Dienstplan von Hand erstellt hat. Fair für das Team, nachvollziehbar für alle Beteiligten und ohne stundenlangen Aufwand.</p>
+                <p>Heute entwickelt und betreut Stephan OrgaShift weiterhin persönlich — mit dem Anspruch, jede neue Funktion an echten Anforderungen aus der Praxis zu messen, nicht an Theorie.</p>
             </div>
-            <div class="imprint-card-outer fi">
-                <div class="imprint-card-inner">
-                    <h1>Impressum</h1>
 
-                    <h2>Angaben gemäß § 5 TMG</h2>
-                    <address>
-                        Stephan Wegmann<br>
-                        Von-Martels-Str. 10<br>
-                        48683 Ahaus<br>
-                        Deutschland
-                    </address>
-                    <!--<p><strong>Vertreten durch:</strong><br>
-                    Max Mustermann</p>-->
-
-                    <div class="divider"></div>
-
-                    <h2>Kontakt</h2>
-                    <p>
-                        Telefon: +49 (0) 151/46523245<br>
-                        E-Mail: <a href="mailto:info@orgashift.com">info@orgashift.com</a>
-                    </p>
-
-                    <div class="divider"></div>
-
-                    <!--<h2>Umsatzsteuer-ID</h2>
-                    <p>
-                        Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br>
-                        DE123456789
-                    </p>-->
-
-                    <div class="divider"></div>
-
-                    <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
-                    <address>
-                        Stephan Wegmann<br>
-                        Von-Martels-Str. 10<br>
-                        48683 Ahaus<br>
-                        Deutschland
-                    </address>
-
-                    <div class="divider"></div>
-
-                    <h2>Haftungsausschluss</h2>
-                    <p class="small">
-                        Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
-                    </p>
-
-                    <div class="divider"></div>
-
-                    <h2>Streitschlichtung</h2>
-                    <p class="small">
-                        Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-                        <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>.<br>
-                        Unsere E-Mail-Adresse finden Sie oben im Impressum.
-                    </p>
+            <div class="founder-card fi">
+                <div class="founder-card-inner">
+                    <div class="founder-avatar">SW</div>
+                    <h3>Stephan Wegmann</h3>
+                    <div class="role">Gründer &amp; Entwickler</div>
+                    <p>Plant, entwickelt und betreut OrgaShift von Ahaus aus — mit direkter Erfahrung aus der eigenen Personaleinsatzplanung.</p>
+                    <div class="founder-meta">
+                        <div><span class="num">2026</span><span class="lbl">Gegründet</span></div>
+                        <div><span class="num">1</span><span class="lbl">Gründer</span></div>
+                        <div><span class="num">DE</span><span class="lbl">Ahaus</span></div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- VALUES -->
+<section class="values">
+    <div class="container">
+        <div class="values-header fi">
+            <div class="section-tag">Wofür wir stehen</div>
+            <h2 class="section-title">Unsere Prinzipien</h2>
+            <p class="section-sub" style="max-width:520px;margin:0 auto">Vier Grundsätze, an denen sich jede Entscheidung bei OrgaShift orientiert.</p>
+        </div>
+
+        <div class="values-grid">
+            <div class="value-card fi">
+                <div class="value-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4db8ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3>Fair</h3>
+                <p>Dienstpläne, die Wünsche und Belastung im Team gerecht verteilen — statt immer dieselben zu benachteiligen.</p>
+            </div>
+            <div class="value-card fi">
+                <div class="value-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h3>Transparent</h3>
+                <p>Jede Planungsentscheidung ist für alle Beteiligten nachvollziehbar — keine Blackbox, keine Bevorzugung.</p>
+            </div>
+            <div class="value-card fi">
+                <div class="value-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <h3>Effizient</h3>
+                <p>Was früher Stunden dauerte, erledigt OrgaShift in Sekunden — Zeit, die zurück ins Team fließt.</p>
+            </div>
+            <div class="value-card fi">
+                <div class="value-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+                </div>
+                <h3>Einfach</h3>
+                <p>Kein Schulungsaufwand, keine überladenen Menüs — nur ein Tool, das genau das tut, was es soll.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="about-cta">
+    <div class="container">
+        <div class="fi">
+            <h2>Überzeug dich selbst.</h2>
+            <p>Teste OrgaShift kostenlos und erlebe, wie viel Zeit gute Planung wirklich sparen kann.</p>
+            <a href="pricing.html" class="liquid-btn">Kostenlos starten</a>
         </div>
     </div>
 </section>
@@ -335,7 +435,7 @@
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="#">Hilfe</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
                     <li><a href="#">Dokumentation</a></li>
                     <li><a href="kontakt.html">Kontakt</a></li>
                 </ul>
@@ -452,6 +552,12 @@ const obs = new IntersectionObserver((entries) => {
 }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
 document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+
+document.querySelectorAll('.value-card').forEach((c, i) => {
+    c.classList.add('fi');
+    c.style.transitionDelay = (i * 60) + 'ms';
+    obs.observe(c);
+});
 
 // ── NAV SCROLL ─────────────────────────────────────────────────────────
 function updateNavBg() {

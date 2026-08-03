@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – Hilfe</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+  const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
+  const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+</script>
+    <style>
+        :root {
+            --color-accent: #007AFF;
+            --color-text: #f0f0f5;
+            --color-text-muted: #8e8e99;
+            --color-surface: rgba(18,18,28,0.92);
+            --color-surface-glass: rgba(255,255,255,0.07);
+            --color-border: rgba(255,255,255,0.1);
+            --color-bg: #0a0a0f;
+            --color-nav-bg: rgba(8,8,16,0.88);
+            --color-nav-border: rgba(255,255,255,0.08);
+            --radius: 14px;
+            --shadow: 0 8px 40px rgba(0,0,0,0.5);
+        }
+        body.light {
+            --color-text: #1a1a2e;
+            --color-text-muted: #5a6376;
+            --color-surface: rgba(255,255,255,0.92);
+            --color-surface-glass: rgba(0,0,0,0.04);
+            --color-border: rgba(0,0,0,0.1);
+            --color-bg: #e8edf5;
+            --color-nav-bg: rgba(255,255,255,0.88);
+            --color-nav-border: rgba(0,0,0,0.1);
+        }
+        body.light { background: var(--color-bg); }
+        body.light nav { border-bottom-color: var(--color-nav-border); }
+        body.light .logo { color: var(--color-text); }
+        body.light .nav-links a { color: var(--color-text); }
+        body.light .theme-toggle { border-color: rgba(0,0,0,0.15); }
+        body.light .page-header h1 { color: var(--color-text); }
+        body.light .page-header p { color: var(--color-text-muted); }
+        body.light .faq-item { box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--color-bg, #0a0a0f);
+            transition: background 0.3s ease;
+            min-height: 100vh;
+            color: var(--color-text);
+            overflow-x: hidden;
+        }
+
+        /* ── BEAMS BACKGROUND ── */
+        #beamsCanvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; display: block;
+            filter: blur(15px); z-index: 0; pointer-events: none;
+        }
+        #beamsOverlay {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
+            background: rgba(10,10,10,0.05);
+            animation: overlayPulse 10s ease-in-out infinite;
+            backdrop-filter: blur(50px);
+        }
+        @keyframes overlayPulse {
+            0%, 100% { opacity: 0.05; }
+            50%       { opacity: 0.15; }
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--color-nav-bg);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--color-nav-border);
+            z-index: 1000; transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--color-text); text-decoration: none; letter-spacing: -0.02em; }
+        .logo-dot { color: var(--color-accent); }
+        .nav-links { display: flex; list-style: none; gap: 24px; }
+        .nav-links a {
+            text-decoration: none; color: var(--color-text);
+            font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s, color 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--color-accent); }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        .theme-toggle {
+            background: none; border: 1px solid var(--color-border); border-radius: 50%;
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: var(--color-surface-glass); }
+        .btn-logout {
+            background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.25);
+            color: #ff3b30; padding: 7px 14px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,59,48,0.22); border-color: rgba(255,59,48,0.4); }
+
+        /* ── PAGE ── */
+        .page-wrap { position: relative; z-index: 2; max-width: 820px; margin: 0 auto; padding: 100px 24px 60px; }
+        .page-header { margin-bottom: 36px; }
+        .page-header h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+        .page-header p  { color: var(--color-text-muted); font-size: 0.95rem; }
+
+        .help-section { margin-bottom: 32px; }
+        .help-section h2 {
+            font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--color-accent); margin-bottom: 14px;
+            padding-left: 2px;
+        }
+
+        .faq-list { display: flex; flex-direction: column; gap: 8px; }
+        .faq-item {
+            border: 1px solid var(--color-border); background: var(--color-surface-glass);
+            border-radius: var(--radius); overflow: hidden;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .faq-item:hover { border-color: rgba(0,122,255,0.35); }
+        .faq-item.active { border-color: rgba(0,122,255,0.45); }
+        .faq-question {
+            padding: 16px 20px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+            font-size: 0.92rem; font-weight: 600; color: var(--color-text); user-select: none;
+        }
+        .toggle-icon {
+            flex-shrink: 0; width: 20px; height: 20px;
+            border: 1px solid var(--color-border); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: var(--color-accent);
+            transition: transform 0.3s ease, border-color 0.2s;
+        }
+        .faq-item.active .toggle-icon { transform: rotate(180deg); border-color: rgba(0,122,255,0.5); }
+        .faq-answer {
+            padding: 0 20px 16px; font-size: 0.88rem; color: var(--color-text-muted);
+            line-height: 1.75; display: none;
+        }
+        .faq-item.active .faq-answer { display: block; }
+        .faq-answer a { color: var(--color-accent); }
+
+        /* VIDEO EMBED */
+        .video-embed {
+            margin-top: 14px; border: 1px solid var(--color-border); border-radius: 10px;
+            overflow: hidden; background: var(--color-surface-glass);
+        }
+        .video-embed iframe { width: 100%; aspect-ratio: 16/9; display: block; border: 0; }
+        .video-placeholder {
+            aspect-ratio: 16/9; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 8px;
+            color: var(--color-text-muted); font-size: 0.82rem;
+        }
+        .video-placeholder-icon {
+            width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--color-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: var(--color-accent);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="beamsCanvas"></canvas>
+<div id="beamsOverlay"></div>
+
+<nav>
+    <div class="nav-container">
+        <a class="logo" href="dashboarduser.html">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="dashboarduser.html">Dashboard</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
+            <li><a href="hilfeuser.html" class="active">Hilfe</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle" title="Farbschema wechseln">🌙</button>
+            <button class="btn-logout" onclick="logout()">Abmelden</button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <div class="page-header">
+        <h1>Hilfe</h1>
+        <p>So nutzt du deinen Dienstplan, deinen Urlaub und dein Konto in OrgaShift.</p>
+    </div>
+
+    <div class="help-section">
+        <h2>Erste Schritte</h2>
+        <div class="faq-list">
+            <div class="faq-item active">
+                <div class="faq-question">Wie habe ich mich angemeldet?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Deine Administratorin oder dein Administrator hat dich in „Personal“ angelegt und dir einen 6-stelligen Mitarbeiter-Code gegeben. Mit diesem Code hast du dich auf der Registrierungsseite als Benutzer angemeldet und dein eigenes Passwort vergeben. Solltest du deinen Zugang verlieren, wende dich an deine Administration.
+                    <!--
+                    <div class="video-embed" data-youtube-id="">
+                        <div class="video-placeholder"><span class="video-placeholder-icon">▶</span><span>Video folgt in Kürze</span></div>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <h2>Meinen Dienstplan einsehen</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Wo sehe ich meine Schichten der aktuellen Woche?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Unter <a href="wochenplanuser.html">Wochenplan</a> siehst du deine Schichten der aktuellen Woche.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wo sehe ich den ganzen Monat auf einen Blick?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Der <a href="monatsplanuser.html">Monatsplan</a> zeigt dir den kompletten Dienstplan für den aktuellen Monat.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <h2>Urlaub</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Wie beantrage ich Urlaub?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Öffne <a href="urlaubUSER.html">Mein Urlaub</a>, trage unter „Urlaub beantragen“ das Von- und Bis-Datum ein (optional mit Notiz) und klicke auf „Antrag einreichen“. Der Antrag geht danach als „ausstehend“ an deine Administration zur Genehmigung.
+                    <!--
+                    <div class="video-embed" data-youtube-id="">
+                        <div class="video-placeholder"><span class="video-placeholder-icon">▶</span><span>Video folgt in Kürze</span></div>
+                    </div>
+                    -->
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wo sehe ich meinen Resturlaub und den Status meiner Anträge?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Ganz oben auf der Seite „Mein Urlaub“ zeigt dir eine Übersicht deinen jährlichen Anspruch, bereits genommene, ausstehende und verbleibende Urlaubstage. Unter „Meine Anträge“ siehst du den Status jedes einzelnen Antrags.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <h2>Mein Konto</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Wie ändere ich mein Passwort?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Klicke im <a href="dashboarduser.html">Dashboard</a> auf die Kachel „Mein Konto“. Dort gibst du dein aktuelles Passwort sowie zweimal dein neues Passwort ein und speicherst die Änderung.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie lösche ich mein Konto?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Klicke im <a href="dashboarduser.html">Dashboard</a> auf die Kachel „Mein Konto“ und dort auf „Konto löschen“. Im folgenden Fenster bestätigst du mit deinem aktuellen Passwort. Dein Login wird danach unwiderruflich gelöscht und du wirst ausgeloggt – dein Mitarbeiterprofil mit Schichten und Urlaub bleibt für deine Organisation erhalten, du kannst dich aber nicht mehr einloggen.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ── AUTH GUARD ── */
+sbClient.auth.getSession().then(({ data: { session } }) => {
+    if (!session) window.location.href = 'login.html';
+});
+
+async function logout() {
+    await sbClient.auth.signOut();
+    window.location.href = 'login.html?logout=1';
+}
+
+/* ── THEME TOGGLE ── */
+(function() {
+    var btn = document.getElementById('themeToggle');
+    function applyTheme(t) {
+        if (t === 'light') document.body.classList.add('light');
+        else document.body.classList.remove('light');
+        btn.textContent = t === 'light' ? '☀️' : '🌙';
+        try { localStorage.setItem('theme', t); } catch(e) {}
+    }
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch(e) {}
+    if (saved === 'light' || saved === 'dark') {
+        applyTheme(saved);
+    } else {
+        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    btn.addEventListener('click', function() {
+        applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+    });
+})();
+
+/* ── BEAMS BACKGROUND ── */
+(function () {
+    const canvas = document.getElementById('beamsCanvas');
+    const ctx = canvas.getContext('2d');
+    const MINIMUM_BEAMS = 20;
+    const intensity = 1.0;
+    let beams = [];
+    let animId;
+
+    function createBeam(width, height) {
+        const angle = -35 + Math.random() * 10;
+        return {
+            x: Math.random() * width * 1.5 - width * 0.25,
+            y: Math.random() * height * 1.5 - height * 0.25,
+            width: 30 + Math.random() * 60,
+            length: height * 2.5,
+            angle,
+            speed: 0.6 + Math.random() * 1.2,
+            opacity: 0.12 + Math.random() * 0.16,
+            hue: 190 + Math.random() * 70,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.02 + Math.random() * 0.03,
+        };
+    }
+
+    function updateCanvasSize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(dpr, dpr);
+        const total = Math.floor(MINIMUM_BEAMS * 1.5);
+        beams = Array.from({ length: total }, () => createBeam(window.innerWidth, window.innerHeight));
+    }
+
+    function resetBeam(beam, index, total) {
+        const col = index % 3;
+        const spacing = window.innerWidth / 3;
+        beam.y = window.innerHeight + 100;
+        beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+        beam.width = 100 + Math.random() * 100;
+        beam.speed = 0.5 + Math.random() * 0.4;
+        beam.hue = 190 + (index * 70) / total;
+        beam.opacity = 0.2 + Math.random() * 0.1;
+    }
+
+    function drawBeam(beam) {
+        ctx.save();
+        ctx.translate(beam.x, beam.y);
+        ctx.rotate(beam.angle * Math.PI / 180);
+        const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * intensity;
+        const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
+        gradient.addColorStop(0,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        gradient.addColorStop(0.1, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(0.4, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.6, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.9, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(1,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+        ctx.restore();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.filter = 'blur(35px)';
+        const total = beams.length;
+        beams.forEach((beam, i) => {
+            beam.y -= beam.speed;
+            beam.pulse += beam.pulseSpeed;
+            if (beam.y + beam.length < -100) resetBeam(beam, i, total);
+            drawBeam(beam);
+        });
+        animId = requestAnimationFrame(animate);
+    }
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    animate();
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+    });
+}());
+
+/* ── FAQ ACCORDION ── */
+document.querySelectorAll('.faq-question').forEach(question => {
+    question.addEventListener('click', () => {
+        question.closest('.faq-item').classList.toggle('active');
+    });
+});
+
+/* ── VIDEO EMBEDS ── */
+document.querySelectorAll('.video-embed').forEach(el => {
+    const id = el.dataset.youtubeId;
+    if (!id) return;
+    el.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}" title="Hilfe-Video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+});
+</script>
+</body>
+</html>

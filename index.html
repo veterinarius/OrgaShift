@@ -395,6 +395,22 @@
         }
         .feature-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 9px; color: var(--text); }
         .feature-card p  { font-size: 0.9rem; color: var(--text-sec); line-height: 1.65; }
+        .instagram-card {
+            grid-column: 1 / -1;
+            display: flex; align-items: center; gap: 22px;
+            border-right: none !important; border-bottom: none !important;
+            text-decoration: none;
+            background: linear-gradient(135deg, rgba(240,148,51,.14), rgba(220,39,67,.12), rgba(129,52,175,.12));
+        }
+        .instagram-card:hover { background: linear-gradient(135deg, rgba(240,148,51,.22), rgba(220,39,67,.18), rgba(129,52,175,.18)); }
+        .instagram-card .fi-icon { margin-bottom: 0; flex-shrink: 0; background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .instagram-card .ig-text h3 { margin-bottom: 4px; }
+        .instagram-card .ig-text p { margin: 0; }
+        .instagram-card .ig-arrow { margin-left: auto; color: var(--text-sec); flex-shrink: 0; }
+        @media (max-width: 560px) {
+            .instagram-card { flex-wrap: wrap; }
+            .instagram-card .ig-arrow { display: none; }
+        }
 
         /* ── ABOUT ───────────────────────────── */
         .about {
@@ -427,15 +443,20 @@
             padding: 9px 6px; border-bottom: 1px solid rgba(127,127,127,0.1); text-align: center;
         }
         .mockup-table tr:last-child td { border-bottom: none; }
-        .mockup-table td:first-child {
-            text-align: left; padding-left: 18px; font-size: 0.82rem; color: var(--text-sec); white-space: nowrap;
+        .mockup-body { padding-bottom: 14px; }
+        .mockup-section-title {
+            font-size: 0.72rem; font-weight: 700; color: var(--text);
+            margin: 14px 18px 8px; padding: 6px 10px;
+            background: rgba(0,122,255,0.12);
+            border-left: 3px solid var(--accent); border-radius: 5px;
         }
-        .mb { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 0.7rem; font-weight: 600; }
-        .mb-f { background: rgba(52,199,89,0.15);  color: #34C759; }
-        .mb-s { background: rgba(0,122,255,0.13);   color: #4db8ff; }
-        .mb-n { background: rgba(155,89,182,0.16);  color: #bf7fff; }
-        .mb-x { background: rgba(127,127,127,0.1); color: var(--text-muted); font-size: 0.62rem; }
-        .mb-u { background: rgba(255,149,0,0.14);   color: #FF9500; }
+        .mockup-section-title:first-child { margin-top: 12px; }
+        .mockup-row-num {
+            text-align: left !important; font-size: 0.68rem !important;
+            color: var(--text-muted) !important; background: rgba(127,127,127,0.06) !important;
+            font-weight: 600; padding-left: 10px !important;
+        }
+        .mockup-color-cell { border-radius: 6px; font-weight: 600; }
 
         /* ── FOOTER ──────────────────────────── */
         footer {
@@ -548,7 +569,7 @@
         <div class="hero-outer">
             <div class="hero-inner">
                 <h1 id="hero-heading">Dienstpläne<br>automatisiert.</h1>
-                <p class="hero-sub">Erstellen Sie perfekte Dienstpläne in Sekunden. KI-gestützt, fair und effizient – für Ihr Team!</p>
+                <p class="hero-sub">Erstellen Sie perfekte Dienstpläne in Sekunden. Smart, fair und effizient – für Ihr Team!</p>
                 <div class="available-row" aria-hidden="true">
                     <div class="ping-wrap">
                         <span class="ping-ring"></span>
@@ -571,7 +592,7 @@
         <div class="features-header fi">
             <div class="section-tag" aria-hidden="true">Features</div>
             <h2 class="section-title" id="features-heading">Intelligente Planung,<br>einfach gemacht.</h2>
-            <p class="section-sub" style="max-width:520px;margin:0 auto">Unsere KI erstellt automatisch optimale Dienstpläne unter Berücksichtigung aller Anforderungen und Wünsche.</p>
+            <p class="section-sub" style="max-width:520px;margin:0 auto">Unsere smarte Dienstplanung erstellt automatisch optimale Dienstpläne unter Berücksichtigung aller Anforderungen und Wünsche.</p>
         </div>
 
         <div class="features-header fi">
@@ -586,8 +607,8 @@
                 <div class="fi-icon" style="background:linear-gradient(135deg,rgba(102,126,234,.18),rgba(0,122,255,.12))" aria-hidden="true">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg>
                 </div>
-                <h3>KI-gestützt</h3>
-                <p>Intelligente Algorithmen berücksichtigen Verfügbarkeiten, Urlaubswünsche und Qualifikationen vollautomatisch.</p>
+                <h3>Intelligente Dienstplanung</h3>
+                <p>Das System berücksichtigt Verfügbarkeiten, Urlaub, Qualifikationen und weitere Vorgaben und erstellt daraus in wenigen Augenblicken einen passenden Dienstplan.</p>
             </div>
 
             <div class="feature-card fi">
@@ -630,6 +651,17 @@
                 <p>Höchste Sicherheitsstandards und vollständige DSGVO-Konformität für Ihre sensiblen Mitarbeiterdaten.</p>
             </div>
 
+            <a class="feature-card instagram-card fi" href="https://instagram.com/nurganzkurz" target="_blank" rel="noopener" aria-label="OrgaShift auf Instagram folgen: NUR GANZ KURZ">
+                <div class="fi-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </div>
+                <div class="ig-text">
+                    <h3>Folgt uns auf Instagram</h3>
+                    <p>Einblicke, Tipps &amp; Neuigkeiten – @nurganzkurz</p>
+                </div>
+                <svg class="ig-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+
         </div>
     </div>
 </section>
@@ -652,76 +684,100 @@
             <div class="about-visual fi">
                 <div class="mockup">
                     <div class="mockup-header">
-                        <span class="mockup-title">Wochendienstplan</span>
+                        <span class="mockup-title">Dienstplan</span>
                         <span class="mockup-sub">KW 12 · März 2025</span>
                     </div>
-                    <div style="overflow-x:auto">
-                        <table class="mockup-table" aria-label="Beispiel-Wochendienstplan KW 12">
-                            <caption class="visually-hidden">Wochendienstplan KW 12 – März 2025. Schichtabkürzungen: F = Frühschicht, S = Spätschicht, N = Nachtschicht, U = Urlaub, – = frei</caption>                            <thead>
-                                <tr>
-                                   <th scope="col">Name</th>
-                                    <th scope="col">Mo</th>
-                                    <th scope="col">Di</th>
-                                    <th scope="col">Mi</th>
-                                    <th scope="col">Do</th>
-                                    <th scope="col">Fr</th>
-                                    <th scope="col">Sa</th>
-                                    <th scope="col">So</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Anna K.</td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Max M.</td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Lisa B.</td>
-                                    <td><span class="mb mb-n">N</span></td>
-                                    <td><span class="mb mb-n">N</span></td>
-                                    <td><span class="mb mb-n">N</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Tom R.</td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-n">N</span></td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-u">U</span></td>
-                                    <td><span class="mb mb-u">U</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Sara P.</td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-n">N</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-s">S</span></td>
-                                    <td><span class="mb mb-f">F</span></td>
-                                    <td><span class="mb mb-x">–</span></td>
-                                    <td><span class="mb mb-n">N</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="mockup-body">
+                        <div class="mockup-section-title">Frühschicht</div>
+                        <div style="overflow-x:auto">
+                            <table class="mockup-table" aria-label="Beispiel Frühschicht-Plan">
+                                <caption class="visually-hidden">Frühschicht-Plan mit laufender Nummer und Tagen, Zellen enthalten die eingeteilten Mitarbeitenden.</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Nr.</th>
+                                        <th scope="col">Mo</th>
+                                        <th scope="col">Di</th>
+                                        <th scope="col">Mi</th>
+                                        <th scope="col">Do</th>
+                                        <th scope="col">Fr</th>
+                                        <th scope="col">Sa</th>
+                                        <th scope="col">So</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="mockup-row-num">1</td>
+                                        <td>Anna K.</td>
+                                        <td>Max M.</td>
+                                        <td class="mockup-color-cell" style="background:#ffe082;color:#3d2e00">Anna K.</td>
+                                        <td>Sara P.</td>
+                                        <td>Tom R.</td>
+                                        <td>Lisa B.</td>
+                                        <td>Max M.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mockup-row-num">2</td>
+                                        <td>Lisa B.</td>
+                                        <td>Sara P.</td>
+                                        <td>Tom R.</td>
+                                        <td>Lisa B.</td>
+                                        <td class="mockup-color-cell" style="background:#b2dfdb;color:#01352f">Anna K.</td>
+                                        <td>Sara P.</td>
+                                        <td>Tom R.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mockup-row-num">3</td>
+                                        <td>Tom R.</td>
+                                        <td>Lisa B.</td>
+                                        <td>Max M.</td>
+                                        <td>Max M.</td>
+                                        <td>Lisa B.</td>
+                                        <td>Anna K.</td>
+                                        <td>Sara P.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mockup-section-title">Spätschicht</div>
+                        <div style="overflow-x:auto">
+                            <table class="mockup-table" aria-label="Beispiel Spätschicht-Plan">
+                                <caption class="visually-hidden">Spätschicht-Plan mit laufender Nummer und Tagen, Zellen enthalten die eingeteilten Mitarbeitenden.</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Nr.</th>
+                                        <th scope="col">Mo</th>
+                                        <th scope="col">Di</th>
+                                        <th scope="col">Mi</th>
+                                        <th scope="col">Do</th>
+                                        <th scope="col">Fr</th>
+                                        <th scope="col">Sa</th>
+                                        <th scope="col">So</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="mockup-row-num">1</td>
+                                        <td>Max M.</td>
+                                        <td>Tom R.</td>
+                                        <td>Sara P.</td>
+                                        <td class="mockup-color-cell" style="background:#c5e1a5;color:#1b3a04">Anna K.</td>
+                                        <td>Max M.</td>
+                                        <td>Lisa B.</td>
+                                        <td>Anna K.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mockup-row-num">2</td>
+                                        <td class="mockup-color-cell" style="background:#ffab91;color:#4a1500">Sara P.</td>
+                                        <td>Anna K.</td>
+                                        <td>Lisa B.</td>
+                                        <td>Tom R.</td>
+                                        <td>Sara P.</td>
+                                        <td>Max M.</td>
+                                        <td>Lisa B.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -738,6 +794,7 @@
                 <h4>OrgaShift</h4>
                 <ul>
                     <li><a href="ueberuns.html">Über uns</a></li>
+                    <li><a href="https://instagram.com/nurganzkurz" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Instagram</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -752,9 +809,8 @@
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="#">Hilfe</a></li>
+                    <li><a href="hilfeallgemein.html">Hilfe</a></li>
                     <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="#">Dokumentation</a></li>
                     <li><a href="kontakt.html">Kontakt</a></li>
                 </ul>
             </div>

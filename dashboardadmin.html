@@ -178,6 +178,8 @@
         .account-btn:hover { border-color: var(--accent); }
         .account-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
         .account-btn.primary:hover { background: #0066d6; }
+        .account-btn.danger { color: #ff6b61; border-color: rgba(255,59,48,0.3); }
+        .account-btn.danger:hover { background: rgba(255,59,48,0.12); border-color: #ff6b61; }
 
         /* PASSWORT-MODAL */
         .modal-overlay {
@@ -229,6 +231,7 @@
     <div class="nav-container">
         <a href="dashboardadmin.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
         <ul class="nav-links">
+            <li><a href="hilfeadmin.html">Hilfe</a></li>
             <li><a href="kontakt.html">Kontakt</a></li>
             <li><a href="pricing.html">Upgrade</a></li>
         </ul>
@@ -268,6 +271,20 @@
             <div class="card-body">
                 <h3>Monatsplan</h3>
                 <p>Detaillierte Monatsübersicht mit allen Schichten und Terminen auf einen Blick.</p>
+            </div>
+            <div class="card-arrow">
+                Öffnen
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+        </a>
+
+        <a href="analytics.html" class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,rgba(253,160,133,.2),rgba(245,87,108,.14))">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="card-body">
+                <h3>Analytics</h3>
+                <p>Ist-Stunden, Teamauslastung und optionale Überstunden auf einen Blick.</p>
             </div>
             <div class="card-arrow">
                 Öffnen
@@ -348,6 +365,7 @@
                 <div class="account-actions">
                     <a href="pricing.html" class="account-btn primary">Tarif verwalten</a>
                     <button type="button" class="account-btn" onclick="openPwModal()">Passwort ändern</button>
+                    <button type="button" class="account-btn danger" id="cancelPlanBtn" onclick="openCancelModal()" style="display:none">Abo kündigen</button>
                 </div>
             </div>
         </div>
@@ -387,6 +405,18 @@
                 <button type="submit" class="account-btn primary" id="orgSubmit">Speichern</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="cancelModal">
+    <div class="modal">
+        <h3>Abo kündigen</h3>
+        <p class="modal-sub">Ihre Organisation wird auf den Free-Trial-Tarif zurückgestuft. Mitarbeitende, Dienstpläne und alle Daten bleiben erhalten, es gelten aber ab sofort wieder die Limits des Free Trials (max. 3 Mitarbeitende, 1 Admin). Haben Sie aktuell mehr Mitarbeitende oder Admins, ist die Kündigung erst möglich, nachdem Sie reduziert haben.</p>
+        <div class="modal-msg" id="cancelMsg"></div>
+        <div class="modal-buttons">
+            <button type="button" class="account-btn" onclick="closeCancelModal()">Abbrechen</button>
+            <button type="button" class="account-btn danger" id="cancelSubmit" onclick="confirmCancelPlan()">Abo jetzt kündigen</button>
+        </div>
     </div>
 </div>
 
@@ -510,12 +540,17 @@ sbClient.auth.getSession().then(async ({ data: { session } }) => {
 });
 
 /* ── ACCOUNT-KARTE ── */
+let currentUserId = null;
+let currentTier   = 'free';
+let isOrgOwner    = true; // ohne Organisation (Solo-Account) ist man immer "Inhaber" der eigenen Daten
+
 async function loadAccountInfo(session) {
     const TIER_LABELS = { free: 'Free Trial', basic: 'Basic', premium: 'Premium' };
     const ROLE_LABELS = { admin: 'Administrator', user: 'Mitarbeiter' };
     const set = (id, val) => { document.getElementById(id).textContent = val || '–'; };
 
     const user = session.user;
+    currentUserId = user.id;
     set('accName',  user.user_metadata?.full_name);
     set('accEmail', user.email);
     if (user.created_at) {
@@ -534,13 +569,14 @@ async function loadAccountInfo(session) {
     let tier = profile.tier || 'free';
     if (profile.organization_id) {
         const { data: org } = await sbClient
-            .from('organizations').select('name, tier')
+            .from('organizations').select('name, tier, created_by')
             .eq('id', profile.organization_id).maybeSingle();
         if (org) {
             set('accOrg', org.name);
             tier = org.tier || tier;
             accOrgId   = profile.organization_id;
             accOrgName = org.name || '';
+            isOrgOwner = org.created_by === user.id;
             document.getElementById('orgEditBtn').style.display = 'inline-block';
         }
     } else if (user.user_metadata?.company) {
@@ -549,6 +585,8 @@ async function loadAccountInfo(session) {
         document.getElementById('orgEditBtn').style.display = 'inline-block';
     }
     set('accTier', TIER_LABELS[tier] || tier);
+    currentTier = tier;
+    document.getElementById('cancelPlanBtn').style.display = (tier !== 'free' && isOrgOwner) ? '' : 'none';
 }
 
 /* ── ORGANISATIONSNAME-MODAL ── */
@@ -627,9 +665,55 @@ function closePwModal() {
 
 pwModal.addEventListener('click', (e) => { if (e.target === pwModal) closePwModal(); });
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && pwModal.classList.contains('open'))  closePwModal();
-    if (e.key === 'Escape' && orgModal.classList.contains('open')) closeOrgModal();
+    if (e.key === 'Escape' && pwModal.classList.contains('open'))     closePwModal();
+    if (e.key === 'Escape' && orgModal.classList.contains('open'))    closeOrgModal();
+    if (e.key === 'Escape' && cancelModal.classList.contains('open')) closeCancelModal();
 });
+
+/* ── ABO-KÜNDIGEN-MODAL ── */
+const cancelModal = document.getElementById('cancelModal');
+const cancelMsg    = document.getElementById('cancelMsg');
+
+function openCancelModal() {
+    cancelMsg.className = 'modal-msg';
+    cancelModal.classList.add('open');
+}
+
+function closeCancelModal() {
+    cancelModal.classList.remove('open');
+}
+
+cancelModal.addEventListener('click', (e) => { if (e.target === cancelModal) closeCancelModal(); });
+
+async function confirmCancelPlan() {
+    if (!isOrgOwner) {
+        cancelMsg.className   = 'modal-msg error';
+        cancelMsg.textContent = 'Nur der Inhaber der Organisation kann das Abo kündigen.';
+        return;
+    }
+
+    const btn = document.getElementById('cancelSubmit');
+    btn.disabled    = true;
+    btn.textContent = 'Wird gekündigt…';
+
+    const { error } = accOrgId
+        ? await sbClient.rpc('set_org_tier', { p_tier: 'free' })
+        : await sbClient.from('profiles').update({ tier: 'free' }).eq('id', currentUserId);
+
+    btn.disabled    = false;
+    btn.textContent = 'Abo jetzt kündigen';
+
+    if (error) {
+        cancelMsg.className   = 'modal-msg error';
+        cancelMsg.textContent = 'Fehler beim Kündigen: ' + error.message;
+        return;
+    }
+
+    currentTier = 'free';
+    document.getElementById('accTier').textContent = 'Free Trial';
+    document.getElementById('cancelPlanBtn').style.display = 'none';
+    closeCancelModal();
+}
 
 /* Leak-Check (HIBP k-Anonymity: nur die ersten 5 Zeichen
    des SHA-1-Hashes verlassen den Browser, nie das Passwort) */

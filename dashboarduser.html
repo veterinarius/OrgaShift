@@ -301,6 +301,28 @@
         .btn-save:active { transform: scale(0.98); }
         .btn-save:disabled { opacity: 0.5; cursor: default; }
 
+        .danger-zone {
+            margin-top: 24px; padding-top: 20px;
+            border-top: 1px solid var(--color-border);
+        }
+        .danger-zone .section-title { color: #ff453a; }
+        .danger-zone p {
+            font-size: 0.82rem; color: var(--color-text-muted);
+            margin: 0 0 14px; line-height: 1.5;
+        }
+        .btn-danger {
+            width: 100%; padding: 11px;
+            background: rgba(255,69,58,0.12);
+            border: 1px solid rgba(255,69,58,0.35);
+            border-radius: 10px;
+            color: #ff453a; font-size: 0.92rem; font-weight: 600;
+            cursor: pointer; transition: background 0.2s, transform 0.15s;
+            font-family: inherit;
+        }
+        .btn-danger:hover { background: rgba(255,69,58,0.2); }
+        .btn-danger:active { transform: scale(0.98); }
+        .btn-danger:disabled { opacity: 0.5; cursor: default; }
+
         body.light .modal-box { box-shadow: 0 24px 80px rgba(0,0,0,0.18); }
         body.light .form-group input { background: rgba(0,0,0,0.04); }
 
@@ -398,6 +420,7 @@
     <div class="nav-container">
         <a class="logo" href="#">Orga<span class="logo-dot">Shift</span></a>
         <ul class="nav-links">
+            <li><a href="hilfeuser.html">Hilfe</a></li>
             <li><a href="kontakt.html">Kontakt</a></li>
         </ul>
         <div class="nav-right">
@@ -592,6 +615,50 @@
             </div>
             <div id="pwMessage" class="pw-message"></div>
             <button class="btn-save" id="btnSavePw" onclick="changePassword()">Passwort speichern</button>
+
+            <div class="danger-zone">
+                <div class="section-title">Konto löschen</div>
+                <p>Dein Konto wird unwiderruflich gelöscht und du wirst ausgeloggt. Dein Mitarbeiterprofil (Schichten, Urlaub) bleibt erhalten, du kannst dich danach aber nicht mehr einloggen.</p>
+                <button class="btn-danger" onclick="openDeleteAccountModal()">Konto löschen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteAccountModal" class="modal-overlay" style="display:none" onclick="closeDeleteAccountModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Konto löschen</h2>
+            <button class="modal-close" onclick="closeDeleteAccountModal()" title="Schließen">&#x2715;</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:0.85rem; color:var(--color-text-muted); margin:0 0 16px; line-height:1.5;">
+                Dein Konto wird unwiderruflich gelöscht und du wirst ausgeloggt. Dein Mitarbeiterprofil (Schichten, Urlaub) bleibt erhalten, du kannst dich danach aber nicht mehr einloggen.
+            </p>
+            <div class="form-group">
+                <label for="deletePassword">Aktuelles Passwort zur Bestätigung</label>
+                <div class="password-wrapper">
+                    <input type="password" id="deletePassword" placeholder="Dein aktuelles Passwort" autocomplete="current-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('deletePassword', this)"
+                            aria-label="Passwort anzeigen" tabindex="-1">
+                        <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="icon-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             style="display:none">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="deleteMessage" class="pw-message"></div>
+            <button class="btn-danger" id="btnDeleteAccount" onclick="deleteMyAccount()">Konto endgültig löschen</button>
         </div>
     </div>
 </div>
@@ -658,11 +725,29 @@
         document.body.style.overflow = '';
     }
 
+    /* ── DELETE ACCOUNT MODAL ── */
+    function openDeleteAccountModal() {
+        document.getElementById('accountModal').style.display = 'none';
+        document.getElementById('deleteAccountModal').style.display = 'flex';
+        document.getElementById('deletePassword').value = '';
+        document.getElementById('deleteMessage').textContent = '';
+        document.getElementById('deleteMessage').className = 'pw-message';
+    }
+
+    function closeDeleteAccountModal(e) {
+        if (e && e.target !== document.getElementById('deleteAccountModal')) return;
+        document.getElementById('deleteAccountModal').style.display = 'none';
+        document.getElementById('accountModal').style.display = 'flex';
+    }
+
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.getElementById('accountModal').style.display = 'none';
-            document.body.style.overflow = '';
+        if (e.key !== 'Escape') return;
+        if (document.getElementById('deleteAccountModal').style.display === 'flex') {
+            closeDeleteAccountModal();
+            return;
         }
+        document.getElementById('accountModal').style.display = 'none';
+        document.body.style.overflow = '';
     });
 
     function togglePassword(inputId, btn) {
@@ -733,6 +818,77 @@
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
         }
+    }
+
+    /* ── DELETE OWN ACCOUNT ── */
+    async function deleteMyAccount() {
+        const pw = document.getElementById('deletePassword').value;
+        const msg = document.getElementById('deleteMessage');
+        const btn = document.getElementById('btnDeleteAccount');
+
+        msg.className = 'pw-message';
+        msg.textContent = '';
+
+        if (!pw) {
+            msg.className = 'pw-message error';
+            msg.textContent = 'Bitte aktuelles Passwort eingeben.';
+            return;
+        }
+
+        if (!confirm('Möchtest du dein Konto wirklich unwiderruflich löschen? Du wirst danach ausgeloggt und kannst dich nicht mehr anmelden.')) {
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Überprüfe…';
+
+        const { data: { user } } = await sbClient.auth.getUser();
+        const { error: signInError } = await sbClient.auth.signInWithPassword({
+            email: user.email,
+            password: pw
+        });
+
+        if (signInError) {
+            btn.disabled = false;
+            btn.textContent = 'Konto endgültig löschen';
+            msg.className = 'pw-message error';
+            msg.textContent = 'Passwort ist falsch.';
+            return;
+        }
+
+        btn.textContent = 'Lösche Konto…';
+
+        try {
+            const session = (await sbClient.auth.getSession()).data.session;
+            const res = await fetch(
+                'https://porfotcajsrjlilliwnx.supabase.co/functions/v1/delete-auth-user',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({ auth_id: user.id })
+                }
+            );
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                btn.disabled = false;
+                btn.textContent = 'Konto endgültig löschen';
+                msg.className = 'pw-message error';
+                msg.textContent = 'Fehler: ' + (body.error || 'HTTP ' + res.status);
+                return;
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Konto endgültig löschen';
+            msg.className = 'pw-message error';
+            msg.textContent = 'Fehler: ' + err.message;
+            return;
+        }
+
+        await sbClient.auth.signOut();
+        window.location.href = 'login.html?deleted=1';
     }
 
     /* ── BEAMS BACKGROUND ── */

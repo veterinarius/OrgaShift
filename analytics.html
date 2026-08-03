@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+  const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
+  const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+</script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black:   #050505;
+            --border:  #27272a;
+            --text:    #ffffff;
+            --text-sec: rgba(255,255,255,0.6);
+            --text-muted: rgba(255,255,255,0.3);
+            --accent:  #007AFF;
+            --surface: rgba(255,255,255,0.05);
+            --nav-bg:  rgba(5,5,5,0.82);
+            --good: #34c759;
+            --bad: #ff453a;
+        }
+        html[data-theme="light"] {
+            --black:      #f5f4f2;
+            --border:     #e4e4e7;
+            --text:       #0a0a0b;
+            --text-sec:   rgba(10,10,11,0.55);
+            --text-muted: rgba(10,10,11,0.28);
+            --accent:     #007AFF;
+            --surface:    rgba(0,0,0,0.04);
+            --nav-bg:     rgba(245,244,242,0.85);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--black);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ── BEAMS BACKGROUND ── */
+        #beams-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; display: block;
+            filter: blur(15px); z-index: 0; pointer-events: none;
+        }
+        .beams-overlay {
+            position: fixed; inset: 0; z-index: 1;
+            background: rgba(10,10,10,0.05);
+            animation: overlayPulse 10s ease-in-out infinite;
+            backdrop-filter: blur(50px); pointer-events: none;
+        }
+        @keyframes overlayPulse {
+            0%, 100% { opacity: 0.05; }
+            50%       { opacity: 0.15; }
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--nav-bg); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+        .logo-dot { color: var(--accent); }
+        .nav-links { display: flex; list-style: none; gap: 28px; }
+        .nav-links a { text-decoration: none; color: var(--text-sec); font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        .theme-toggle {
+            background: none; border: 1px solid var(--border); border-radius: 50%;
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: var(--surface); }
+        .btn-logout {
+            background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.25);
+            color: #ff3b30; padding: 7px 14px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,59,48,0.22); border-color: rgba(255,59,48,0.4); }
+
+        /* PAGE */
+        .page { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 88px 24px 60px; }
+
+        /* HEADER */
+        .page-header {
+            border: 1px solid var(--border); padding: 32px 40px; margin-bottom: 32px;
+            position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        html[data-theme="light"] .page-header::before {
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+        }
+        .page-header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+        .page-header p  { color: var(--text-sec); font-size: 0.95rem; }
+
+        /* KPI */
+        .kpi-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1px; background: var(--border); border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .kpi-tile { background: var(--black); padding: 24px 28px; }
+        .kpi-label { font-size: 0.82rem; color: var(--text-sec); margin-bottom: 8px; }
+        .kpi-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+
+        /* PANEL */
+        .panel {
+            border: 1px solid var(--border); padding: 28px 32px; margin-bottom: 24px;
+            background: var(--black);
+        }
+        .panel h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; }
+
+        .notice {
+            border: 1px solid var(--border); border-left: 3px solid var(--accent);
+            padding: 12px 16px; margin-bottom: 24px; font-size: 0.85rem; color: var(--text-sec);
+            background: var(--surface);
+        }
+
+        /* TABLE */
+        .analytics-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .analytics-table th, .analytics-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+        .analytics-table th { color: var(--text-muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .analytics-table tbody tr:last-child td { border-bottom: none; }
+        .muted { color: var(--text-muted); }
+        .over { color: var(--bad); font-weight: 600; }
+        .under { color: var(--good); }
+
+        /* BAR CHART */
+        .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .bar-label { width: 140px; flex-shrink: 0; font-size: 0.85rem; color: var(--text-sec); }
+        .bar-track { flex: 1; height: 10px; border-radius: 6px; background: var(--surface); overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--accent); border-radius: 6px; }
+        .bar-pct { width: 110px; flex-shrink: 0; font-size: 0.8rem; color: var(--text-muted); text-align: right; }
+
+        #analyticsState { border: 1px solid var(--border); padding: 32px; color: var(--text-sec); }
+        #analyticsState a { color: var(--accent); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .page-header { padding: 24px 20px; }
+            .panel { padding: 20px; }
+            .bar-label { width: 90px; }
+            .bar-pct { width: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="beams-canvas"></canvas>
+<div class="beams-overlay"></div>
+
+<nav>
+    <div class="nav-container">
+        <a href="dashboardadmin.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="dashboardadmin.html">Dashboard</a></li>
+            <li><a href="hilfeadmin.html">Hilfe</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle" title="Farbschema wechseln">🌙</button>
+            <button class="btn-logout" onclick="logout()">Abmelden</button>
+        </div>
+    </div>
+</nav>
+
+<main class="page">
+    <div class="page-header">
+        <h1>Analytics</h1>
+        <p>Ist-Stunden, Teamauslastung und optionale Wochenstunden-Limits – berechnet aus dem aktuellen Wochenplan.</p>
+    </div>
+
+    <div id="analyticsState">Lädt…</div>
+    <div id="analyticsContent"></div>
+</main>
+
+<script src="js/analytics.js"></script>
+<script>
+/* ── THEME TOGGLE ── */
+(function() {
+    var html = document.documentElement;
+    var btn  = document.getElementById('themeToggle');
+    function applyTheme(t) {
+        html.setAttribute('data-theme', t);
+        btn.textContent = t === 'light' ? '☀️' : '🌙';
+        try { localStorage.setItem('theme', t); } catch(e) {}
+    }
+    var stored = null;
+    try { stored = localStorage.getItem('theme'); } catch(e) {}
+    if (stored === 'light' || stored === 'dark') {
+        applyTheme(stored);
+    } else {
+        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    btn.addEventListener('click', function() {
+        applyTheme(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+})();
+
+/* ── BEAMS BACKGROUND ── */
+(function () {
+    const canvas = document.getElementById('beams-canvas');
+    const ctx = canvas.getContext('2d');
+    const MINIMUM_BEAMS = 20;
+    const intensity = 1.0;
+    let beams = [];
+    let animId;
+
+    function createBeam(width, height) {
+        const angle = -35 + Math.random() * 10;
+        return {
+            x: Math.random() * width * 1.5 - width * 0.25,
+            y: Math.random() * height * 1.5 - height * 0.25,
+            width: 30 + Math.random() * 60,
+            length: height * 2.5,
+            angle,
+            speed: 0.6 + Math.random() * 1.2,
+            opacity: 0.12 + Math.random() * 0.16,
+            hue: 190 + Math.random() * 70,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.02 + Math.random() * 0.03,
+        };
+    }
+
+    function updateCanvasSize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(dpr, dpr);
+        const total = Math.floor(MINIMUM_BEAMS * 1.5);
+        beams = Array.from({ length: total }, () => createBeam(window.innerWidth, window.innerHeight));
+    }
+
+    function resetBeam(beam, index, total) {
+        const col = index % 3;
+        const spacing = window.innerWidth / 3;
+        beam.y = window.innerHeight + 100;
+        beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+        beam.width = 100 + Math.random() * 100;
+        beam.speed = 0.5 + Math.random() * 0.4;
+        beam.hue = 190 + (index * 70) / total;
+        beam.opacity = 0.2 + Math.random() * 0.1;
+    }
+
+    function drawBeam(beam) {
+        ctx.save();
+        ctx.translate(beam.x, beam.y);
+        ctx.rotate(beam.angle * Math.PI / 180);
+        const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * intensity;
+        const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
+        gradient.addColorStop(0,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        gradient.addColorStop(0.1, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(0.4, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.6, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.9, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(1,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+        ctx.restore();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.filter = 'blur(35px)';
+        const total = beams.length;
+        beams.forEach((beam, i) => {
+            beam.y -= beam.speed;
+            beam.pulse += beam.pulseSpeed;
+            if (beam.y + beam.length < -100) resetBeam(beam, i, total);
+            drawBeam(beam);
+        });
+        animId = requestAnimationFrame(animate);
+    }
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    animate();
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+    });
+}());
+
+async function logout() {
+    await sbClient.auth.signOut();
+    window.location.href = 'login.html?logout=1';
+}
+</script>
+</body>
+</html>

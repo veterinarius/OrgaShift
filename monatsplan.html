@@ -1235,6 +1235,7 @@
         let savedShifts = localStorage.getItem('monatsplan_shiftNames');
         let savedDays = localStorage.getItem('monatsplan_dayNames');
         let savedRowCounts = localStorage.getItem('monatsplan_rowCounts');
+        let savedShiftDurations = localStorage.getItem('monatsplan_shiftDurations');
         if (savedShifts && savedDays) {
             shiftNames = JSON.parse(savedShifts);
             dayNames = JSON.parse(savedDays);
@@ -1242,10 +1243,15 @@
             if (rowCounts.length < shiftNames.length) {
                 for (let i = rowCounts.length; i < shiftNames.length; i++) rowCounts.push(7);
             }
+            shiftDurations = savedShiftDurations ? JSON.parse(savedShiftDurations) : shiftNames.map(() => 8);
+            if (shiftDurations.length < shiftNames.length) {
+                for (let i = shiftDurations.length; i < shiftNames.length; i++) shiftDurations.push(8);
+            }
         } else {
             shiftNames = ['Schicht 1', 'Schicht 2'];
             dayNames = ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4', 'Tag 5'];
             rowCounts = [7, 7];
+            shiftDurations = [8, 8];
         }
         loadDataFromLocalStorage();
         updateEmployeeList();
@@ -1552,6 +1558,7 @@
     // Dynamische Schichten und Tage
     let shiftNames = [];
     let rowCounts = [];
+    let shiftDurations = [];
 
     function openSettingsModal() {
         document.getElementById('settingsModal').style.display = 'flex';
@@ -1563,24 +1570,29 @@
     function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
     function addShiftInput(value = '') {
         shiftNames.push(value || `Schicht ${shiftNames.length + 1}`);
+        shiftDurations.push(8);
         renderShiftInputs();
     }
-    function removeShiftInput(index) { shiftNames.splice(index, 1); renderShiftInputs(); }
+    function removeShiftInput(index) { shiftNames.splice(index, 1); shiftDurations.splice(index, 1); renderShiftInputs(); }
     function renderShiftInputs() {
         const container = document.getElementById('shiftNamesContainer');
         container.innerHTML = '';
         shiftNames.forEach((name, i) => {
             const rowVal = Array.isArray(rowCounts) && rowCounts[i] ? rowCounts[i] : 7;
+            const durVal = Array.isArray(shiftDurations) && shiftDurations[i] != null ? shiftDurations[i] : 8;
             container.innerHTML += `<div style='display:flex;align-items:center;margin-bottom:4px;gap:6px;'>
                 <input type='text' value='${name}' onchange='updateShiftName(${i}, this.value)' style='flex:1;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
                 <span style='color:var(--color-text-muted);font-size:0.85rem;'>Zeilen:</span>
                 <input type='number' min='1' max='50' value='${rowVal}' onchange='updateRowCount(${i}, this.value)' style='width:60px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
+                <span style='color:var(--color-text-muted);font-size:0.85rem;'>Dauer (Std.):</span>
+                <input type='number' min='0' max='24' step='0.5' value='${durVal}' onchange='updateShiftDuration(${i}, this.value)' style='width:60px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
                 <button type='button' onclick='removeShiftInput(${i})' style='color:#ff453a;background:none;border:none;font-size:1.2em;cursor:pointer;'>✕</button>
             </div>`;
         });
     }
     function updateShiftName(index, value) { shiftNames[index] = value; }
     function updateRowCount(index, value) { rowCounts[index] = parseInt(value); }
+    function updateShiftDuration(index, value) { shiftDurations[index] = parseFloat(value) || 0; }
     function addDayInput(value = '') {
         dayNames.push(value || `Tag ${dayNames.length + 1}`);
         renderDayInputs();
@@ -1602,6 +1614,7 @@
         localStorage.setItem('monatsplan_shiftNames', JSON.stringify(shiftNames));
         localStorage.setItem('monatsplan_dayNames', JSON.stringify(dayNames));
         localStorage.setItem('monatsplan_rowCounts', JSON.stringify(rowCounts));
+        localStorage.setItem('monatsplan_shiftDurations', JSON.stringify(shiftDurations));
         const newTitle = document.getElementById('mainTitleInput').value.trim();
         if (newTitle) localStorage.setItem('monatsplan_mainTitle', newTitle);
         closeSettingsModal();

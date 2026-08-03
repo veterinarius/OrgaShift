@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrgaShift 2 – Hilfe für Admins</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+  const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
+  const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+</script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black:   #050505;
+            --border:  #27272a;
+            --text:    #ffffff;
+            --text-sec: rgba(255,255,255,0.6);
+            --text-muted: rgba(255,255,255,0.3);
+            --accent:  #007AFF;
+            --surface: rgba(255,255,255,0.05);
+            --surface-hover: rgba(255,255,255,0.08);
+            --nav-bg:  rgba(5,5,5,0.82);
+        }
+        html[data-theme="light"] {
+            --black:      #f5f4f2;
+            --border:     #e4e4e7;
+            --text:       #0a0a0b;
+            --text-sec:   rgba(10,10,11,0.55);
+            --text-muted: rgba(10,10,11,0.28);
+            --accent:     #007AFF;
+            --surface:    rgba(0,0,0,0.04);
+            --surface-hover: rgba(0,0,0,0.07);
+            --nav-bg:     rgba(245,244,242,0.85);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--black);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ── BEAMS BACKGROUND ── */
+        #beams-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; display: block;
+            filter: blur(15px); z-index: 0; pointer-events: none;
+        }
+        .beams-overlay {
+            position: fixed; inset: 0; z-index: 1;
+            background: rgba(10,10,10,0.05);
+            animation: overlayPulse 10s ease-in-out infinite;
+            backdrop-filter: blur(50px); pointer-events: none;
+        }
+        @keyframes overlayPulse {
+            0%, 100% { opacity: 0.05; }
+            50%       { opacity: 0.15; }
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: var(--nav-bg); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center; height: 60px;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+        .logo-dot { color: var(--accent); }
+        .nav-links { display: flex; list-style: none; gap: 28px; }
+        .nav-links a { text-decoration: none; color: var(--text-sec); font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        .theme-toggle {
+            background: none; border: 1px solid var(--border); border-radius: 50%;
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { background: var(--surface); }
+        .btn-logout {
+            background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.25);
+            color: #ff3b30; padding: 7px 14px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,59,48,0.22); border-color: rgba(255,59,48,0.4); }
+
+        /* PAGE */
+        .page { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 88px 24px 60px; }
+
+        .page-header {
+            border: 1px solid var(--border); padding: 32px 40px; margin-bottom: 40px;
+            position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        html[data-theme="light"] .page-header::before {
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+        }
+        .page-header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+        .page-header p  { color: var(--text-sec); font-size: 0.95rem; }
+
+        /* SECTIONS */
+        .help-section { margin-bottom: 36px; }
+        .help-section h2 {
+            font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--accent); margin-bottom: 14px;
+            padding-left: 2px;
+        }
+
+        .faq-list { display: flex; flex-direction: column; gap: 8px; }
+        .faq-item {
+            border: 1px solid var(--border); background: var(--surface);
+            border-radius: 8px; overflow: hidden;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .faq-item:hover { background: var(--surface-hover); border-color: rgba(0,122,255,0.3); }
+        .faq-item.active { border-color: rgba(0,122,255,0.4); }
+        .faq-question {
+            padding: 16px 20px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; gap: 16px;
+            font-size: 0.92rem; font-weight: 600; color: var(--text); user-select: none;
+        }
+        .toggle-icon {
+            flex-shrink: 0; width: 20px; height: 20px;
+            border: 1px solid var(--border); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: var(--accent);
+            transition: transform 0.3s ease, border-color 0.2s;
+        }
+        .faq-item.active .toggle-icon { transform: rotate(180deg); border-color: rgba(0,122,255,0.5); }
+        .faq-answer {
+            padding: 0 20px 16px; font-size: 0.88rem; color: var(--text-sec);
+            line-height: 1.75; display: none;
+        }
+        .faq-item.active .faq-answer { display: block; }
+        .faq-answer a { color: var(--accent); }
+        .faq-answer code {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 4px; padding: 1px 6px; font-size: 0.85em;
+        }
+
+        /* VIDEO EMBED */
+        .video-embed {
+            margin-top: 14px; border: 1px solid var(--border); border-radius: 10px;
+            overflow: hidden; background: var(--surface);
+        }
+        .video-embed iframe { width: 100%; aspect-ratio: 16/9; display: block; border: 0; }
+        .video-placeholder {
+            aspect-ratio: 16/9; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 8px;
+            color: var(--text-muted); font-size: 0.82rem;
+        }
+        .video-placeholder-icon {
+            width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .page-header { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="beams-canvas"></canvas>
+<div class="beams-overlay"></div>
+
+<nav>
+    <div class="nav-container">
+        <a href="dashboardadmin.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
+        <ul class="nav-links">
+            <li><a href="dashboardadmin.html">Dashboard</a></li>
+            <li><a href="personal.html">Personal</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
+            <li><a href="hilfeadmin.html" class="active">Hilfe</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle" title="Farbschema wechseln">🌙</button>
+            <button class="btn-logout" onclick="logout()">Abmelden</button>
+        </div>
+    </div>
+</nav>
+
+<main class="page">
+    <div class="page-header">
+        <h1>Hilfe für Admins</h1>
+        <p>Alle Funktionen von OrgaShift auf einen Blick – von der Einladung deines Teams bis zur Dienstplanung.</p>
+    </div>
+
+    <div class="help-section">
+        <h2>Mitarbeitende &amp; Admins einladen</h2>
+        <div class="faq-list">
+            <div class="faq-item active">
+                <div class="faq-question">Wie füge ich einen neuen Mitarbeitenden hinzu?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Öffne <a href="personal.html">Personal</a> und fülle unter „Neuen Mitarbeitenden hinzufügen“ die Daten aus (Name, Rolle, E-Mail, Urlaubsanspruch usw.). Beim Anlegen wird automatisch ein 6-stelliger Mitarbeiter-Code erzeugt. Gib diesen Code an die Person weiter – sie registriert sich damit selbst auf der Registrierungsseite und vergibt ihr eigenes Passwort.
+                    <!--
+                    <div class="video-embed" data-youtube-id="">
+                        <div class="video-placeholder"><span class="video-placeholder-icon">▶</span><span>Video folgt in Kürze</span></div>
+                    </div>
+                    -->
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie lade ich einen weiteren Admin ein?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Ebenfalls unter <a href="personal.html">Personal</a>, im Bereich „Weitere Admins einladen“: Organisationsnamen festlegen (falls noch nicht geschehen) und über „Code erzeugen“ einen Admin-Einladungscode generieren. Die eingeladene Person wählt bei der Registrierung die Rolle „Admin“ und trägt diesen Code ein – sie erhält damit Zugriff auf Mitarbeitende und Pläne deiner Organisation. Zusätzliche Admins sind je nach Tarif kostenpflichtig und werden über den Kontoinhaber abgerechnet.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie meldet sich eine eingeladene Person an?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Auf der Registrierungsseite wählt sie zunächst die Rolle (Admin oder Benutzer) und trägt anschließend den erhaltenen Code ein (Mitarbeiter-Code bzw. Admin-Einladungscode). Nach dem Setzen des Passworts landet sie automatisch im passenden Dashboard.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie entferne ich einen Mitarbeitenden?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Öffne <a href="personal.html">Personal</a> und klicke bei der entsprechenden Person auf „Löschen“. Nach der Bestätigung werden Login-Zugang und Mitarbeiterdatensatz vollständig entfernt.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <h2>Dienstplanung</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Wie erstelle ich automatisch einen Dienstplan?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Im <a href="wochenplan.html">Wochenplan</a> Start- und Enddatum wählen und auf „🗓 Dienstplan generieren“ klicken. OrgaShift erstellt die Schichten automatisch unter Berücksichtigung von Verfügbarkeiten, Urlaub und Zusatz-Präferenzen der Mitarbeitenden.
+                    <!--
+                    <div class="video-embed" data-youtube-id="">
+                        <div class="video-placeholder"><span class="video-placeholder-icon">▶</span><span>Video folgt in Kürze</span></div>
+                    </div>
+                    -->
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie weise ich Schichten manuell zu?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Ziehe eine Mitarbeiter-Kachel per Drag &amp; Drop direkt auf die gewünschte Schichtzelle in der Tabelle. So lassen sich Zuweisungen jederzeit von Hand anpassen oder korrigieren.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie exportiere oder drucke ich den Dienstplan?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Über die Buttons „📊 Excel“ und „🖨️ Drucken“ am unteren Rand der Seitenleiste kannst du den Plan als Excel-Datei exportieren oder direkt drucken bzw. als PDF speichern.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Was zeigt der Monatsplan?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Der <a href="monatsplan.html">Monatsplan</a> bietet eine Gesamtübersicht aller Schichten und Termine des Monats – ideal, um Auslastung und Besetzung schnell zu prüfen, ohne einzelne Wochen durchzublättern.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <h2>Urlaub verwalten</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Wie genehmige ich Urlaubsanträge?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Unter <a href="urlaubMA.html">Urlaubsanträge</a> siehst du alle offenen Anträge deines Teams und kannst sie per Klick auf „Genehmigen“ freigeben. Der Resturlaub der Mitarbeitenden wird automatisch mitgeführt.
+                    <!--
+                    <div class="video-embed" data-youtube-id="">
+                        <div class="video-placeholder"><span class="video-placeholder-icon">▶</span><span>Video folgt in Kürze</span></div>
+                    </div>
+                    -->
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wo sehe ich alle Urlaube auf einen Blick?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Die <a href="urlaubALLE.html">Urlaub Übersicht</a> zeigt die komplette Teamübersicht aller Urlaubsanträge inklusive automatischer Überschneidungserkennung, damit nicht zu viele Personen gleichzeitig fehlen.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <h2>Account &amp; Tarif</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Wie ändere ich mein Passwort oder den Organisationsnamen?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Im <a href="dashboardadmin.html">Dashboard</a> unter „Mein Account“ findest du die Buttons „Passwort ändern“ sowie den Stift-Button neben dem Organisationsnamen. Der Organisationsname wird allen Mitgliedern und eingeladenen Admins angezeigt.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie upgrade ich meinen Tarif?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Über „Tarif verwalten“ im Account-Bereich des Dashboards oder direkt über den Menüpunkt „Upgrade“ gelangst du zur <a href="pricing.html">Preisseite</a> und kannst deinen Plan jederzeit wechseln.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie kündige ich mein Abo?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Im <a href="dashboardadmin.html">Dashboard</a> findest du unter „Mein Account“ den Button „Abo kündigen“ (sichtbar, sobald du nicht mehr im Free Trial bist). Nach Bestätigung wird deine Organisation sofort auf den Free-Trial-Tarif zurückgestuft. Mitarbeitende, Dienstpläne und alle Daten bleiben dabei vollständig erhalten – es gelten ab dann nur wieder die Limits des Free Trials.<br><br>
+                    Der Button ist nur für den Hauptadmin sichtbar, also die Person, die die Organisation ursprünglich angelegt hat. Zusätzlich eingeladene Admins können den Tarif nicht kündigen, da in der Regel der Hauptadmin die Rechnung erhält.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Kann ich mein eigenes Admin-Konto löschen?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Nein – dafür gibt es bewusst keine Selbstlöschfunktion, da du in der Regel Inhaber der Organisation bist. Möchtest du OrgaShift nicht mehr nutzen, kündige einfach dein Abo (siehe oben); deine Organisation, Mitarbeitenden und Dienstpläne bleiben dabei unter deiner Kontrolle. Soll deine gesamte Organisation inklusive aller Daten gelöscht werden, wende dich über das <a href="kontakt.html">Kontaktformular</a> an uns.
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+/* ── AUTH GUARD ── */
+sbClient.auth.getSession().then(({ data: { session } }) => {
+    if (!session) window.location.href = 'login.html';
+});
+
+async function logout() {
+    await sbClient.auth.signOut();
+    window.location.href = 'login.html?logout=1';
+}
+
+/* ── THEME TOGGLE ── */
+(function() {
+    var html = document.documentElement;
+    var btn  = document.getElementById('themeToggle');
+    function applyTheme(t) {
+        html.setAttribute('data-theme', t);
+        btn.textContent = t === 'light' ? '☀️' : '🌙';
+        try { localStorage.setItem('theme', t); } catch(e) {}
+    }
+    var stored = null;
+    try { stored = localStorage.getItem('theme'); } catch(e) {}
+    if (stored === 'light' || stored === 'dark') {
+        applyTheme(stored);
+    } else {
+        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    btn.addEventListener('click', function() {
+        applyTheme(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+})();
+
+/* ── BEAMS BACKGROUND ── */
+(function () {
+    const canvas = document.getElementById('beams-canvas');
+    const ctx = canvas.getContext('2d');
+    const MINIMUM_BEAMS = 20;
+    const intensity = 1.0;
+    let beams = [];
+    let animId;
+
+    function createBeam(width, height) {
+        const angle = -35 + Math.random() * 10;
+        return {
+            x: Math.random() * width * 1.5 - width * 0.25,
+            y: Math.random() * height * 1.5 - height * 0.25,
+            width: 30 + Math.random() * 60,
+            length: height * 2.5,
+            angle,
+            speed: 0.6 + Math.random() * 1.2,
+            opacity: 0.12 + Math.random() * 0.16,
+            hue: 190 + Math.random() * 70,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.02 + Math.random() * 0.03,
+        };
+    }
+
+    function updateCanvasSize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(dpr, dpr);
+        const total = Math.floor(MINIMUM_BEAMS * 1.5);
+        beams = Array.from({ length: total }, () => createBeam(window.innerWidth, window.innerHeight));
+    }
+
+    function resetBeam(beam, index, total) {
+        const col = index % 3;
+        const spacing = window.innerWidth / 3;
+        beam.y = window.innerHeight + 100;
+        beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+        beam.width = 100 + Math.random() * 100;
+        beam.speed = 0.5 + Math.random() * 0.4;
+        beam.hue = 190 + (index * 70) / total;
+        beam.opacity = 0.2 + Math.random() * 0.1;
+    }
+
+    function drawBeam(beam) {
+        ctx.save();
+        ctx.translate(beam.x, beam.y);
+        ctx.rotate(beam.angle * Math.PI / 180);
+        const pulsingOpacity = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * intensity;
+        const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
+        gradient.addColorStop(0,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        gradient.addColorStop(0.1, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(0.4, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.6, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity})`);
+        gradient.addColorStop(0.9, `hsla(${beam.hue}, 85%, 65%, ${pulsingOpacity * 0.5})`);
+        gradient.addColorStop(1,   `hsla(${beam.hue}, 85%, 65%, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+        ctx.restore();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.filter = 'blur(35px)';
+        const total = beams.length;
+        beams.forEach((beam, i) => {
+            beam.y -= beam.speed;
+            beam.pulse += beam.pulseSpeed;
+            if (beam.y + beam.length < -100) resetBeam(beam, i, total);
+            drawBeam(beam);
+        });
+        animId = requestAnimationFrame(animate);
+    }
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    animate();
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+    });
+}());
+
+/* ── FAQ ACCORDION ── */
+document.querySelectorAll('.faq-question').forEach(question => {
+    question.addEventListener('click', () => {
+        question.closest('.faq-item').classList.toggle('active');
+    });
+});
+
+/* ── VIDEO EMBEDS ── */
+document.querySelectorAll('.video-embed').forEach(el => {
+    const id = el.dataset.youtubeId;
+    if (!id) return;
+    el.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}" title="Hilfe-Video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+});
+</script>
+</body>
+</html>

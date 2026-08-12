@@ -430,6 +430,7 @@
 </main>
 </div>
 
+<script src="js/vacation-conflicts.js"></script>
 <script>
     // ─────────────────────────────────────────
     //  BEAMS BACKGROUND
@@ -560,6 +561,18 @@
         const type = document.getElementById('entryType').value;
         if (!employeeId || !startDate || !endDate) { alert('Bitte füllen Sie alle Felder aus.'); return; }
         if (new Date(startDate) > new Date(endDate)) { alert('Das Startdatum muss vor dem Enddatum liegen.'); return; }
+
+        // Regelbasierte Konfliktprüfung (js/vacation-conflicts.js), nur für
+        // Urlaub relevant - reine Warnung, Admin entscheidet weiterhin selbst.
+        if (type === 'vacation' && window.checkVacationConflicts) {
+            const emp = employees.find(e => e.id === employeeId);
+            const result = await window.checkVacationConflicts(sbClient, {
+                orgId, employeeId, employeeName: emp ? emp.name : null,
+                fromDate: startDate, toDate: endDate, employees
+            });
+            const message = window.formatVacationConflictMessage(result);
+            if (message && !confirm('Möglicher Konflikt:\n\n' + message + '\n\nTrotzdem eintragen?')) return;
+        }
 
         const error = await insertEntry(employeeId, startDate, endDate, type);
         if (error) { alert('Eintragen fehlgeschlagen: ' + error.message); return; }

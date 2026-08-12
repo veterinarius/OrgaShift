@@ -45,6 +45,7 @@
     }
 
     var sb = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
+    window.sbClient = sb; // anderen Skripten auf der Seite (z.B. Tarif-Limit-Prüfung) zugänglich machen
     var orgId = null;
     var userId = null;
     var isAdmin = false; // steuert Schreibrechte (Badge/Speichern/Verlassen-Warnung)

@@ -132,6 +132,17 @@
             background: var(--surface);
         }
 
+        /* INSIGHTS */
+        .insight-row {
+            border-left: 3px solid var(--border); padding: 10px 14px; margin-bottom: 10px;
+            font-size: 0.88rem; color: var(--text-sec); background: var(--surface);
+        }
+        .insight-row:last-child { margin-bottom: 0; }
+        .insight-row a { color: var(--accent); }
+        .insight-critical { border-left-color: var(--bad); }
+        .insight-warning  { border-left-color: #ff9f0a; }
+        .insight-info     { border-left-color: var(--accent); }
+
         /* TABLE */
         .analytics-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .analytics-table th, .analytics-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }

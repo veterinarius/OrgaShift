@@ -375,6 +375,7 @@
 </main>
 </div>
 
+<script src="js/vacation-conflicts.js"></script>
 <script>
     // ─────────────────────────────────────────
     //  BEAMS BACKGROUND
@@ -594,9 +595,23 @@
     }
 
     async function approveVac(id) {
+        const empId = getSelectedEmpId();
+        const vac = vacations.find(v => v.id === id);
+
+        // Regelbasierte Konfliktprüfung (js/vacation-conflicts.js) - reine
+        // Warnung, Admin entscheidet weiterhin selbst.
+        if (vac && window.checkVacationConflicts) {
+            const emp = currentEmployee(empId);
+            const result = await window.checkVacationConflicts(sbClient, {
+                orgId, employeeId: empId, employeeName: emp ? emp.name : null,
+                fromDate: vac.from, toDate: vac.to, employees
+            });
+            const message = window.formatVacationConflictMessage(result);
+            if (message && !confirm('Möglicher Konflikt:\n\n' + message + '\n\nTrotzdem genehmigen?')) return;
+        }
+
         const { error } = await sbClient.from('vacations').update({ status: 'approved', decided_by: currentUserId }).eq('id', id);
         if (error) { alert('Genehmigen fehlgeschlagen: ' + error.message); return; }
-        const empId = getSelectedEmpId();
         await loadVacations(empId);
         updateStats(empId); renderList();
     }

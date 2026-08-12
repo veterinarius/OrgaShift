@@ -145,8 +145,73 @@
         return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
     }
 
+    // Leitet aus den bereits berechneten Kennzahlen verständliche Hinweise ab
+    // (regelbasiert, kein LLM) – kritischste Fälle zuerst.
+    function generateInsights(stats) {
+        const insights = [];
+
+        stats.perEmployee.filter(e => e.overLimit).forEach(e => {
+            const diff = e.hours - e.limit;
+            insights.push({
+                severity: 'critical',
+                text: `${esc(e.name)} liegt ${diff.toLocaleString('de-DE')} Std. über dem Wochenlimit (${e.hours.toLocaleString('de-DE')} von ${e.limit.toLocaleString('de-DE')} Std.).`
+            });
+        });
+
+        stats.shiftUtilization
+            .filter(s => s.pct < 50)
+            .sort((a, b) => a.pct - b.pct)
+            .forEach(s => {
+                insights.push({
+                    severity: 'warning',
+                    text: `Schicht „${esc(s.name)}" ist nur zu ${s.pct}% besetzt (${s.filled}/${s.total} Plätzen).`
+                });
+            });
+
+        const withHours = stats.perEmployee.filter(e => e.hours > 0);
+        if (withHours.length > 1) {
+            const max = Math.max(...withHours.map(e => e.hours));
+            const min = Math.min(...withHours.map(e => e.hours));
+            const avg = withHours.reduce((sum, e) => sum + e.hours, 0) / withHours.length;
+            if (avg > 0 && (max - min) > avg * 0.5) {
+                const top = withHours.find(e => e.hours === max);
+                const low = withHours.find(e => e.hours === min);
+                insights.push({
+                    severity: 'info',
+                    text: `Ungleiche Verteilung: ${esc(top.name)} arbeitet ${max.toLocaleString('de-DE')} Std., ${esc(low.name)} nur ${min.toLocaleString('de-DE')} Std. (Ø ${avg.toLocaleString('de-DE', { maximumFractionDigits: 1 })} Std.).`
+                });
+            }
+        }
+
+        if (stats.durationsMissing) {
+            insights.push({
+                severity: 'info',
+                text: 'Für mindestens eine Schicht ist keine Dauer hinterlegt – bei den Ist-Stunden wurde mit 8 Std. gerechnet. Dauer im Wochenplan unter „Einstellungen" pflegen für genaue Werte.'
+            });
+        }
+        if (stats.teamMonthlyAssignments == null) {
+            insights.push({
+                severity: 'info',
+                text: 'Noch kein Monatsplan in der Cloud gespeichert – die Spalte „Einsätze (Monat)" bleibt leer. Im <a href="monatsplan.html">Monatsplan</a> speichern, um sie zu befüllen.'
+            });
+        }
+
+        if (insights.length === 0) {
+            insights.push({ severity: 'info', text: 'Alles im grünen Bereich – keine Auffälligkeiten bei Auslastung, Stunden oder Verteilung.' });
+        }
+
+        return insights;
+    }
+
     function render(stats) {
         document.getElementById('analyticsState').style.display = 'none';
+
+        const insights = generateInsights(stats);
+        const insightsPanel = `
+            <div class="panel">
+                <h2>Hinweise</h2>
+                ${insights.map(i => `<div class="insight-row insight-${i.severity}">${i.text}</div>`).join('')}
+            </div>`;
 
         const kpis = `
             <div class="kpi-grid">
@@ -209,16 +274,7 @@
                 ${bars || '<p class="muted">Keine Schichten konfiguriert.</p>'}
             </div>`;
 
-        const notices = [];
-        if (stats.durationsMissing) {
-            notices.push('Für mindestens eine Schicht ist keine Dauer hinterlegt – bei den Ist-Stunden wurde mit 8 Std. gerechnet. Dauer im Wochenplan unter „Einstellungen" pflegen für genaue Werte.');
-        }
-        if (stats.teamMonthlyAssignments == null) {
-            notices.push('Noch kein Monatsplan in der Cloud gespeichert – die Spalte „Einsätze (Monat)" bleibt leer. Im <a href="monatsplan.html">Monatsplan</a> speichern, um sie zu befüllen.');
-        }
-        const notice = notices.map(n => `<p class="notice">${n}</p>`).join('');
-
-        document.getElementById('analyticsContent').innerHTML = kpis + notice + table + chart;
+        document.getElementById('analyticsContent').innerHTML = insightsPanel + kpis + table + chart;
     }
 
     async function init() {

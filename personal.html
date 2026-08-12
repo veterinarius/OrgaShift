@@ -950,6 +950,73 @@
             } catch (_) {}
         }
 
+        // ── Namen auch aus den in der Cloud gespeicherten Wochen-/Monatsplänen
+        // entfernen (Zellen im Dienstplan sind freier Text und werden beim
+        // Löschen eines Mitarbeiters sonst nicht automatisch bereinigt, siehe
+        // js/analytics.js, das Namen sowohl aus employees als auch aus dem
+        // Schedule-Grid zusammenführt) ──
+        async function removeFromCloudPlans(displayName) {
+            if (!orgId) return;
+            const jobs = [
+                { planType: 'wochenplan', prefix: 'dienstplan_' },
+                { planType: 'monatsplan', prefix: 'monatsplan_' }
+            ];
+            for (const { planType, prefix } of jobs) {
+                try {
+                    const { data: row, error } = await sbClient
+                        .from('plans').select('data')
+                        .eq('organization_id', orgId).eq('plan_type', planType)
+                        .maybeSingle();
+                    if (error || !row || !row.data) continue;
+
+                    const snap = row.data;
+                    let changed = false;
+
+                    const employeesKey = prefix + 'employees';
+                    if (employeesKey in snap) {
+                        try {
+                            const list = JSON.parse(snap[employeesKey]);
+                            const filtered = list.filter(n => n !== displayName);
+                            if (filtered.length !== list.length) {
+                                snap[employeesKey] = JSON.stringify(filtered);
+                                changed = true;
+                            }
+                        } catch (_) {}
+                    }
+
+                    const scheduleKey = prefix + 'schedule';
+                    if (scheduleKey in snap) {
+                        try {
+                            const schedule = JSON.parse(snap[scheduleKey]);
+                            Object.keys(schedule).forEach(shift => {
+                                (schedule[shift] || []).forEach(cellRow => {
+                                    cellRow.forEach((cell, idx) => {
+                                        if ((cell || '').trim() === displayName) {
+                                            cellRow[idx] = '';
+                                            changed = true;
+                                        }
+                                    });
+                                });
+                            });
+                            if (changed) snap[scheduleKey] = JSON.stringify(schedule);
+                        } catch (_) {}
+                    }
+
+                    if (!changed) continue;
+
+                    const { error: upsertError } = await sbClient.from('plans').upsert({
+                        organization_id: orgId,
+                        plan_type: planType,
+                        data: snap,
+                        updated_by: adminId
+                    }, { onConflict: 'organization_id,plan_type' });
+                    if (upsertError) console.warn('[removeFromCloudPlans]', planType, upsertError.message);
+                } catch (err) {
+                    console.warn('[removeFromCloudPlans]', planType, err);
+                }
+            }
+        }
+
         // ── Init: auth check → plan → employees ──
         async function init() {
             const { data: { session } } = await sbClient.auth.getSession();
@@ -1154,7 +1221,10 @@
             if (error) { alert('Fehler: ' + error.message); return; }
 
             employees = employees.filter(e => e.id !== id);
-            if (displayName) removeFromSchedule(displayName);
+            if (displayName) {
+                removeFromSchedule(displayName);
+                await removeFromCloudPlans(displayName);
+            }
             updatePlanUI();
             renderEmployees();
         }

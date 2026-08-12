@@ -230,6 +230,10 @@
         .field-error.show { display: block; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .days-preview { font-size: 0.85rem; color: var(--color-text-muted); margin-top: 5px; }
+        .vac-conflict-warning {
+            display: none; margin-top: 10px; padding: 10px 14px; font-size: 0.85rem;
+            border-left: 3px solid var(--color-warn); background: rgba(255,149,0,0.1); border-radius: 4px;
+        }
 
         /* ── PRIMARY BUTTON ── */
         .btn-primary {
@@ -381,6 +385,7 @@
                         </div>
                     </div>
                     <div id="daysPreview" class="days-preview"></div>
+                    <div id="vacConflictWarning" class="vac-conflict-warning"></div>
                     <div class="form-group" style="margin-top:12px">
                         <label for="fieldNote">Notiz (optional)</label>
                         <input type="text" id="fieldNote" class="form-control" placeholder="z.B. Familienurlaub">
@@ -404,6 +409,7 @@
 </main>
 </div>
 
+<script src="js/vacation-conflicts.js"></script>
 <script>
     // ─────────────────────────────────────────
     //  BEAMS BACKGROUND
@@ -603,8 +609,37 @@
             preview.textContent = `= ${d} Arbeitstag${d !== 1 ? 'e' : ''}`;
         } else { preview.textContent = ''; }
     }
+
+    // Regelbasierte Konfliktprüfung (js/vacation-conflicts.js) - reine
+    // Information, blockiert das Einreichen nicht.
+    async function updateConflictWarning() {
+        const warningBox = document.getElementById('vacConflictWarning');
+        const from = document.getElementById('fieldFrom').value;
+        const to   = document.getElementById('fieldTo').value;
+        if (!myEmployee || !from || !to || new Date(to) < new Date(from) || !window.checkVacationConflicts) {
+            warningBox.style.display = 'none';
+            return;
+        }
+        const result = await window.checkVacationConflicts(sbClient, {
+            orgId: myEmployee.organization_id,
+            employeeId: myEmployee.id,
+            employeeName: myEmployee.name,
+            fromDate: from,
+            toDate: to
+        });
+        const message = window.formatVacationConflictMessage(result);
+        if (message) {
+            warningBox.textContent = '⚠ ' + message;
+            warningBox.style.display = 'block';
+        } else {
+            warningBox.style.display = 'none';
+        }
+    }
+
     document.getElementById('fieldFrom').addEventListener('change', updatePreview);
     document.getElementById('fieldTo').addEventListener('change', updatePreview);
+    document.getElementById('fieldFrom').addEventListener('change', updateConflictWarning);
+    document.getElementById('fieldTo').addEventListener('change', updateConflictWarning);
     document.getElementById('fieldFrom').addEventListener('blur', () => {
         const v = document.getElementById('fieldFrom').value;
         document.getElementById('fieldFrom').classList.toggle('error', !v);
@@ -640,6 +675,7 @@
         if (error) { alert('Antrag konnte nicht gespeichert werden: ' + error.message); return; }
         document.getElementById('vacForm').reset();
         document.getElementById('daysPreview').textContent = '';
+        document.getElementById('vacConflictWarning').style.display = 'none';
         await loadVacations(myEmployee.id);
         updateStats(); renderList();
     });

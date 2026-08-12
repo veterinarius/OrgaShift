@@ -996,19 +996,58 @@
     // ─────────────────────────────────────────────
     //  MITARBEITER
     // ─────────────────────────────────────────────
-    function addEmployee() {
+    // Prüft das Tarif-Limit (max_employees), BEVOR ein neuer Name hinzugefügt wird.
+    // Zählt echte Mitarbeiterdatensätze (employees-Tabelle) zusammen mit bereits im
+    // Plan vorhandenen Namen, damit über den Plan hinzugefügte Namen das Limit nicht
+    // umgehen können (das Limit wird bislang nur beim Insert in personal.html geprüft).
+    async function checkTierLimitReached() {
+        try {
+            if (!window.sbClient) return null;
+            const { data: { session } } = await window.sbClient.auth.getSession();
+            if (!session) return null;
+
+            const { data: profile } = await window.sbClient
+                .from('profiles').select('organization_id, tier').eq('id', session.user.id).single();
+            if (!profile || !profile.organization_id) return null;
+
+            const { data: limitRow } = await window.sbClient
+                .from('tier_limits').select('max_employees').eq('tier', profile.tier || 'free').single();
+            const limit = limitRow ? limitRow.max_employees : null;
+            if (limit == null) return null;
+
+            const { data: realEmployees } = await window.sbClient
+                .from('employees').select('name').eq('organization_id', profile.organization_id);
+            const names = new Set((realEmployees || []).map(e => e.name));
+            employees.forEach(n => names.add(n));
+
+            return { limit, count: names.size };
+        } catch (_) {
+            return null;
+        }
+    }
+
+    async function addEmployee() {
         const input = document.getElementById('employeeName');
         const name = input.value.trim();
-        if (name) {
-            employees.push(name);
-            preferences[name] = { dayShiftPrefs: {}, rowPrefs: {} };
-            input.value = '';
-            updateEmployeeList();
-            saveDataToLocalStorage();
-            showCustomAlert('Mitarbeiter erfolgreich hinzugefügt!');
-        } else {
+        if (!name) {
             showCustomAlert('Bitte geben Sie einen Namen ein.');
+            return;
         }
+
+        if (!employees.includes(name)) {
+            const limitInfo = await checkTierLimitReached();
+            if (limitInfo && limitInfo.count >= limitInfo.limit) {
+                showCustomAlert(`Ihr Tarif erlaubt maximal ${limitInfo.limit} Mitarbeitende. Bitte in der Personalverwaltung upgraden oder zunächst Platz schaffen.`);
+                return;
+            }
+        }
+
+        employees.push(name);
+        preferences[name] = { dayShiftPrefs: {}, rowPrefs: {} };
+        input.value = '';
+        updateEmployeeList();
+        saveDataToLocalStorage();
+        showCustomAlert('Mitarbeiter erfolgreich hinzugefügt!');
     }
 
     function removeEmployee(employeeName) {

@@ -17,6 +17,43 @@
         return snap[key];
     }
 
+    // Erkennt "HH:MM–HH:MM" (auch mit "-" statt "–") irgendwo im Zelltext.
+    // Über-Mitternacht-Schichten (Ende <= Start) werden als +24h gerechnet.
+    const TIME_RANGE_RE = /(\d{1,2}):(\d{2})\s*[–\-—]\s*(\d{1,2}):(\d{2})/;
+
+    // Zerlegt eine Zelle in Name (erste Zeile) und, falls vorhanden, die daraus
+    // ablesbare tatsächliche Dauer in Stunden. Der Zelltext kann z.B.
+    // "Micha\n08:00–16:00" lauten (siehe generateSchedule() in wochenplan.html).
+    function parseCellEntry(rawText) {
+        const text = (rawText || '').trim();
+        if (!text) return null;
+        const name = text.split('\n')[0].trim();
+        if (!name) return null;
+        const match = text.match(TIME_RANGE_RE);
+        let hours = null;
+        if (match) {
+            const startMin = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+            let endMin = parseInt(match[3], 10) * 60 + parseInt(match[4], 10);
+            if (endMin <= startMin) endMin += 24 * 60;
+            hours = (endMin - startMin) / 60;
+        }
+        return { name, hours };
+    }
+
+    // Sucht eine hinterlegte Start-/Endzeit-Präferenz für Name/Tag/Schicht und
+    // liefert die daraus berechnete Dauer in Stunden, oder null.
+    function preferenceHours(preferences, name, day, shift) {
+        const t = preferences && preferences[name] && preferences[name].shiftTimes &&
+            preferences[name].shiftTimes[day] && preferences[name].shiftTimes[day][shift];
+        if (!t || !t.start || !t.end) return null;
+        const [sh, sm] = t.start.split(':').map(Number);
+        const [eh, em] = t.end.split(':').map(Number);
+        if ([sh, sm, eh, em].some(n => Number.isNaN(n))) return null;
+        let startMin = sh * 60 + sm, endMin = eh * 60 + em;
+        if (endMin <= startMin) endMin += 24 * 60;
+        return (endMin - startMin) / 60;
+    }
+
     function showState(html) {
         document.getElementById('analyticsContent').innerHTML = '';
         document.getElementById('analyticsState').innerHTML = html;
@@ -29,6 +66,27 @@
         const y = parts[0], m = parts[1];
         if (!y || !m) return null;
         return new Date(y, m - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    }
+
+    // ISO-8601-Kalenderwoche (Donnerstag-der-Woche-Algorithmus, wie in wochenplan.html).
+    function getISOWeekInfo(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = (d.getUTCDay() + 6) % 7;
+        d.setUTCDate(d.getUTCDate() - dayNum + 3);
+        const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+        const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+        firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+        const isoWeek = 1 + Math.round((d - firstThursday) / (7 * 86400000));
+        return isoWeek;
+    }
+
+    // dienstplan_startDate ist das Startdatum der zuletzt in wochenplan.html
+    // veröffentlichten Woche (roher ISO-String, kein JSON).
+    function formatWeekLabel(startDateIso) {
+        if (!startDateIso) return null;
+        const start = new Date(startDateIso);
+        if (isNaN(start.getTime())) return null;
+        return 'KW ' + getISOWeekInfo(start);
     }
 
     // Zählt besetzte Zellen im Schedule-Grid, ohne Dauer zu berücksichtigen
@@ -48,10 +106,10 @@
             for (let r = 0; r < rows; r++) {
                 const row = shiftRows[r] || [];
                 dayNames.forEach((_, dIdx) => {
-                    const name = (row[dIdx] || '').trim();
-                    if (name) {
+                    const entry = parseCellEntry(row[dIdx]);
+                    if (entry) {
                         shiftFilled++;
-                        countByName[name] = (countByName[name] || 0) + 1;
+                        countByName[entry.name] = (countByName[entry.name] || 0) + 1;
                     }
                 });
             }
@@ -69,39 +127,74 @@
         return { countByName, filledCells, totalCells, shiftUtilization };
     }
 
-    function computeStats(weekly, monthly, employees) {
-        const { shiftNames, dayNames, rowCounts, shiftDurations } = weekly;
-        let durationsMissing = false;
-
-        // Ist-Stunden je Mitarbeiter (Woche) – identisch zur Zellzählung, aber mit Dauer gewichtet
+    // Ist-Stunden je Mitarbeiter für ein Schedule-Grid: tatsächliche Dauer, wenn im
+    // Zelltext ("Name\nHH:MM–HH:MM") oder – falls timeLookupFn übergeben – in den
+    // Präferenzen (Start-/Endzeit je Tag/Schicht) hinterlegt, sonst Fallback auf die
+    // pauschale Schichtdauer. Gemeinsam für Wochen- und Monatsplan genutzt (der
+    // Monatsplan kennt keine Präferenz-Uhrzeiten, daher dort timeLookupFn=null).
+    function computeHoursForGrid(shiftNames, dayNames, rowCounts, shiftDurations, schedule, timeLookupFn) {
         const hoursByName = {};
+        let durationsMissing = false;
+        let exactCells = 0;
+        let estimatedCells = 0;
         shiftNames.forEach((shift, sIdx) => {
             const rows = rowCounts[sIdx] || 0;
             const duration = (shiftDurations && shiftDurations[sIdx] != null) ? shiftDurations[sIdx] : null;
             if (duration == null) durationsMissing = true;
-            const effectiveDuration = duration != null ? duration : 8;
-            const shiftRows = (weekly.schedule && weekly.schedule[shift]) || [];
+            const fallbackDuration = duration != null ? duration : 8;
+            const shiftRows = (schedule && schedule[shift]) || [];
             for (let r = 0; r < rows; r++) {
                 const row = shiftRows[r] || [];
-                dayNames.forEach((_, dIdx) => {
-                    const name = (row[dIdx] || '').trim();
-                    if (name) hoursByName[name] = (hoursByName[name] || 0) + effectiveDuration;
+                dayNames.forEach((day, dIdx) => {
+                    const entry = parseCellEntry(row[dIdx]);
+                    if (!entry) return;
+                    let hours = entry.hours;
+                    if (hours == null && timeLookupFn) hours = timeLookupFn(entry.name, day, shift);
+                    if (hours != null) exactCells++;
+                    else { hours = fallbackDuration; estimatedCells++; }
+                    hoursByName[entry.name] = (hoursByName[entry.name] || 0) + hours;
                 });
             }
         });
+        return { hoursByName, durationsMissing, exactCells, estimatedCells };
+    }
+
+    function computeStats(weekly, monthly, employees) {
+        const { shiftNames, dayNames, rowCounts, shiftDurations, preferences, weekLabel } = weekly;
+
+        const weeklyResult = computeHoursForGrid(
+            shiftNames, dayNames, rowCounts, shiftDurations, weekly.schedule,
+            (name, day, shift) => preferenceHours(preferences, name, day, shift)
+        );
+        const hoursByName = weeklyResult.hoursByName;
 
         const weeklyGrid = countGrid(shiftNames, dayNames, rowCounts, weekly.schedule);
 
-        const assignmentsByName = monthly
-            ? countGrid(monthly.shiftNames, monthly.dayNames, monthly.rowCounts, monthly.schedule).countByName
-            : {};
+        // Monatsstunden (für den Abgleich mit dem Monatslimit): echte Ist-Stunden
+        // aus dem Monatsplan, nicht nur die reine Einsatz-Anzahl.
+        let assignmentsByName = {};
+        let monthlyHoursByName = {};
+        let monthlyDurationsMissing = false;
+        let monthlyExactCells = 0;
+        let monthlyEstimatedCells = 0;
+        if (monthly) {
+            assignmentsByName = countGrid(monthly.shiftNames, monthly.dayNames, monthly.rowCounts, monthly.schedule).countByName;
+            const monthlyResult = computeHoursForGrid(
+                monthly.shiftNames, monthly.dayNames, monthly.rowCounts, monthly.shiftDurations, monthly.schedule, null
+            );
+            monthlyHoursByName = monthlyResult.hoursByName;
+            monthlyDurationsMissing = monthlyResult.durationsMissing;
+            monthlyExactCells = monthlyResult.exactCells;
+            monthlyEstimatedCells = monthlyResult.estimatedCells;
+        }
 
-        // Mit Mitarbeiterstamm abgleichen (für optionales Wochenstunden-Limit)
+        // Mit Mitarbeiterstamm abgleichen (für optionales Monatsstunden-Limit)
         const byName = {};
         employees.forEach(emp => { if (emp.name) byName[emp.name] = emp; });
 
         const allNames = new Set([
             ...Object.keys(hoursByName),
+            ...Object.keys(monthlyHoursByName),
             ...Object.keys(assignmentsByName),
             ...employees.map(e => e.name).filter(Boolean)
         ]);
@@ -109,16 +202,18 @@
         const perEmployee = Array.from(allNames).map(name => {
             const emp = byName[name];
             const hours = hoursByName[name] || 0;
+            const monthlyHours = monthly ? (monthlyHoursByName[name] || 0) : null;
             const weeklyAssignments = weeklyGrid.countByName[name] || 0;
             const monthlyAssignments = monthly ? (assignmentsByName[name] || 0) : null;
             const limit = emp && emp.weekly_hours_limit != null ? emp.weekly_hours_limit : null;
             return {
                 name,
                 hours,
+                monthlyHours,
                 weeklyAssignments,
                 monthlyAssignments,
                 limit,
-                overLimit: limit != null && hours > limit
+                overLimit: limit != null && monthlyHours != null && monthlyHours > limit
             };
         }).sort((a, b) => b.hours - a.hours);
 
@@ -135,9 +230,13 @@
             teamWeeklyAssignments,
             teamMonthlyAssignments,
             monthLabel: monthly ? monthly.monthLabel : null,
+            weekLabel: weekLabel || null,
             avgUtilization,
             overLimitCount,
-            durationsMissing
+            hasMonthly: !!monthly,
+            durationsMissing: weeklyResult.durationsMissing || monthlyDurationsMissing,
+            exactCells: weeklyResult.exactCells + monthlyExactCells,
+            estimatedCells: weeklyResult.estimatedCells + monthlyEstimatedCells
         };
     }
 
@@ -151,10 +250,10 @@
         const insights = [];
 
         stats.perEmployee.filter(e => e.overLimit).forEach(e => {
-            const diff = e.hours - e.limit;
+            const diff = e.monthlyHours - e.limit;
             insights.push({
                 severity: 'critical',
-                text: `${esc(e.name)} liegt ${diff.toLocaleString('de-DE')} Std. über dem Wochenlimit (${e.hours.toLocaleString('de-DE')} von ${e.limit.toLocaleString('de-DE')} Std.).`
+                text: `${esc(e.name)} liegt ${diff.toLocaleString('de-DE')} Std. über dem Monatslimit (${e.monthlyHours.toLocaleString('de-DE')} von ${e.limit.toLocaleString('de-DE')} Std.).`
             });
         });
 
@@ -183,16 +282,23 @@
             }
         }
 
-        if (stats.durationsMissing) {
+        if (stats.estimatedCells > 0) {
+            const totalCells = stats.exactCells + stats.estimatedCells;
+            const pct = totalCells > 0 ? Math.round((stats.exactCells / totalCells) * 100) : 0;
+            insights.push({
+                severity: 'info',
+                text: `${pct}% der Einsätze basieren auf hinterlegten Uhrzeiten, für die restlichen ${stats.estimatedCells} von ${totalCells} wurde mit der pauschalen Schichtdauer gerechnet. Für genauere Ist-Stunden im Wochenplan bei den Mitarbeiter-Präferenzen (⚙️) Start-/Endzeiten je Tag hinterlegen.`
+            });
+        } else if (stats.durationsMissing) {
             insights.push({
                 severity: 'info',
                 text: 'Für mindestens eine Schicht ist keine Dauer hinterlegt – bei den Ist-Stunden wurde mit 8 Std. gerechnet. Dauer im Wochenplan unter „Einstellungen" pflegen für genaue Werte.'
             });
         }
-        if (stats.teamMonthlyAssignments == null) {
+        if (!stats.hasMonthly) {
             insights.push({
                 severity: 'info',
-                text: 'Noch kein Monatsplan in der Cloud gespeichert – die Spalte „Einsätze (Monat)" bleibt leer. Im <a href="monatsplan.html">Monatsplan</a> speichern, um sie zu befüllen.'
+                text: 'Noch kein Monatsplan in der Cloud gespeichert – die Spalten „Ist-Stunden (Monat)" und „Einsätze (Monat)" bleiben leer, und Monatslimits können nicht geprüft werden. Im <a href="monatsplan.html">Monatsplan</a> speichern, um sie zu befüllen.'
             });
         }
 
@@ -216,11 +322,11 @@
         const kpis = `
             <div class="kpi-grid">
                 <div class="kpi-tile">
-                    <div class="kpi-label">Team-Ist-Stunden (aktuelle Woche)</div>
+                    <div class="kpi-label">Team-Ist-Stunden${stats.weekLabel ? ' (' + esc(stats.weekLabel) + ')' : ' (aktuelle Woche)'}</div>
                     <div class="kpi-value">${stats.teamHours.toLocaleString('de-DE')} Std.</div>
                 </div>
                 <div class="kpi-tile">
-                    <div class="kpi-label">Team-Einsätze (Woche)</div>
+                    <div class="kpi-label">Team-Einsätze${stats.weekLabel ? ' (' + esc(stats.weekLabel) + ')' : ' (Woche)'}</div>
                     <div class="kpi-value">${stats.teamWeeklyAssignments.toLocaleString('de-DE')}</div>
                 </div>
                 <div class="kpi-tile">
@@ -232,13 +338,13 @@
                     <div class="kpi-value">${stats.avgUtilization}%</div>
                 </div>
                 <div class="kpi-tile">
-                    <div class="kpi-label">Über Wochenlimit</div>
+                    <div class="kpi-label">Über Monatslimit</div>
                     <div class="kpi-value">${stats.overLimitCount}</div>
                 </div>
             </div>`;
 
         const rows = stats.perEmployee.map(e => {
-            const diff = e.limit != null ? (e.hours - e.limit) : null;
+            const diff = (e.limit != null && e.monthlyHours != null) ? (e.monthlyHours - e.limit) : null;
             const diffHtml = diff == null
                 ? '<span class="muted">–</span>'
                 : `<span class="${diff > 0 ? 'over' : 'under'}">${diff > 0 ? '+' : ''}${diff.toLocaleString('de-DE')} Std.</span>`;
@@ -246,6 +352,7 @@
                 <td>${esc(e.name)}</td>
                 <td>${e.hours.toLocaleString('de-DE')} Std.</td>
                 <td>${e.weeklyAssignments.toLocaleString('de-DE')}</td>
+                <td>${e.monthlyHours != null ? e.monthlyHours.toLocaleString('de-DE') + ' Std.' : '<span class="muted">–</span>'}</td>
                 <td>${e.monthlyAssignments != null ? e.monthlyAssignments.toLocaleString('de-DE') : '<span class="muted">–</span>'}</td>
                 <td>${e.limit != null ? e.limit.toLocaleString('de-DE') + ' Std.' : '<span class="muted">kein Limit</span>'}</td>
                 <td>${diffHtml}</td>
@@ -256,8 +363,8 @@
             <div class="panel">
                 <h2>Stunden &amp; Einsätze je Mitarbeitende:r</h2>
                 <table class="analytics-table">
-                    <thead><tr><th>Name</th><th>Ist-Stunden (Woche)</th><th>Einsätze (Woche)</th><th>Einsätze${stats.monthLabel ? ' (' + esc(stats.monthLabel) + ')' : ' (Monat)'}</th><th>Wochenlimit</th><th>Differenz</th></tr></thead>
-                    <tbody>${rows || '<tr><td colspan="6" class="muted">Keine Einsätze im aktuellen Wochenplan.</td></tr>'}</tbody>
+                    <thead><tr><th>Name</th><th>Ist-Stunden${stats.weekLabel ? ' (' + esc(stats.weekLabel) + ')' : ' (Woche)'}</th><th>Einsätze${stats.weekLabel ? ' (' + esc(stats.weekLabel) + ')' : ' (Woche)'}</th><th>Ist-Stunden${stats.monthLabel ? ' (' + esc(stats.monthLabel) + ')' : ' (Monat)'}</th><th>Einsätze${stats.monthLabel ? ' (' + esc(stats.monthLabel) + ')' : ' (Monat)'}</th><th>Monatslimit</th><th>Differenz</th></tr></thead>
+                    <tbody>${rows || '<tr><td colspan="7" class="muted">Keine Einsätze im aktuellen Wochenplan.</td></tr>'}</tbody>
                 </table>
             </div>`;
 
@@ -309,6 +416,8 @@
         const rowCounts = parseSnapshotValue(weeklySnap, 'dienstplan_rowCounts', shiftNames.map(() => 7));
         const shiftDurations = parseSnapshotValue(weeklySnap, 'dienstplan_shiftDurations', null);
         const schedule = parseSnapshotValue(weeklySnap, 'dienstplan_schedule', {});
+        const preferences = parseSnapshotValue(weeklySnap, 'dienstplan_preferences', {});
+        const weekLabel = formatWeekLabel(rawSnapshotValue(weeklySnap, 'dienstplan_startDate', null));
 
         if (shiftNames.length === 0 || dayNames.length === 0) {
             showState('<p>Der Wochenplan enthält noch keine Schichten oder Tage.</p>');
@@ -325,13 +434,14 @@
                     shiftNames: mShiftNames,
                     dayNames: mDayNames,
                     rowCounts: parseSnapshotValue(monthlySnap, 'monatsplan_rowCounts', mShiftNames.map(() => 7)),
+                    shiftDurations: parseSnapshotValue(monthlySnap, 'monatsplan_shiftDurations', null),
                     schedule: parseSnapshotValue(monthlySnap, 'monatsplan_schedule', {}),
                     monthLabel: formatMonthLabel(rawSnapshotValue(monthlySnap, 'monatsplan_selectMonth', null))
                 };
             }
         }
 
-        const stats = computeStats({ shiftNames, dayNames, rowCounts, shiftDurations, schedule }, monthly, employees || []);
+        const stats = computeStats({ shiftNames, dayNames, rowCounts, shiftDurations, schedule, preferences, weekLabel }, monthly, employees || []);
         render(stats);
     }
 

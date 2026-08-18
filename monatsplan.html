@@ -18,6 +18,13 @@
             --color-nav-border: rgba(255,255,255,0.08);
             --radius: 14px;
             --shadow: 0 8px 40px rgba(0,0,0,0.5);
+            --day1-accent: #007AFF; --day1-tint: rgba(0,122,255,0.16);
+            --day2-accent: #34C759; --day2-tint: rgba(52,199,89,0.16);
+            --day3-accent: #FFD60A; --day3-tint: rgba(255,214,10,0.18);
+            --day4-accent: #FF9500; --day4-tint: rgba(255,149,0,0.16);
+            --day5-accent: #FF3B30; --day5-tint: rgba(255,59,48,0.16);
+            --day6-accent: #AF52DE; --day6-tint: rgba(175,82,222,0.16);
+            --day7-accent: #5AC8FA; --day7-tint: rgba(90,200,250,0.16);
         }
 
         /* ── LIGHT MODE ── */
@@ -40,7 +47,6 @@
         body.light .panel-title { color: var(--color-text); }
         body.light table th { background: rgba(0,0,0,0.04); color: var(--color-text); }
         body.light table td { color: var(--color-text); background: rgba(255,255,255,0.7); }
-        body.light table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
         body.light .row-number { background: rgba(0,0,0,0.06) !important; color: var(--color-text-muted) !important; }
         body.light input, body.light select, body.light textarea {
             background: rgba(255,255,255,0.9);
@@ -64,7 +70,6 @@
             color: var(--color-text) !important;
         }
         body.light .employee-tag { border-color: rgba(0,0,0,0.15); }
-        body.light .extra-pref-section { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
         body.light .table-title { color: var(--color-text); }
         body.light .btn { border-color: rgba(0,0,0,0.15); }
         body.light .btn-secondary { background: rgba(0,0,0,0.06); color: var(--color-text); }
@@ -236,33 +241,51 @@
         }
         .table-title:first-child { margin-top: 0; }
         .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        #print-schedule-container { display: none; }
+        table { width: 100%; border-collapse: separate; border-spacing: 6px 8px; min-width: 400px; }
         table th {
-            padding: 10px 12px; font-size: 0.75rem; font-weight: 600;
+            padding: 10px 12px; font-size: 0.75rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.04em;
             color: var(--color-text-muted);
             background: rgba(255,255,255,0.04);
-            border-bottom: 1px solid var(--color-border);
+            border-radius: 8px;
             white-space: nowrap; text-align: center;
         }
-        table th:first-child { text-align: left; }
+        table th:first-child { text-align: left; white-space: normal; width: 85px; line-height: 1.25; }
+        table th:nth-child(7n+2) { background: var(--day1-tint); color: var(--day1-accent); }
+        table th:nth-child(7n+3) { background: var(--day2-tint); color: var(--day2-accent); }
+        table th:nth-child(7n+4) { background: var(--day3-tint); color: var(--day3-accent); }
+        table th:nth-child(7n+5) { background: var(--day4-tint); color: var(--day4-accent); }
+        table th:nth-child(7n+6) { background: var(--day5-tint); color: var(--day5-accent); }
+        table th:nth-child(7n+7) { background: var(--day6-tint); color: var(--day6-accent); }
+        table th:nth-child(7n+8) { background: var(--day7-tint); color: var(--day7-accent); }
         table td {
-            padding: 8px 10px; text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 10px 12px; text-align: center;
             color: var(--color-text); font-size: 0.88rem;
-            transition: background 0.15s;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+            transition: filter 0.15s, box-shadow 0.15s;
             white-space: pre-wrap; word-wrap: break-word;
         }
-        table td[contenteditable="true"]:hover { background: rgba(255,255,255,0.05); }
-        table td[contenteditable="true"]:focus { background: rgba(0,122,255,0.08); outline: none; box-shadow: inset 0 0 0 1px var(--color-accent); }
-        table tr:last-child td { border-bottom: none; }
+        table td[contenteditable="true"]:nth-child(7n+2) { background: var(--day1-tint); }
+        table td[contenteditable="true"]:nth-child(7n+3) { background: var(--day2-tint); }
+        table td[contenteditable="true"]:nth-child(7n+4) { background: var(--day3-tint); }
+        table td[contenteditable="true"]:nth-child(7n+5) { background: var(--day4-tint); }
+        table td[contenteditable="true"]:nth-child(7n+6) { background: var(--day5-tint); }
+        table td[contenteditable="true"]:nth-child(7n+7) { background: var(--day6-tint); }
+        table td[contenteditable="true"]:nth-child(7n+8) { background: var(--day7-tint); }
+        table td[contenteditable="true"]:hover { filter: brightness(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.22); }
+        table td[contenteditable="true"]:focus { outline: none; box-shadow: 0 0 0 2px var(--color-accent), 0 2px 8px rgba(0,0,0,0.22); }
         .row-number {
             text-align: left !important;
             font-size: 0.78rem !important;
             color: var(--color-text-muted) !important;
             background: rgba(255,255,255,0.03) !important;
             font-weight: 600;
-            min-width: 60px;
+            width: 85px;
+            padding-left: 8px !important;
+            padding-right: 4px !important;
+            border-radius: 10px;
         }
 
         /* ── CELL DRAG ── */
@@ -342,18 +365,6 @@
             padding: 2px 4px; border-radius: 4px; font-size: 0.8rem; transition: color 0.2s;
         }
         .employee-tag button:hover { color: var(--color-accent); }
-
-        /* ── EXTRA PREFS SECTION ── */
-        .extra-pref-section {
-            margin-top: 12px; padding: 12px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 10px; border: 1px solid var(--color-border);
-        }
-        .extra-pref-title {
-            font-weight: 600; font-size: 0.88rem; margin-bottom: 8px; color: var(--color-text);
-        }
-        #extraPrefList { font-size: 0.82rem; color: var(--color-text-muted); }
-        #extraPrefList strong { color: var(--color-text); }
 
         /* ── BUTTONS ── */
         .btn {
@@ -466,9 +477,16 @@
             .right-panel { width: 100%; }
             .page-wrap { padding-top: 0; }
             body { background: white !important; color: #000 !important;
-                   font-size: 9pt !important; line-height: 1.1 !important; }
-            .schedule-container { box-shadow: none; border: 1px solid #ddd; background: white; }
-            table { font-size: 7pt !important; page-break-inside: avoid; }
+                   font-size: 9pt !important; line-height: 1.1 !important;
+                   overflow-x: visible !important; }
+            .schedule-container { display: none !important; }
+            #print-schedule-container { display: block !important; }
+            #print-schedule-container, .table-wrapper { overflow: visible !important; }
+            table { font-size: 7pt !important; table-layout: fixed !important; width: auto !important;
+                    margin-bottom: 10px; }
+            table tr { page-break-inside: avoid; }
+            table th, table td { width: 60px; }
+            table th:first-child, table td.row-number { width: 60px; }
             table th { background: #f5f5f7 !important; color: #000 !important; padding: 1px 2px !important; }
             table td { background: white !important; color: #000 !important;
                        border-color: #ddd !important; padding: 1px 2px !important; }
@@ -531,22 +549,6 @@
 
             <div id="employeeList" class="employee-list" aria-live="polite"></div>
 
-            <div id="extra-preferences-section" class="extra-pref-section">
-                <div class="extra-pref-title">Zusatzpräferenzen (Urlaub / Krank)</div>
-                <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px;">
-                    <select id="extraPrefEmployeeSelect"><option value="">Mitarbeiter wählen</option></select>
-                    <select id="extraPrefType">
-                        <option value="">Präferenz wählen</option>
-                        <option value="Urlaub">Urlaub</option>
-                        <option value="Krank">Krank</option>
-                    </select>
-                    <input type="date" id="extraPrefStart">
-                    <input type="date" id="extraPrefEnd">
-                    <button class="btn btn-secondary" onclick="addExtraPreference()">Hinzufügen</button>
-                </div>
-                <div id="extraPrefList"></div>
-            </div>
-
             <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
                 <input type="text" id="whatsappHint" placeholder="Hinweistext für WhatsApp" style="width:100%;">
                 <div class="export-row">
@@ -575,6 +577,7 @@
                         <input type="month" id="monthSelect">
                     </div>
                     <button class="btn btn-primary" onclick="generateSchedule()">📅 Monatsplan generieren</button>
+                    <button class="btn btn-secondary" onclick="prefillFromWochenplan()" title="Konkrete, gespeicherte Wochenplan-Wochen für den gewählten Monat übernehmen (vollständiger Abgleich bei jedem Klick). Wichtig: Schicht-Namen und Wochentag-Einstellungen müssen in Wochenplan und Monatsplan absolut identisch sein, sonst werden Einträge nicht zugeordnet.">📋 Aus Wochenplan übernehmen</button>
                     <div class="date-info" id="dateInfo"></div>
                 </div>
 
@@ -587,6 +590,7 @@
                         </table>
                     </div>
                 </div>
+                <div id="print-schedule-container"></div>
 
                 <div class="remarks-container input-section">
                     <h2>Bemerkungen</h2>
@@ -754,7 +758,7 @@
             const thead = table.querySelector('thead tr');
             if (thead) {
                 const firstCell = thead.querySelector('th:first-child');
-                let newHeaderHTML = firstCell ? firstCell.outerHTML : '<th>lfd. Nr. / Zeit</th>';
+                let newHeaderHTML = firstCell ? firstCell.outerHTML : '<th>lfd. Nr. /<br>Datum</th>';
                 newHeaderHTML += dayNames.map(day => `<th>${day}</th>`).join('');
                 thead.innerHTML = newHeaderHTML;
             }
@@ -765,6 +769,20 @@
                 monthRow.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
             }
         });
+    }
+
+    // ISO-8601-Kalenderwoche (Donnerstag-der-Woche-Algorithmus, wie in wochenplan.html) -
+    // wird für den Zugriff auf dessen wochengebundene localStorage-Keys gebraucht
+    // (dienstplan_tableData__{JAHR}-W{WOCHE}).
+    function getISOWeekKey(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = (d.getUTCDay() + 6) % 7;
+        d.setUTCDate(d.getUTCDate() - dayNum + 3);
+        const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+        const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+        firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+        const isoWeek = 1 + Math.round((d - firstThursday) / (7 * 86400000));
+        return d.getUTCFullYear() + '-W' + String(isoWeek).padStart(2, '0');
     }
 
     function updateMonthInfo() {
@@ -790,7 +808,302 @@
         }
     }
 
-    function generateSchedule() {
+    // ─────────────────────────────────────────────
+    //  ÜBERNAHME AUS WOCHENPLAN
+    // ─────────────────────────────────────────────
+    // Übernimmt für den gewählten Monat ausschließlich KONKRETE, tatsächlich
+    // gespeicherte Wochenplan-Wochen (dienstplan_tableData__{ISO-Wochenschlüssel}).
+    // Kalendertage, für die keine Wochenplan-Woche gespeichert ist, bleiben leer -
+    // es wird NICHT mehr aus den allgemeinen, wiederkehrenden Wochentag-
+    // Präferenzen hochgerechnet (das hatte einzelne Präferenzen über jedes
+    // Vorkommen des Wochentags im Monat vervielfacht).
+    // Die Wochenplan-Quelle wird bevorzugt aus der Cloud gelesen (Tabelle
+    // "plans", plan_type='wochenplan', wie in js/analytics.js), da lokale
+    // dienstplan_*-Keys nur existieren, wenn genau dieser Browser zuvor
+    // wochenplan.html besucht hat. Ohne Supabase-Session wird auf lokale
+    // dienstplan_*-Keys zurückgefallen.
+    // Jeder Klick ist ein vollständiger Re-Sync: zuvor per Übernahme gesetzte
+    // Einträge (nachverfolgt in monatsplan_syncedFromWochenplan) werden ersetzt,
+    // manuell im Präferenzen-Modal gesetzte Einträge bleiben unangetastet.
+    // Schichten werden nur übernommen, wenn im Monatsplan eine gleichnamige
+    // Schicht existiert - sonst wird der Eintrag übersprungen und gesammelt.
+
+    function parseSnapshotValue(snap, key, fallback) {
+        if (!snap || !(key in snap)) return fallback;
+        try { return JSON.parse(snap[key]); } catch (e) { return fallback; }
+    }
+
+    // Liefert Wochentag-Spalten und einen Woche-Lookup des Wochenplans, bevorzugt
+    // aus dem Cloud-Snapshot (plan_type='wochenplan') statt aus lokalem
+    // localStorage, damit die Übernahme unabhängig davon funktioniert, in
+    // welchem Browser/Gerät der Wochenplan zuletzt gepflegt wurde.
+    async function loadWochenplanSnapshot() {
+        try {
+            if (window.sbClient) {
+                const { data: { session } } = await window.sbClient.auth.getSession();
+                if (session) {
+                    const { data: profile } = await window.sbClient
+                        .from('profiles').select('organization_id').eq('id', session.user.id).single();
+                    if (profile && profile.organization_id) {
+                        const { data: planRow } = await window.sbClient
+                            .from('plans').select('data')
+                            .eq('organization_id', profile.organization_id)
+                            .eq('plan_type', 'wochenplan')
+                            .maybeSingle();
+                        if (planRow && planRow.data) {
+                            const snap = planRow.data;
+                            return {
+                                source: 'cloud',
+                                dayNames: parseSnapshotValue(snap, 'dienstplan_dayNames', []),
+                                getWeekTableData: weekKey => parseSnapshotValue(snap, 'dienstplan_tableData__' + weekKey, null)
+                            };
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+        let localDayNames = [];
+        try { localDayNames = JSON.parse(localStorage.getItem('dienstplan_dayNames') || '[]'); } catch (e) {}
+        return {
+            source: 'local',
+            dayNames: localDayNames,
+            getWeekTableData: weekKey => {
+                try {
+                    const raw = localStorage.getItem('dienstplan_tableData__' + weekKey);
+                    return raw ? JSON.parse(raw) : null;
+                } catch (e) { return null; }
+            }
+        };
+    }
+
+    function syncedFromWochenplanKey() { return 'monatsplan_syncedFromWochenplan'; }
+    function monthKeyFor(year, month) { return year + '-' + String(month).padStart(2, '0'); }
+    function loadAllSyncMarkers() {
+        try { return JSON.parse(localStorage.getItem(syncedFromWochenplanKey()) || '{}'); } catch (e) { return {}; }
+    }
+    function saveAllSyncMarkers(markers) { localStorage.setItem(syncedFromWochenplanKey(), JSON.stringify(markers)); }
+
+    async function prefillFromWochenplan() {
+        if (!selectedMonth || !selectedYear || dayNames.length === 0) {
+            showCustomAlert('Bitte zuerst einen Monat auswählen.');
+            return;
+        }
+
+        const wp = await loadWochenplanSnapshot();
+        const wpDayNames = wp.dayNames;
+
+        // Der Wochenplan zeigt standardmäßig generische Spalten ("Tag 1" usw.) und
+        // erst nach expliziter Umstellung in dessen Einstellungen echte Wochentage
+        // ("Montag" ...). Ohne mindestens einen echten Wochentag gibt es nichts,
+        // das sich einem Kalendertag zuordnen ließe.
+        const ALL_WEEKDAYS_DE = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+        if (!wpDayNames.some(d => ALL_WEEKDAYS_DE.includes(d))) {
+            showCustomAlert(`Der Wochenplan verwendet aktuell keine echten Wochentag-Namen als Spalten (${wpDayNames.join(', ') || 'keine Tage konfiguriert'}). Dafür bitte im Wochenplan unter „Einstellungen" echte Wochentage wie „Montag" einrichten.`);
+            return;
+        }
+
+        // ── PHASE 1: sammeln, ohne employees/preferences schon zu verändern ──
+        // Für jeden Kalendertag NUR die ECHTEN (ggf. manuell bearbeiteten)
+        // Einträge aus der jeweils zuständigen, tatsächlich gespeicherten
+        // Wochenplan-WOCHE übernehmen (dienstplan_tableData__{ISO-Wochenschlüssel}).
+        // Liegt für eine Woche noch nichts gespeichert vor, bleibt der Tag leer.
+        const weekTableCache = {};
+        function loadWeekTableData(weekKey) {
+            if (weekKey in weekTableCache) return weekTableCache[weekKey];
+            const data = wp.getWeekTableData(weekKey);
+            weekTableCache[weekKey] = data;
+            return data;
+        }
+
+        const collected = {}; // { employee: { dayLabel: Set(shift) } }
+        const collectedTimes = {}; // { employee: { dayLabel: { shift: {start,end} } } }
+        const unmatchedShifts = new Set();
+        let filledDays = 0;
+        let emptyDays = 0;
+
+        // Parst die zweite Zeile einer Wochenplan-Zelle ("08:00–16:00", nur "08:00"
+        // oder nur "16:00") in {start, end}. Bei nur einem Wert lässt sich aus dem
+        // Text allein nicht sicher unterscheiden, ob es Start- oder Endzeit war -
+        // ein einzelner Wert wird daher als Startzeit übernommen.
+        function parseTimeLine(line) {
+            if (!line) return null;
+            const trimmed = line.trim();
+            if (!trimmed) return null;
+            const parts = trimmed.split(/[–-]/).map(s => s.trim()).filter(Boolean);
+            if (parts.length >= 2) return { start: parts[0], end: parts[1] };
+            if (/^\d{1,2}:\d{2}$/.test(parts[0])) return { start: parts[0], end: '' };
+            return null;
+        }
+
+        function collect(employee, dayLabel, shift, timeInfo) {
+            if (!shiftNames.includes(shift)) { unmatchedShifts.add(shift); return; }
+            if (!collected[employee]) collected[employee] = {};
+            if (!collected[employee][dayLabel]) collected[employee][dayLabel] = new Set();
+            collected[employee][dayLabel].add(shift);
+            if (timeInfo && (timeInfo.start || timeInfo.end)) {
+                if (!collectedTimes[employee]) collectedTimes[employee] = {};
+                if (!collectedTimes[employee][dayLabel]) collectedTimes[employee][dayLabel] = {};
+                collectedTimes[employee][dayLabel][shift] = timeInfo;
+            }
+        }
+
+        dayNames.forEach((dayLabel, dIdx) => {
+            const dateObj = new Date(selectedYear, selectedMonth - 1, dIdx + 1);
+            const weekday = dateObj.toLocaleDateString('de-DE', { weekday: 'long' });
+            const wpColIdx = wpDayNames.indexOf(weekday);
+            const weekTableData = wpColIdx !== -1 ? loadWeekTableData(getISOWeekKey(dateObj)) : null;
+
+            if (weekTableData) {
+                filledDays++;
+                Object.keys(weekTableData).forEach(shift => {
+                    (weekTableData[shift] || []).forEach(row => {
+                        // Spalte 0 ist im Wochenplan die Zeilennummer, Tage folgen ab Index 1.
+                        const cellText = (row[wpColIdx + 1] || '').trim();
+                        if (!cellText) return;
+                        const lines = cellText.split('\n');
+                        const name = lines[0].trim();
+                        const timeInfo = parseTimeLine(lines[1]);
+                        if (name) collect(name, dayLabel, shift, timeInfo);
+                    });
+                });
+            } else {
+                emptyDays++;
+            }
+        });
+
+        const collectedNames = Object.keys(collected);
+        if (collectedNames.length === 0 && filledDays === 0) {
+            showCustomAlert('Für diesen Monat liegt noch keine gespeicherte Wochenplan-Woche vor. Bitte zuerst im Wochenplan die passenden Wochen speichern (ggf. „☁ Änderungen speichern" klicken) und den Vorgang danach wiederholen.');
+            return;
+        }
+
+        // ── PHASE 2: Tarif-Limit für neue Mitarbeiter vorab prüfen ──
+        const missingEmployees = collectedNames.filter(name => !employees.includes(name));
+        if (missingEmployees.length > 0) {
+            const limitInfo = await checkTierLimitReached();
+            if (limitInfo && (limitInfo.count + missingEmployees.length) > limitInfo.limit) {
+                showCustomAlert(`Ihr Tarif erlaubt maximal ${limitInfo.limit} Mitarbeitende. Für die ${missingEmployees.length} fehlenden Mitarbeiter aus dem Wochenplan reicht der Platz nicht.`);
+                return;
+            }
+        }
+
+        // ── PHASE 3: alte, aus dem Wochenplan stammende Einträge entfernen ──
+        const monthKey = monthKeyFor(selectedYear, selectedMonth);
+        const allMarkers = loadAllSyncMarkers();
+        const previousMarker = allMarkers[monthKey] || {};
+        const isFirstSyncForMonth = !(monthKey in allMarkers);
+
+        if (isFirstSyncForMonth) {
+            // Erster Lauf mit dieser Funktion für den Monat: bereits vorhandene
+            // Einträge könnten Altlasten der alten, hochrechnenden Logik sein und
+            // lassen sich nicht sicher von manuellen Einträgen unterscheiden -
+            // daher einmalig nachfragen, ob zurückgesetzt werden soll.
+            const hasExistingPrefsForMonth = dayNames.some(dayLabel =>
+                Object.keys(preferences).some(emp => preferences[emp] && preferences[emp][dayLabel] && preferences[emp][dayLabel].length > 0)
+            );
+            if (hasExistingPrefsForMonth) {
+                const monthLabel = new Date(selectedYear, selectedMonth - 1, 1).toLocaleString('de-DE', { month: 'long', year: 'numeric' });
+                const doReset = window.confirm(
+                    `Für ${monthLabel} gibt es bereits Präferenz-Einträge, die (auch) aus einer älteren Version dieser Übernahme stammen könnten und sich nicht sicher von manuell gesetzten Einträgen unterscheiden lassen.\n\n` +
+                    `OK = alle bestehenden Präferenz-Einträge für ${monthLabel} zurücksetzen und sauber neu aus dem Wochenplan übernehmen.\n` +
+                    `Abbrechen = bestehende Einträge behalten, nur neue Einträge ergänzen.`
+                );
+                if (doReset) {
+                    dayNames.forEach(dayLabel => {
+                        Object.keys(preferences).forEach(emp => {
+                            if (preferences[emp] && preferences[emp][dayLabel]) delete preferences[emp][dayLabel];
+                            if (preferences[emp] && preferences[emp].shiftTimes) delete preferences[emp].shiftTimes[dayLabel];
+                        });
+                    });
+                }
+            }
+        } else {
+            // Regulärer Re-Sync: nur die beim letzten Mal aus dem Wochenplan
+            // übernommenen Einträge entfernen, manuelle Einträge bleiben stehen.
+            Object.keys(previousMarker).forEach(employee => {
+                if (!preferences[employee]) return;
+                Object.keys(previousMarker[employee]).forEach(dayLabel => {
+                    const staleShifts = previousMarker[employee][dayLabel];
+                    if (preferences[employee][dayLabel]) {
+                        preferences[employee][dayLabel] = preferences[employee][dayLabel].filter(s => !staleShifts.includes(s));
+                    }
+                    if (preferences[employee].shiftTimes && preferences[employee].shiftTimes[dayLabel]) {
+                        staleShifts.forEach(s => delete preferences[employee].shiftTimes[dayLabel][s]);
+                    }
+                });
+            });
+        }
+
+        // ── PHASE 4: frisches Set anwenden und als neuen Marker speichern ──
+        const newlyAddedEmployees = [];
+        let addedPrefEntries = 0;
+        const freshMarker = {};
+
+        collectedNames.forEach(employee => {
+            if (!employees.includes(employee)) {
+                employees.push(employee);
+                newlyAddedEmployees.push(employee);
+            }
+            if (!preferences[employee]) preferences[employee] = {};
+            freshMarker[employee] = {};
+            Object.keys(collected[employee]).forEach(dayLabel => {
+                if (!preferences[employee][dayLabel]) preferences[employee][dayLabel] = [];
+                const shiftsForDay = Array.from(collected[employee][dayLabel]);
+                freshMarker[employee][dayLabel] = shiftsForDay;
+                shiftsForDay.forEach(shift => {
+                    if (!preferences[employee][dayLabel].includes(shift)) {
+                        preferences[employee][dayLabel].push(shift);
+                        addedPrefEntries++;
+                    }
+                    const timeInfo = collectedTimes[employee]?.[dayLabel]?.[shift];
+                    if (timeInfo) {
+                        if (!preferences[employee].shiftTimes) preferences[employee].shiftTimes = {};
+                        if (!preferences[employee].shiftTimes[dayLabel]) preferences[employee].shiftTimes[dayLabel] = {};
+                        preferences[employee].shiftTimes[dayLabel][shift] = timeInfo;
+                    }
+                });
+            });
+        });
+
+        allMarkers[monthKey] = freshMarker;
+        saveAllSyncMarkers(allMarkers);
+
+        updateEmployeeList();
+        saveDataToLocalStorage();
+        showPrefillSummary({ addedPrefEntries, newlyAddedEmployees, unmatchedShifts: Array.from(unmatchedShifts), filledDays, emptyDays, wpSource: wp.source });
+    }
+
+    function showPrefillSummary({ addedPrefEntries, newlyAddedEmployees, unmatchedShifts, filledDays, emptyDays, wpSource }) {
+        const modal = document.createElement('div');
+        modal.id = 'prefillSummaryModal';
+        modal.className = 'modal-overlay';
+        const content = document.createElement('div');
+        content.className = 'modal-content';
+        let html = `<h2>Aus Wochenplan übernommen</h2>`;
+        html += `<p style="color:var(--color-text-muted);font-size:0.85rem;margin-bottom:10px;border-left:3px solid #FF9500;padding-left:8px;">Wichtig: Schicht-Namen und Wochentag-Einstellungen müssen im Wochenplan und im Monatsplan absolut identisch sein (gleiche Schreibweise), sonst werden Einträge beim Abgleich nicht erkannt oder fehlen.</p>`;
+        html += `<p style="color:var(--color-text);margin-bottom:10px;">${addedPrefEntries} Präferenz-${addedPrefEntries === 1 ? 'Eintrag' : 'Einträge'} aus konkreten Wochenplan-Wochen übernommen.</p>`;
+        html += `<p style="color:var(--color-text-muted);font-size:0.85rem;margin-bottom:10px;">${filledDays} Kalendertag${filledDays === 1 ? '' : 'e'} hatten eine gespeicherte Wochenplan-Woche und wurden übernommen. ${emptyDays} Kalendertag${emptyDays === 1 ? '' : 'e'} blieben leer, da dafür noch kein Wochenplan gespeichert ist${emptyDays > 0 ? ' – bitte zuerst im Wochenplan speichern und danach hier erneut übernehmen' : ''}.</p>`;
+        if (wpSource === 'local') {
+            html += `<p style="color:#FF9500;margin-bottom:10px;">Hinweis: Es konnte keine Cloud-Version des Wochenplans gelesen werden (nicht angemeldet oder keine Organisation zugeordnet) – es wurden nur lokal in diesem Browser gespeicherte Wochenplan-Daten verwendet.</p>`;
+        }
+        if (newlyAddedEmployees.length > 0) {
+            html += `<p style="color:var(--color-text);margin-bottom:10px;">Neu in den Monatsplan aufgenommen: ${newlyAddedEmployees.join(', ')}.</p>`;
+        }
+        if (unmatchedShifts.length > 0) {
+            html += `<p style="color:#FF9500;margin-bottom:10px;">Folgende Schichten gibt es im Wochenplan, aber nicht (mit gleichem Namen) im Monatsplan – zugehörige Einträge wurden übersprungen: ${unmatchedShifts.join(', ')}. Unter „Einstellungen" mit demselben Namen anlegen und den Vorgang wiederholen, falls gewünscht.</p>`;
+        }
+        html += `<p style="color:var(--color-text-muted);font-size:0.85rem;margin-bottom:16px;">Erneutes Übernehmen gleicht die aus dem Wochenplan stammenden Einträge vollständig neu ab (veraltete werden ersetzt); manuell im Präferenzen-Modal gesetzte Einträge bleiben davon unberührt.</p>`;
+        html += `<div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button class="btn btn-secondary" onclick="document.getElementById('prefillSummaryModal').remove()">Schließen</button>
+            <button class="btn btn-primary" onclick="document.getElementById('prefillSummaryModal').remove();generateSchedule();">Jetzt Monatsplan generieren</button>
+        </div>`;
+        content.innerHTML = html;
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    }
+
+    async function generateSchedule() {
         if (!selectedMonth || !selectedYear) {
             showCustomAlert('Bitte wählen Sie einen Monat aus.');
             return;
@@ -807,6 +1120,11 @@
             if (!aDr && bDr) return 1;
             return a.localeCompare(b, 'de', { sensitivity: 'base' });
         });
+        const monthStr = selectedMonth.toString().padStart(2, '0');
+        const vacationRanges = await fetchVacationSkipRanges(
+            `${selectedYear}-${monthStr}-01`,
+            `${selectedYear}-${monthStr}-${dayNames.length.toString().padStart(2, '0')}`
+        );
         const generatedSchedule = {};
         shiftNames.forEach((shift, sIdx) => {
             generatedSchedule[shift] = [];
@@ -821,7 +1139,7 @@
             const shiftPreferences = {};
             shiftNames.forEach(shift => shiftPreferences[shift] = []);
             Object.keys(employeePrefs).forEach(day => {
-                if (day === 'extra') return;
+                if (day === 'extra' || day === 'shiftTimes') return;
                 const dayPrefs = employeePrefs[day] || [];
                 dayPrefs.forEach(shift => {
                     if (shiftPreferences[shift]) {
@@ -835,23 +1153,15 @@
                     preferredDays.forEach(day => {
                         const dayIndex = dayNames.indexOf(day);
                         if (dayIndex !== -1) {
-                            let skip = false;
-                            if (employeePrefs.extra && Array.isArray(employeePrefs.extra)) {
-                                const dateOfDay = new Date(selectedYear, selectedMonth - 1, parseInt(day));
-                                employeePrefs.extra.forEach(extra => {
-                                    if ((extra.type === 'Urlaub' || extra.type === 'Krank') && extra.start && extra.end) {
-                                        const start = new Date(extra.start);
-                                        const end = new Date(extra.end);
-                                        if (dateOfDay >= start && dateOfDay <= end) {
-                                            skip = true;
-                                        }
-                                    }
-                                });
-                            }
-                            if (skip) return;
+                            const dateStr = `${selectedYear}-${monthStr}-${(dayIndex + 1).toString().padStart(2, '0')}`;
+                            if (isEmployeeSkipped(vacationRanges, employee, dateStr)) return;
+                            const timeInfo = employeePrefs.shiftTimes?.[day]?.[shift];
+                            const cellText = timeInfo && (timeInfo.start || timeInfo.end)
+                                ? `${employee}\n${timeInfo.start || ''}${timeInfo.start && timeInfo.end ? '–' : ''}${timeInfo.end || ''}`
+                                : employee;
                             for (let i = 0; i < generatedSchedule[shift].length; i++) {
                                 if (!generatedSchedule[shift][i][dayIndex]) {
-                                    generatedSchedule[shift][i][dayIndex] = employee;
+                                    generatedSchedule[shift][i][dayIndex] = cellText;
                                     break;
                                 }
                             }
@@ -893,7 +1203,7 @@
             tableHTML += `
                 <thead>
                     <tr>
-                        <th>lfd. Nr. / Datum</th>
+                        <th>lfd. Nr. /<br>Datum</th>
                         ${dayNames.map(day => `<th>${day}</th>`).join('')}
                     </tr>
                 </thead>
@@ -941,6 +1251,46 @@
         } catch (_) {
             return null;
         }
+    }
+
+    // Lädt genehmigte Urlaubs- und Krankentage aus der Urlaubsübersicht (Supabase)
+    // und ordnet sie den Mitarbeiternamen im Plan zu – der Plan kennt nur Namen,
+    // keine employee_id, daher erfolgt der Abgleich über den exakten Namen.
+    async function fetchVacationSkipRanges(rangeStart, rangeEnd) {
+        try {
+            if (!window.sbClient) return {};
+            const { data: { session } } = await window.sbClient.auth.getSession();
+            if (!session) return {};
+
+            const [empRes, vacRes, sickRes] = await Promise.all([
+                window.sbClient.from('employees').select('id, name'),
+                window.sbClient.from('vacations').select('employee_id, from_date, to_date')
+                    .eq('status', 'approved').lte('from_date', rangeEnd).gte('to_date', rangeStart),
+                window.sbClient.from('sick_leave').select('employee_id, from_date, to_date')
+                    .lte('from_date', rangeEnd).gte('to_date', rangeStart)
+            ]);
+
+            const idToName = {};
+            (empRes.data || []).forEach(e => { idToName[e.id] = e.name; });
+
+            const rangesByName = {};
+            const addRange = row => {
+                const name = idToName[row.employee_id];
+                if (!name) return;
+                (rangesByName[name] || (rangesByName[name] = [])).push({ start: row.from_date, end: row.to_date });
+            };
+            (vacRes.data || []).forEach(addRange);
+            (sickRes.data || []).forEach(addRange);
+            return rangesByName;
+        } catch (_) {
+            return {};
+        }
+    }
+
+    function isEmployeeSkipped(rangesByName, employeeName, dateStr) {
+        const ranges = rangesByName[employeeName];
+        if (!ranges) return false;
+        return ranges.some(r => dateStr >= r.start && dateStr <= r.end);
     }
 
     async function addEmployee() {
@@ -1056,7 +1406,7 @@
             let tableHTML = `
                 <thead>
                     <tr>
-                        <th>lfd. Nr. / Datum</th>
+                        <th>lfd. Nr. /<br>Datum</th>
                         ${dayNames.map(day => `<th>${day}</th>`).join('')}
                     </tr>
                 </thead>
@@ -1354,8 +1704,6 @@
             tag.addEventListener('dragleave', handleDragLeave);
             container.appendChild(tag);
         });
-        updateExtraPrefEmployeeSelect();
-        displayExtraPreferences();
     }
 
     function editEmployeeName(oldName) {
@@ -1382,11 +1730,6 @@
             const idx = employees.indexOf(oldName);
             if (idx !== -1) employees[idx] = newName;
             if (preferences[oldName]) { preferences[newName] = preferences[oldName]; delete preferences[oldName]; }
-            Object.keys(preferences).forEach(emp => {
-                if (preferences[emp] && preferences[emp].extra) {
-                    preferences[emp].extra.forEach(e => { if (e.employee === oldName) e.employee = newName; });
-                }
-            });
             document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
                 if (cell.textContent.trim() === oldName) cell.textContent = newName;
             });
@@ -1449,54 +1792,53 @@
         });
     }
 
-    // --- Zusatzpräferenzen ---
-    function updateExtraPrefEmployeeSelect() {
-        const select = document.getElementById('extraPrefEmployeeSelect');
-        if (!select) return;
-        select.innerHTML = '<option value="">Mitarbeiter auswählen</option>' +
-            employees.map(emp => `<option value="${emp}">${emp}</option>`).join('');
+    // Teilt die Tage des Monats in 2 (oder bei sehr vielen Tagen 3) etwa gleich
+    // grosse Bloecke auf, damit jede gedruckte Tabelle schmal genug fuer eine
+    // Druckseite bleibt, statt Spalten am Rand abzuschneiden.
+    function getPrintDayBlocks(totalDays) {
+        const maxPerBlock = 16;
+        const numBlocks = Math.min(3, Math.max(2, Math.ceil(totalDays / maxPerBlock)));
+        const base = Math.floor(totalDays / numBlocks);
+        const extra = totalDays % numBlocks;
+        const blocks = [];
+        let start = 0;
+        for (let i = 0; i < numBlocks; i++) {
+            const size = base + (i < extra ? 1 : 0);
+            blocks.push({ start, end: start + size });
+            start += size;
+        }
+        return blocks;
     }
 
-    function addExtraPreference() {
-        const employee = document.getElementById('extraPrefEmployeeSelect').value;
-        const type = document.getElementById('extraPrefType').value;
-        const start = document.getElementById('extraPrefStart').value;
-        const end = document.getElementById('extraPrefEnd').value;
-        if (!employee || !type || !start || !end) { alert('Bitte alle Felder ausfüllen!'); return; }
-        if (!preferences[employee]) preferences[employee] = {};
-        if (!preferences[employee].extra) preferences[employee].extra = [];
-        preferences[employee].extra.push({ type, start, end });
-        saveDataToLocalStorage();
-        displayExtraPreferences();
-    }
-
-    function displayExtraPreferences() {
-        const container = document.getElementById('extraPrefList');
+    function buildPrintSchedule() {
+        const container = document.getElementById('print-schedule-container');
         if (!container) return;
-        let html = '';
-        employees.forEach(emp => {
-            const extras = preferences[emp]?.extra || [];
-            if (extras.length > 0) {
-                html += `<div style='margin-bottom:8px;'><strong>${emp}:</strong> `;
-                html += extras.map((e, idx) => {
-                    const start = new Date(e.start);
-                    const end = new Date(e.end);
-                    const startStr = start.toLocaleDateString('de-DE');
-                    const endStr = end.toLocaleDateString('de-DE');
-                    return `${e.type} (${startStr} bis ${endStr}) <button onclick="removeExtraPreference('${emp}',${idx})" title="Löschen" style="margin-left:4px;color:#ff453a;background:none;border:none;cursor:pointer;font-size:1em;">✕</button>`;
-                }).join(', ');
-                html += '</div>';
-            }
+        container.innerHTML = '';
+        if (!dayNames || dayNames.length === 0 || !shiftNames) return;
+        const blocks = getPrintDayBlocks(dayNames.length);
+        shiftNames.forEach((shift, sIdx) => {
+            const rows = getTableData(`shiftBody_${sIdx}`);
+            blocks.forEach(block => {
+                const title = document.createElement('div');
+                title.className = 'table-title';
+                title.textContent = blocks.length > 1
+                    ? `${shift} - Tage ${block.start + 1}-${block.end}`
+                    : shift;
+                container.appendChild(title);
+                const table = document.createElement('table');
+                let html = `<thead><tr><th>lfd. Nr. /<br>Datum</th>`;
+                for (let d = block.start; d < block.end; d++) html += `<th>${dayNames[d]}</th>`;
+                html += `</tr></thead><tbody>`;
+                rows.forEach(row => {
+                    html += `<tr><td class="row-number">${row[0] || ''}</td>`;
+                    for (let d = block.start; d < block.end; d++) html += `<td>${row[d + 1] || ''}</td>`;
+                    html += `</tr>`;
+                });
+                html += `</tbody>`;
+                table.innerHTML = html;
+                container.appendChild(table);
+            });
         });
-        container.innerHTML = html || '<span style="color:var(--color-text-muted)">Keine Zusatzpräferenzen.</span>';
-    }
-
-    function removeExtraPreference(employee, idx) {
-        if (!preferences[employee] || !preferences[employee].extra) return;
-        if (!window.confirm('Möchten Sie diesen Eintrag wirklich löschen?')) return;
-        preferences[employee].extra.splice(idx, 1);
-        saveDataToLocalStorage();
-        displayExtraPreferences();
     }
 
     function printSchedule() {
@@ -1509,6 +1851,7 @@
         let dateLine = (start && end) ? `<div style='font-weight:bold;'>Wochenplan vom ${start} bis ${end}</div>` : '';
         header.innerHTML = `${mainTitle}${dateLine ? '<br>' + dateLine : ''}`;
         header.style.display = 'block';
+        buildPrintSchedule();
         window.print();
         setTimeout(() => { header.style.display = 'none'; }, 500);
     }

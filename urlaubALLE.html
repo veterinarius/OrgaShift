@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrgaShift 2 – Jahresplaner</title>
+    <title>OrgaShift 2 – Urlaubsübersicht</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script>
         const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
@@ -50,13 +50,12 @@
         body.light input[type="text"],
         body.light input[type="date"],
         body.light select { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.15); color: var(--color-text); }
-        body.light .planner-table td { color: var(--color-text); border-color: rgba(0,0,0,0.07); }
-        body.light .planner-table td:first-child { background: rgba(0,0,0,0.04); color: var(--color-text); }
-        body.light .planner-table thead tr:last-child th { background: rgba(0,0,0,0.04); color: var(--color-text-muted); }
         body.light .weekend { background: rgba(0,0,0,0.04) !important; color: var(--color-text-muted) !important; }
+        body.light .day-cell.weekend { background: rgba(0,0,0,0.03); }
         body.light .legend-item { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
-        body.light .stat-card { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
-        body.light .stat-card h4 { color: var(--color-text); }
+        body.light .overview-card { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+        body.light .overview-card h4 { color: var(--color-text); }
+        body.light .heat-seg { background: rgba(0,0,0,0.05); }
         body.light .btn-secondary { background: rgba(0,0,0,0.07); color: var(--color-text); }
         body.light #beamsOverlay { animation: overlayPulseLight 10s ease-in-out infinite; }
         @keyframes overlayPulseLight {
@@ -150,7 +149,8 @@
             transition: all 0.2s; font-family: inherit;
         }
         .year-btn:hover { background: #0056CC; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,122,255,0.4); }
-        .year-display { font-size: 1.8rem; font-weight: 700; color: #fff; min-width: 80px; text-align: center; }
+        .year-display { font-size: 1.8rem; font-weight: 700; color: #fff; min-width: 180px; text-align: center; }
+        .today-btn { margin-left: 4px; }
         .page-subtitle { color: rgba(255,255,255,0.65); font-size: 0.95rem; }
 
         /* ── CONTROLS ── */
@@ -210,80 +210,6 @@
         }
         .btn-danger:hover { background: rgba(255,59,48,0.22); }
 
-        /* ── TABLE CONTAINER ── */
-        .table-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius);
-            backdrop-filter: blur(20px);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .table-container { overflow-x: auto; }
-
-        .planner-table {
-            width: max-content; min-width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82em;
-        }
-        .planner-table thead tr:first-child th {
-            padding: 8px 4px; text-align: center;
-            font-weight: 600; font-size: 0.75rem;
-            position: sticky; top: 0; z-index: 10;
-            min-width: 24px; color: #fff; opacity: 0.9;
-        }
-        .planner-table thead tr:first-child th:first-child {
-            background: rgba(255,255,255,0.06) !important;
-            position: sticky; left: 0; z-index: 20;
-            min-width: 130px; text-align: left; padding: 8px 14px;
-            color: var(--color-text-muted); opacity: 1;
-        }
-        .planner-table thead tr:last-child th {
-            background: rgba(255,255,255,0.04);
-            padding: 6px 3px; text-align: center;
-            font-size: 0.7rem; color: var(--color-text-muted);
-            border-bottom: 1px solid var(--color-border);
-            font-weight: 500;
-        }
-        .planner-table thead tr:last-child th:first-child {
-            position: sticky; left: 0; z-index: 15;
-            background: rgba(255,255,255,0.06);
-        }
-        .planner-table td {
-            padding: 3px; text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
-            color: var(--color-text); font-size: 0.78em;
-            transition: background 0.15s;
-            cursor: pointer; min-width: 24px; height: 32px;
-        }
-        .planner-table td:first-child {
-            background: rgba(255,255,255,0.04);
-            font-weight: 600; color: var(--color-text);
-            text-align: left; padding: 6px 14px;
-            position: sticky; left: 0; z-index: 5;
-            min-width: 130px; cursor: default;
-            border-right: 1px solid var(--color-border);
-        }
-        .planner-table td:hover:not(:first-child) { background: rgba(0,122,255,0.12); }
-        .vacation { background: rgba(78,205,196,0.25) !important; color: #4ecdc4 !important; font-weight: 700; }
-        .sick     { background: rgba(255,107,107,0.25) !important; color: #ff6b6b !important; font-weight: 700; }
-        .weekend  { background: rgba(255,255,255,0.03) !important; color: rgba(255,255,255,0.2) !important; cursor: default !important; }
-
-        /* Monatsspalten-Header Farben */
-        .month-0  { background: rgba(231,76,60,0.75) !important; }
-        .month-1  { background: rgba(230,126,34,0.75) !important; }
-        .month-2  { background: rgba(243,156,18,0.75) !important; }
-        .month-3  { background: rgba(46,204,113,0.75) !important; }
-        .month-4  { background: rgba(26,188,156,0.75) !important; }
-        .month-5  { background: rgba(52,152,219,0.75) !important; }
-        .month-6  { background: rgba(155,89,182,0.75) !important; }
-        .month-7  { background: rgba(233,30,99,0.75) !important; }
-        .month-8  { background: rgba(255,87,34,0.75) !important; }
-        .month-9  { background: rgba(121,85,72,0.75) !important; }
-        .month-10 { background: rgba(96,125,139,0.75) !important; }
-        .month-11 { background: rgba(44,62,80,0.9) !important; }
-
         /* ── LEGEND ── */
         .legend {
             display: flex; justify-content: center; gap: 12px;
@@ -301,21 +227,104 @@
         .legend-color.vacation { background: rgba(78,205,196,0.6); }
         .legend-color.sick { background: rgba(255,107,107,0.6); }
         .legend-color.weekend { background: rgba(255,255,255,0.08); border: 1px solid var(--color-border); }
+        .legend-color.today { background: transparent; border: 2px solid var(--color-accent); }
 
-        /* ── STATS ── */
-        .stats-row {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px; margin-top: 20px;
-        }
-        .stat-card {
-            background: var(--color-surface-glass);
-            backdrop-filter: blur(20px);
+        /* ── CALENDAR ── */
+        .calendar-card {
+            background: var(--color-surface);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius); padding: 16px; text-align: center;
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            margin-bottom: 20px;
         }
-        .stat-card h4 { font-size: 0.9rem; font-weight: 600; color: var(--color-text); margin-bottom: 8px; }
-        .stat-card div { font-size: 0.85rem; color: var(--color-text-muted); margin-top: 3px; }
-        .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--color-accent); }
+        .calendar-weekdays {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+            margin-bottom: 8px; padding: 0 2px;
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--color-text-muted); text-align: center;
+        }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day-cell {
+            min-height: 92px; border-radius: 10px; padding: 6px;
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            display: flex; flex-direction: column; gap: 4px;
+            transition: background 0.15s;
+        }
+        .day-cell.weekend { background: rgba(255,255,255,0.03); }
+        .day-cell.other-month { opacity: 0.35; }
+        .day-cell.today { border-color: var(--color-accent); box-shadow: inset 0 0 0 2px rgba(0,122,255,0.35); }
+        .day-number {
+            font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .day-cell.today .day-number { color: var(--color-accent); }
+        .conflict-badge { font-size: 0.72rem; cursor: help; }
+        .day-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+        .employee-chip {
+            font-size: 0.66rem; font-weight: 700; padding: 2px 5px; border-radius: 6px;
+            cursor: pointer; white-space: nowrap; transition: transform 0.1s;
+        }
+        .employee-chip:hover { transform: scale(1.1); }
+        .employee-chip.chip-vacation { background: rgba(78,205,196,0.28); color: #1f9d92; }
+        .employee-chip.chip-sick { background: rgba(255,107,107,0.28); color: #d9453f; }
+        body.light .employee-chip.chip-vacation { color: #0e766c; }
+        body.light .employee-chip.chip-sick { color: #b5312b; }
+
+        /* ── EMPLOYEE OVERVIEW ── */
+        .overview-section {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .overview-header {
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .overview-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
+        .overview-header h2 span { font-size: 0.8rem; font-weight: 500; color: var(--color-text-muted); margin-left: 6px; }
+        .search-bar { min-width: 220px; }
+        .search-bar input {
+            width: 100%; padding: 9px 16px;
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            border-radius: 20px; color: var(--color-text);
+            font-size: 0.85rem; font-family: inherit; outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-bar input:focus { border-color: var(--color-accent); }
+        .search-bar input::placeholder { color: var(--color-text-muted); opacity: 0.6; }
+
+        .overview-list {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+        .overview-card {
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            border-radius: 12px; padding: 14px;
+        }
+        .overview-card h4 { font-size: 0.92rem; font-weight: 600; color: var(--color-text); margin-bottom: 6px; }
+        .overview-days { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 10px; }
+        .stat-value { font-size: 1rem; font-weight: 700; color: var(--color-accent); }
+        .heat-strip-row { display: flex; align-items: center; gap: 5px; }
+        .heat-strip-row + .heat-strip-row { margin-top: 3px; }
+        .heat-strip-label {
+            width: 12px; flex-shrink: 0; text-align: center;
+            font-size: 0.62rem; font-weight: 700; color: var(--color-text-muted);
+        }
+        .heat-strip { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; }
+        .heat-seg {
+            height: 12px; border-radius: 3px; background: rgba(255,255,255,0.06);
+            cursor: pointer; transition: outline 0.15s;
+        }
+        .heat-seg:hover { outline: 2px solid var(--color-accent); outline-offset: 1px; }
 
         /* ── SAVE STATUS TOAST ── */
         #saveStatus {
@@ -335,12 +344,78 @@
             font-size: 0.9rem;
         }
 
+        /* ── DAY NOTES ── */
+        .day-number-actions { display: flex; align-items: center; gap: 4px; }
+        .note-btn {
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            font-size: 0.82rem; line-height: 1;
+            width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0.65; transition: opacity 0.15s, transform 0.15s, background 0.15s, border-color 0.15s;
+        }
+        .note-btn:hover { opacity: 1; transform: scale(1.1); background: rgba(255,255,255,0.14); }
+        .note-btn.has-note {
+            opacity: 1; background: rgba(0,122,255,0.16); border-color: rgba(0,122,255,0.35);
+        }
+        .day-note-preview {
+            font-size: 0.66rem; color: var(--color-text-muted);
+            background: var(--color-surface-glass);
+            border-radius: 5px; padding: 2px 5px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            cursor: pointer;
+        }
+
+        /* ── NOTE MODAL ── */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(10px);
+            z-index: 2100;
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .modal-backdrop.open { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 420px; width: 100%;
+            transform: translateY(24px);
+            transition: transform 0.28s cubic-bezier(0.16,1,0.3,1);
+            backdrop-filter: blur(24px);
+        }
+        .modal-backdrop.open .modal-box { transform: translateY(0); }
+        .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: var(--color-text); margin-bottom: 4px; }
+        .modal-box .modal-date-label { font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 16px; }
+        .modal-box textarea {
+            width: 100%; min-height: 100px; resize: vertical;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--color-border);
+            border-radius: 8px; color: var(--color-text);
+            padding: 10px 12px; font-size: 0.9rem; font-family: inherit; outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .modal-box textarea:focus { border-color: var(--color-accent); background: rgba(0,122,255,0.06); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+        .modal-actions .btn-danger { margin-right: auto; }
+
         /* ── RESPONSIVE ── */
         @media(max-width: 900px) {
             .nav-links { display: none; }
             .page-title { font-size: 1.5rem; }
             .controls { flex-direction: column; align-items: stretch; }
             .control-group { flex-wrap: wrap; }
+            .day-cell { min-height: 64px; }
+            .employee-chip { font-size: 0.6rem; }
+        }
+        @media(max-width: 600px) {
+            .calendar-weekdays, .calendar-grid { gap: 3px; }
+            .day-cell { min-height: 48px; padding: 4px; }
         }
     </style>
 </head>
@@ -372,13 +447,14 @@
 <main class="page">
 
     <div class="page-header">
-        <h1 class="page-title">Jahresplaner</h1>
+        <h1 class="page-title">Urlaubsübersicht</h1>
         <div class="year-nav">
-            <button class="year-btn" onclick="changeYear(-1)">&#9664;</button>
-            <span class="year-display" id="yearDisplay">2026</span>
-            <button class="year-btn" onclick="changeYear(1)">&#9654;</button>
+            <button class="year-btn" onclick="changeMonth(-1)">&#9664;</button>
+            <span class="year-display" id="monthDisplay">–</span>
+            <button class="year-btn" onclick="changeMonth(1)">&#9654;</button>
+            <button class="btn btn-secondary today-btn" onclick="goToToday()">Heute</button>
         </div>
-        <p class="page-subtitle">Urlaubs- und Krankentage Übersicht</p>
+        <p class="page-subtitle">Wer ist wann im Urlaub oder krank?</p>
     </div>
 
     <!-- Controls -->
@@ -402,32 +478,59 @@
     <div class="legend">
         <div class="legend-item">
             <div class="legend-color vacation"></div>
-            <span>Urlaub (U)</span>
+            <span>Urlaub</span>
         </div>
         <div class="legend-item">
             <div class="legend-color sick"></div>
-            <span>Krankheit (K)</span>
+            <span>Krankheit</span>
         </div>
         <div class="legend-item">
             <div class="legend-color weekend"></div>
             <span>Wochenende</span>
         </div>
         <div class="legend-item">
-            <span>Klicken zum Löschen einzelner Tage</span>
+            <div class="legend-color today"></div>
+            <span>Heute</span>
+        </div>
+        <div class="legend-item">
+            <span>⚠️ = mehrere gleichzeitig im Urlaub · Klick auf einen Namen löscht den Tag</span>
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-card">
-        <div class="table-container">
-            <table class="planner-table" id="plannerTable"></table>
+    <!-- Calendar -->
+    <div class="calendar-card">
+        <div class="calendar-weekdays">
+            <div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div><div>So</div>
         </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-row" id="statsContainer"></div>
+    <!-- Employee overview -->
+    <div class="overview-section">
+        <div class="overview-header">
+            <h2>Mitarbeiter-Übersicht<span id="overviewYearLabel"></span></h2>
+            <div class="search-bar">
+                <input type="text" id="overviewSearch" placeholder="Mitarbeiter suchen..." oninput="overviewFilter = this.value; renderOverview();">
+            </div>
+        </div>
+        <div class="overview-list" id="overviewList"></div>
+    </div>
 
 </main>
+</div>
+
+<!-- Notiz-Modal -->
+<div class="modal-backdrop" id="noteModalBackdrop" onclick="if(event.target===this) closeNoteModal();">
+    <div class="modal-box">
+        <h3>Notiz</h3>
+        <div class="modal-date-label" id="noteModalDateLabel"></div>
+        <textarea id="noteModalTextarea" placeholder="Notiz für diesen Tag eintragen…"></textarea>
+        <div class="modal-actions">
+            <button class="btn btn-danger" id="noteDeleteBtn" onclick="deleteDayNote()">Löschen</button>
+            <button class="btn btn-secondary" onclick="closeNoteModal()">Abbrechen</button>
+            <button class="btn btn-primary" onclick="saveDayNote()">Speichern</button>
+        </div>
+    </div>
 </div>
 
 <script src="js/vacation-conflicts.js"></script>
@@ -492,20 +595,37 @@
     })();
 
     // ─────────────────────────────────────────
-    //  JAHRESPLANER FUNKTIONALITÄT (Supabase, organisationsweit)
+    //  URLAUBSÜBERSICHT: MONATSKALENDER + MITARBEITER-ÜBERSICHT (Supabase, organisationsweit)
     // ─────────────────────────────────────────
-    const monthsShort = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    const monthsFull = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 
     let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth(); // 0-basiert
     let orgId = null;
     let currentUserId = null;
-    let employees = [];   // [{id, name}] – aus public.employees
-    let entries = {};     // { [employeeId]: [{id, start, end, type}] } – aus vacations + sick_leave
+    let employees = [];      // [{id, name}] – aus public.employees
+    let entries = {};        // { [employeeId]: [{id, start, end, type}] } – aus vacations + sick_leave (ganzes Jahr)
+    let overviewFilter = '';
+    let dayNotes = {};       // { [dateStr]: {id, note} } – aus public.day_notes (ganzes Jahr)
+    let activeNoteDate = null;
 
     function isLeapYear(year) { return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0); }
     function getDaysInMonth(year) { return [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; }
     function isWeekend(date) { const day = date.getDay(); return day === 0 || day === 6; }
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function toDateStr(year, month, day) { return `${year}-${pad2(month + 1)}-${pad2(day)}`; }
+    function todayStr() { const d = new Date(); return toDateStr(d.getFullYear(), d.getMonth(), d.getDate()); }
+    function initials(name) {
+        const parts = String(name || '?').trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return '?';
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    function formatMonthYear(year, month) {
+        const label = new Date(year, month, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+        return label.charAt(0).toUpperCase() + label.slice(1);
+    }
 
     function showSaveStatus() {
         const status = document.getElementById('saveStatus');
@@ -515,7 +635,7 @@
 
     async function loadEmployees() {
         const { data, error } = await sbClient.from('employees').select('id, name').order('name');
-        if (error) { console.error('[jahresplaner] Mitarbeiter laden fehlgeschlagen:', error.message); employees = []; return; }
+        if (error) { console.error('[urlaubsuebersicht] Mitarbeiter laden fehlgeschlagen:', error.message); employees = []; return; }
         employees = data || [];
     }
 
@@ -534,8 +654,8 @@
             sbClient.from('sick_leave').select('id, employee_id, from_date, to_date')
                 .lte('from_date', yearEnd).gte('to_date', yearStart)
         ]);
-        if (vacRes.error) console.error('[jahresplaner] Urlaub laden fehlgeschlagen:', vacRes.error.message);
-        if (sickRes.error) console.error('[jahresplaner] Krankheit laden fehlgeschlagen:', sickRes.error.message);
+        if (vacRes.error) console.error('[urlaubsuebersicht] Urlaub laden fehlgeschlagen:', vacRes.error.message);
+        if (sickRes.error) console.error('[urlaubsuebersicht] Krankheit laden fehlgeschlagen:', sickRes.error.message);
 
         entries = {};
         employees.forEach(e => { entries[e.id] = []; });
@@ -547,11 +667,41 @@
         });
     }
 
-    async function changeYear(delta) {
-        currentYear += delta;
-        document.getElementById('yearDisplay').textContent = currentYear;
-        await loadEntries(currentYear);
-        generateTable();
+    async function loadDayNotes(year) {
+        const yearStart = `${year}-01-01`;
+        const yearEnd = `${year}-12-31`;
+        const { data, error } = await sbClient.from('day_notes').select('id, note_date, note')
+            .gte('note_date', yearStart).lte('note_date', yearEnd);
+        if (error) { console.error('[urlaubsuebersicht] Notizen laden fehlgeschlagen:', error.message); dayNotes = {}; return; }
+        dayNotes = {};
+        (data || []).forEach(n => { dayNotes[n.note_date] = { id: n.id, note: n.note }; });
+    }
+
+    function updateMonthDisplay() {
+        document.getElementById('monthDisplay').textContent = formatMonthYear(currentYear, currentMonth);
+        document.getElementById('overviewYearLabel').textContent = `(Jahr ${currentYear})`;
+    }
+
+    async function changeMonth(delta) {
+        currentMonth += delta;
+        let yearChanged = false;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; yearChanged = true; }
+        else if (currentMonth > 11) { currentMonth = 0; currentYear++; yearChanged = true; }
+        if (yearChanged) { await loadEntries(currentYear); await loadDayNotes(currentYear); }
+        updateMonthDisplay();
+        generateCalendar();
+        renderOverview();
+    }
+
+    async function goToToday() {
+        const now = new Date();
+        const yearChanged = now.getFullYear() !== currentYear;
+        currentYear = now.getFullYear();
+        currentMonth = now.getMonth();
+        if (yearChanged) { await loadEntries(currentYear); await loadDayNotes(currentYear); }
+        updateMonthDisplay();
+        generateCalendar();
+        renderOverview();
     }
 
     async function addEntry() {
@@ -580,7 +730,8 @@
         document.getElementById('startDate').value = '';
         document.getElementById('endDate').value = '';
         await loadEntries(currentYear);
-        generateTable();
+        generateCalendar();
+        renderOverview();
         showSaveStatus();
     }
 
@@ -604,65 +755,106 @@
         return checkDate >= new Date(start) && checkDate <= new Date(end);
     }
 
-    function getEntryForDate(employeeId, dateStr) {
-        const list = entries[employeeId];
-        if (!list) return null;
-        for (const entry of list) {
-            if (isDateInRange(dateStr, entry.start, entry.end)) return entry.type;
-        }
-        return null;
+    function getEntriesForDate(dateStr) {
+        const result = [];
+        employees.forEach(emp => {
+            const list = entries[emp.id] || [];
+            for (const entry of list) {
+                if (isDateInRange(dateStr, entry.start, entry.end)) {
+                    result.push({ employeeId: emp.id, name: emp.name || '(ohne Namen)', type: entry.type });
+                    break;
+                }
+            }
+        });
+        return result;
     }
 
-    function generateTable() {
-        const table = document.getElementById('plannerTable');
-        const daysInMonth = getDaysInMonth(currentYear);
+    function generateCalendar() {
+        const grid = document.getElementById('calendarGrid');
 
         if (employees.length === 0) {
-            table.innerHTML = `<tr><td class="no-employees" colspan="100%">Noch keine Mitarbeiter hinterlegt. <a href="personal.html">Jetzt in Personal anlegen</a></td></tr>`;
-            updateStats(); return;
+            grid.innerHTML = `<div class="no-employees" style="grid-column:1/-1;">Noch keine Mitarbeiter hinterlegt. <a href="personal.html">Jetzt in Personal anlegen</a></div>`;
+            return;
         }
 
-        let html = '<thead><tr><th></th>';
-        for (let month = 0; month < 12; month++) {
-            html += `<th class="month-${month}" colspan="${daysInMonth[month]}">${monthsShort[month]}</th>`;
-        }
-        html += '</tr><tr><th>Mitarbeiter</th>';
-        for (let month = 0; month < 12; month++) {
-            for (let day = 1; day <= daysInMonth[month]; day++) {
-                html += `<th>${day}</th>`;
-            }
-        }
-        html += '</tr></thead><tbody>';
+        const daysInMonth = getDaysInMonth(currentYear)[currentMonth];
+        const firstWeekday = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7; // Mo=0..So=6
+        const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+        const daysInPrevMonth = getDaysInMonth(prevYear)[prevMonth];
+        const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+        const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+        const todayKey = todayStr();
 
-        employees.forEach(employee => {
-            html += `<tr><td>${escHtml(employee.name || '(ohne Namen)')}</td>`;
-            for (let month = 0; month < 12; month++) {
-                for (let day = 1; day <= daysInMonth[month]; day++) {
-                    const dateStr = `${currentYear}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                    const date = new Date(currentYear, month, day);
-                    const entryType = getEntryForDate(employee.id, dateStr);
-                    let cls = '', content = '';
-                    if (entryType === 'vacation') { cls = 'vacation'; content = 'U'; }
-                    else if (entryType === 'sick')  { cls = 'sick';     content = 'K'; }
-                    else if (isWeekend(date))       { cls = 'weekend';  content = '·'; }
-                    html += `<td class="${cls}" data-employee="${employee.id}" data-date="${dateStr}">${content}</td>`;
-                }
-            }
-            html += '</tr>';
-        });
-        html += '</tbody>';
-        table.innerHTML = html;
+        const cells = [];
+        for (let i = firstWeekday - 1; i >= 0; i--) {
+            cells.push({ day: daysInPrevMonth - i, month: prevMonth, year: prevYear, otherMonth: true });
+        }
+        for (let day = 1; day <= daysInMonth; day++) {
+            cells.push({ day, month: currentMonth, year: currentYear, otherMonth: false });
+        }
+        let trailing = 1;
+        while (cells.length % 7 !== 0) {
+            cells.push({ day: trailing++, month: nextMonth, year: nextYear, otherMonth: true });
+        }
 
-        table.querySelectorAll('td:not(:first-child)').forEach(cell => {
-            cell.addEventListener('click', function() {
-                const employeeId = this.dataset.employee;
-                const date = this.dataset.date;
-                if (this.textContent && this.textContent !== '·' && !this.classList.contains('weekend')) {
-                    deleteSingleDay(employeeId, date);
-                }
+        const html = cells.map(cell => {
+            const dateStr = toDateStr(cell.year, cell.month, cell.day);
+            const dateObj = new Date(cell.year, cell.month, cell.day);
+            const dayEntries = getEntriesForDate(dateStr);
+            const vacationCount = dayEntries.filter(e => e.type === 'vacation').length;
+
+            const classes = ['day-cell'];
+            if (cell.otherMonth) classes.push('other-month');
+            if (isWeekend(dateObj)) classes.push('weekend');
+            if (dateStr === todayKey) classes.push('today');
+
+            const chips = dayEntries.map(e =>
+                `<span class="employee-chip chip-${e.type}" data-employee="${e.employeeId}" data-date="${dateStr}" title="${escHtml(e.name)} – ${e.type === 'vacation' ? 'Urlaub' : 'Krankheit'} (Klick zum Löschen)">${escHtml(initials(e.name))}</span>`
+            ).join('');
+
+            const conflictBadge = vacationCount > 1
+                ? `<span class="conflict-badge" title="${vacationCount} Mitarbeitende gleichzeitig im Urlaub">⚠️</span>`
+                : '';
+
+            const noteEntry = dayNotes[dateStr];
+            const noteBtn = `<button type="button" class="note-btn${noteEntry ? ' has-note' : ''}" data-date="${dateStr}" title="${noteEntry ? 'Notiz bearbeiten' : 'Notiz hinzufügen'}">${noteEntry ? '📝' : '🗒️'}</button>`;
+            const notePreview = noteEntry
+                ? `<div class="day-note-preview" data-date="${dateStr}" title="${escHtml(noteEntry.note)}">${escHtml(noteEntry.note)}</div>`
+                : '';
+
+            return `<div class="${classes.join(' ')}" data-date="${dateStr}">
+                <div class="day-number"><span>${cell.day}</span><div class="day-number-actions">${conflictBadge}${noteBtn}</div></div>
+                <div class="day-chips">${chips}</div>
+                ${notePreview}
+            </div>`;
+        }).join('');
+
+        grid.innerHTML = html;
+
+        grid.querySelectorAll('.employee-chip').forEach(chip => {
+            chip.addEventListener('click', function (e) {
+                e.stopPropagation();
+                deleteSingleDay(this.dataset.employee, this.dataset.date);
             });
         });
-        updateStats();
+        grid.querySelectorAll('.note-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                openNoteModal(this.dataset.date);
+            });
+        });
+        grid.querySelectorAll('.day-note-preview').forEach(preview => {
+            preview.addEventListener('click', function (e) {
+                e.stopPropagation();
+                openNoteModal(this.dataset.date);
+            });
+        });
+        grid.querySelectorAll('.day-cell:not(.weekend)').forEach(cell => {
+            cell.addEventListener('click', function () {
+                document.getElementById('startDate').value = this.dataset.date;
+            });
+        });
     }
 
     async function deleteSingleDay(employeeId, dateStr) {
@@ -689,7 +881,8 @@
         }
 
         await loadEntries(currentYear);
-        generateTable();
+        generateCalendar();
+        renderOverview();
         showSaveStatus();
     }
 
@@ -699,22 +892,120 @@
         return date.toISOString().split('T')[0];
     }
 
-    function updateStats() {
-        const statsContainer = document.getElementById('statsContainer');
-        if (employees.length === 0) { statsContainer.innerHTML = ''; return; }
-        let totalVacation = 0, totalSick = 0;
-        const statsHtml = employees.map(employee => {
-            let vacationDays = 0, sickDays = 0;
-            (entries[employee.id] || []).forEach(entry => {
-                const start = new Date(entry.start), end = new Date(entry.end);
-                const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                if (entry.type === 'vacation') vacationDays += days;
-                else if (entry.type === 'sick') sickDays += days;
-            });
-            totalVacation += vacationDays; totalSick += sickDays;
-            return `<div class="stat-card"><h4>${escHtml(employee.name || '(ohne Namen)')}</h4><div>Urlaub: <span class="stat-value">${vacationDays}</span> Tage</div><div>Krank: <span class="stat-value">${sickDays}</span> Tage</div></div>`;
+    function computeYearlyStats(employeeId) {
+        let vacationDays = 0, sickDays = 0;
+        const perMonthVacation = new Array(12).fill(0);
+        const perMonthSick = new Array(12).fill(0);
+        const yearFrom = new Date(currentYear, 0, 1);
+        const yearTo = new Date(currentYear, 11, 31);
+
+        (entries[employeeId] || []).forEach(entry => {
+            const start = new Date(entry.start), end = new Date(entry.end);
+            const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+            if (entry.type === 'vacation') vacationDays += days;
+            else if (entry.type === 'sick') sickDays += days;
+
+            const perMonth = entry.type === 'vacation' ? perMonthVacation : perMonthSick;
+            const cursor = new Date(Math.max(start, yearFrom));
+            const limit = new Date(Math.min(end, yearTo));
+            while (cursor <= limit) {
+                perMonth[cursor.getMonth()]++;
+                cursor.setDate(cursor.getDate() + 1);
+            }
+        });
+        return { vacationDays, sickDays, perMonthVacation, perMonthSick };
+    }
+
+    function renderOverview() {
+        const list = document.getElementById('overviewList');
+        if (employees.length === 0) { list.innerHTML = ''; return; }
+
+        const filter = overviewFilter.trim().toLowerCase();
+        const filtered = employees.filter(e => (e.name || '').toLowerCase().includes(filter));
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="no-employees">Keine Mitarbeiter gefunden.</div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(employee => {
+            const { vacationDays, sickDays, perMonthVacation, perMonthSick } = computeYearlyStats(employee.id);
+            const buildSegs = (perMonth, color, label) => {
+                const maxMonth = Math.max(1, ...perMonth);
+                return perMonth.map((count, m) => {
+                    const style = count > 0
+                        ? `background: rgba(${color}, ${Math.min(0.15 + (count / maxMonth) * 0.65, 0.85).toFixed(2)});`
+                        : '';
+                    return `<div class="heat-seg" style="${style}" title="${monthsFull[m]}: ${count} ${label}" onclick="jumpToMonth(${m})"></div>`;
+                }).join('');
+            };
+            const vacationSegs = buildSegs(perMonthVacation, '78,205,196', 'Urlaubstag(e)');
+            const sickSegs = buildSegs(perMonthSick, '255,107,107', 'Krankheitstag(e)');
+
+            return `<div class="overview-card">
+                <h4>${escHtml(employee.name || '(ohne Namen)')}</h4>
+                <div class="overview-days">Urlaub: <span class="stat-value">${vacationDays}</span> Tage · Krank: <span class="stat-value">${sickDays}</span> Tage</div>
+                <div class="heat-strip-row"><span class="heat-strip-label" title="Urlaub">U</span><div class="heat-strip">${vacationSegs}</div></div>
+                <div class="heat-strip-row"><span class="heat-strip-label" title="Krankheit">K</span><div class="heat-strip">${sickSegs}</div></div>
+            </div>`;
         }).join('');
-        statsContainer.innerHTML = statsHtml + `<div class="stat-card"><h4>Gesamt</h4><div>Urlaub: <span class="stat-value">${totalVacation}</span> Tage</div><div>Krank: <span class="stat-value">${totalSick}</span> Tage</div></div>`;
+    }
+
+    function formatDateLabel(dateStr) {
+        const d = new Date(dateStr + 'T12:00:00');
+        return d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function openNoteModal(dateStr) {
+        activeNoteDate = dateStr;
+        document.getElementById('noteModalDateLabel').textContent = formatDateLabel(dateStr);
+        document.getElementById('noteModalTextarea').value = (dayNotes[dateStr] && dayNotes[dateStr].note) || '';
+        document.getElementById('noteDeleteBtn').style.display = dayNotes[dateStr] ? '' : 'none';
+        document.getElementById('noteModalBackdrop').classList.add('open');
+        document.getElementById('noteModalTextarea').focus();
+    }
+
+    function closeNoteModal() {
+        document.getElementById('noteModalBackdrop').classList.remove('open');
+        activeNoteDate = null;
+    }
+
+    async function saveDayNote() {
+        if (!activeNoteDate) return;
+        const text = document.getElementById('noteModalTextarea').value.trim();
+        const dateStr = activeNoteDate;
+
+        if (!text) {
+            if (dayNotes[dateStr]) await deleteDayNote();
+            else closeNoteModal();
+            return;
+        }
+
+        const { error } = await sbClient.from('day_notes')
+            .upsert({ organization_id: orgId, note_date: dateStr, note: text, created_by: currentUserId }, { onConflict: 'organization_id,note_date' });
+        if (error) { alert('Speichern fehlgeschlagen: ' + error.message); return; }
+
+        await loadDayNotes(currentYear);
+        generateCalendar();
+        closeNoteModal();
+        showSaveStatus();
+    }
+
+    async function deleteDayNote() {
+        if (!activeNoteDate || !dayNotes[activeNoteDate]) { closeNoteModal(); return; }
+        const { error } = await sbClient.from('day_notes').delete().eq('id', dayNotes[activeNoteDate].id);
+        if (error) { alert('Löschen fehlgeschlagen: ' + error.message); return; }
+
+        await loadDayNotes(currentYear);
+        generateCalendar();
+        closeNoteModal();
+        showSaveStatus();
+    }
+
+    function jumpToMonth(month) {
+        currentMonth = month;
+        updateMonthDisplay();
+        generateCalendar();
     }
 
     async function init() {
@@ -726,11 +1017,13 @@
             .from('profiles').select('organization_id').eq('id', currentUserId).single();
         orgId = profile?.organization_id || null;
 
-        document.getElementById('yearDisplay').textContent = currentYear;
         await loadEmployees();
         updateEmployeeSelect();
         await loadEntries(currentYear);
-        generateTable();
+        await loadDayNotes(currentYear);
+        updateMonthDisplay();
+        generateCalendar();
+        renderOverview();
     }
     init();
 </script>

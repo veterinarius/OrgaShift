@@ -421,42 +421,29 @@
         .about-text .section-title { text-align: left; }
         .about-text p { font-size: 0.97rem; color: var(--text-sec); margin-bottom: 14px; line-height: 1.75; }
 
-        /* Schedule mockup */
-        .mockup {
-            border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--mockup-bg);
-            transition: background 0.35s ease;
+        /* Schedule example carousel */
+        .mockup-carousel { position: relative; max-width: 540px; margin: 0 auto; }
+        .mockup-track {
+            display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
         }
-        .mockup-header {
-            padding: 13px 18px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
+        .mockup-track::-webkit-scrollbar { display: none; }
+        .mockup-slide {
+            flex: 0 0 92%; scroll-snap-align: start; aspect-ratio: 16 / 9;
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+            background: var(--mockup-bg); transition: background 0.35s ease;
         }
-        .mockup-title { font-size: 0.78rem; font-weight: 600; color: var(--text); }
-        .mockup-sub   { font-size: 0.72rem; color: var(--text-muted); }
-        .mockup-table { width: 100%; border-collapse: collapse; }
-        .mockup-table th {
-            padding: 8px 6px; text-align: center; font-size: 0.68rem; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
+        .mockup-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mockup-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+            width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--mockup-bg); color: var(--text); display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background 0.2s ease, opacity 0.2s ease;
         }
-        .mockup-table th:first-child { text-align: left; padding-left: 18px; }
-        .mockup-table td {
-            padding: 9px 6px; border-bottom: 1px solid rgba(127,127,127,0.1); text-align: center;
-        }
-        .mockup-table tr:last-child td { border-bottom: none; }
-        .mockup-body { padding-bottom: 14px; }
-        .mockup-section-title {
-            font-size: 0.72rem; font-weight: 700; color: var(--text);
-            margin: 14px 18px 8px; padding: 6px 10px;
-            background: rgba(0,122,255,0.12);
-            border-left: 3px solid var(--accent); border-radius: 5px;
-        }
-        .mockup-section-title:first-child { margin-top: 12px; }
-        .mockup-row-num {
-            text-align: left !important; font-size: 0.68rem !important;
-            color: var(--text-muted) !important; background: rgba(127,127,127,0.06) !important;
-            font-weight: 600; padding-left: 10px !important;
-        }
-        .mockup-color-cell { border-radius: 6px; font-weight: 600; }
+        .mockup-arrow:hover { background: rgba(0,122,255,0.14); }
+        .mockup-arrow:disabled { opacity: 0.35; cursor: default; }
+        .mockup-arrow-prev { left: -16px; }
+        .mockup-arrow-next { right: -16px; }
 
         /* ── FOOTER ──────────────────────────── */
         footer {
@@ -651,6 +638,7 @@
                 <p>Höchste Sicherheitsstandards und vollständige DSGVO-Konformität für Ihre sensiblen Mitarbeiterdaten.</p>
             </div>
 
+            <!--
             <a class="feature-card instagram-card fi" href="https://instagram.com/nurganzkurz" target="_blank" rel="noopener" aria-label="OrgaShift auf Instagram folgen: NUR GANZ KURZ">
                 <div class="fi-icon" aria-hidden="true">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -661,6 +649,7 @@
                 </div>
                 <svg class="ig-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
+            -->
 
         </div>
     </div>
@@ -682,103 +671,27 @@
             </div>
 
             <div class="about-visual fi">
-                <div class="mockup">
-                    <div class="mockup-header">
-                        <span class="mockup-title">Dienstplan</span>
-                        <span class="mockup-sub">KW 12 · März 2025</span>
-                    </div>
-                    <div class="mockup-body">
-                        <div class="mockup-section-title">Frühschicht</div>
-                        <div style="overflow-x:auto">
-                            <table class="mockup-table" aria-label="Beispiel Frühschicht-Plan">
-                                <caption class="visually-hidden">Frühschicht-Plan mit laufender Nummer und Tagen, Zellen enthalten die eingeteilten Mitarbeitenden.</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Nr.</th>
-                                        <th scope="col">Mo</th>
-                                        <th scope="col">Di</th>
-                                        <th scope="col">Mi</th>
-                                        <th scope="col">Do</th>
-                                        <th scope="col">Fr</th>
-                                        <th scope="col">Sa</th>
-                                        <th scope="col">So</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="mockup-row-num">1</td>
-                                        <td>Anna K.</td>
-                                        <td>Max M.</td>
-                                        <td class="mockup-color-cell" style="background:#ffe082;color:#3d2e00">Anna K.</td>
-                                        <td>Sara P.</td>
-                                        <td>Tom R.</td>
-                                        <td>Lisa B.</td>
-                                        <td>Max M.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="mockup-row-num">2</td>
-                                        <td>Lisa B.</td>
-                                        <td>Sara P.</td>
-                                        <td>Tom R.</td>
-                                        <td>Lisa B.</td>
-                                        <td class="mockup-color-cell" style="background:#b2dfdb;color:#01352f">Anna K.</td>
-                                        <td>Sara P.</td>
-                                        <td>Tom R.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="mockup-row-num">3</td>
-                                        <td>Tom R.</td>
-                                        <td>Lisa B.</td>
-                                        <td>Max M.</td>
-                                        <td>Max M.</td>
-                                        <td>Lisa B.</td>
-                                        <td>Anna K.</td>
-                                        <td>Sara P.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div class="mockup-carousel">
+                    <button class="mockup-arrow mockup-arrow-prev" type="button" aria-label="Vorheriges Beispiel" aria-controls="mockupTrack">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <div class="mockup-track" id="mockupTrack">
+                        <div class="mockup-slide">
+                            <img src="images/dienstplan-beispiel-1.png" alt="Beispiel-Dienstplan 1" loading="lazy">
                         </div>
-                        <div class="mockup-section-title">Spätschicht</div>
-                        <div style="overflow-x:auto">
-                            <table class="mockup-table" aria-label="Beispiel Spätschicht-Plan">
-                                <caption class="visually-hidden">Spätschicht-Plan mit laufender Nummer und Tagen, Zellen enthalten die eingeteilten Mitarbeitenden.</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Nr.</th>
-                                        <th scope="col">Mo</th>
-                                        <th scope="col">Di</th>
-                                        <th scope="col">Mi</th>
-                                        <th scope="col">Do</th>
-                                        <th scope="col">Fr</th>
-                                        <th scope="col">Sa</th>
-                                        <th scope="col">So</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="mockup-row-num">1</td>
-                                        <td>Max M.</td>
-                                        <td>Tom R.</td>
-                                        <td>Sara P.</td>
-                                        <td class="mockup-color-cell" style="background:#c5e1a5;color:#1b3a04">Anna K.</td>
-                                        <td>Max M.</td>
-                                        <td>Lisa B.</td>
-                                        <td>Anna K.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="mockup-row-num">2</td>
-                                        <td class="mockup-color-cell" style="background:#ffab91;color:#4a1500">Sara P.</td>
-                                        <td>Anna K.</td>
-                                        <td>Lisa B.</td>
-                                        <td>Tom R.</td>
-                                        <td>Sara P.</td>
-                                        <td>Max M.</td>
-                                        <td>Lisa B.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="mockup-slide">
+                            <img src="images/dienstplan-beispiel-2.png" alt="Beispiel-Dienstplan 2" loading="lazy">
+                        </div>
+                        <div class="mockup-slide">
+                            <img src="images/dienstplan-beispiel-3.png" alt="Beispiel-Dienstplan 3" loading="lazy">
+                        </div>
+                        <div class="mockup-slide">
+                            <img src="images/dienstplan-beispiel-4.png" alt="Beispiel-Dienstplan 4" loading="lazy">
                         </div>
                     </div>
+                    <button class="mockup-arrow mockup-arrow-next" type="button" aria-label="Nächstes Beispiel" aria-controls="mockupTrack">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -961,6 +874,37 @@ window.addEventListener('scroll', updateNavBg, { passive: true });
         btn.setAttribute('aria-pressed', String(isLight));
         updateNavBg();
     });
+}());
+
+// ── SCHEDULE EXAMPLE CAROUSEL ────────────────────────────────────────────
+(function () {
+    const track = document.getElementById('mockupTrack');
+    if (!track) return;
+    const prevBtn = document.querySelector('.mockup-arrow-prev');
+    const nextBtn = document.querySelector('.mockup-arrow-next');
+
+    function slideWidth() {
+        const slide = track.querySelector('.mockup-slide');
+        if (!slide) return track.clientWidth;
+        const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || '0');
+        return slide.getBoundingClientRect().width + gap;
+    }
+
+    function updateArrows() {
+        const max = track.scrollWidth - track.clientWidth - 1;
+        prevBtn.disabled = track.scrollLeft <= 0;
+        nextBtn.disabled = track.scrollLeft >= max;
+    }
+
+    prevBtn.addEventListener('click', () => {
+        track.scrollBy({ left: -slideWidth(), behavior: 'smooth' });
+    });
+    nextBtn.addEventListener('click', () => {
+        track.scrollBy({ left: slideWidth(), behavior: 'smooth' });
+    });
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    updateArrows();
 }());
 </script>
 </body>

@@ -154,6 +154,15 @@
                 localStorage.setItem(MARKER_KEY, res.data.updated_at);
                 setDirty(false);
 
+                if (!isAdmin && isWochenplan) {
+                    // Nur-Lese-Wochenansicht: sofort neu rendern statt hart neu zu laden,
+                    // damit Wochen-Navigation und spätere Admin-Updates ohne F5 sichtbar werden.
+                    sessionStorage.removeItem(RELOAD_GUARD);
+                    window.dispatchEvent(new CustomEvent('cloud-plans:updated'));
+                    updateBadge();
+                    return;
+                }
+
                 // Einmalig neu laden, damit die Seite die Cloud-Daten übernimmt
                 if (!sessionStorage.getItem(RELOAD_GUARD)) {
                     sessionStorage.setItem(RELOAD_GUARD, '1');
@@ -164,6 +173,13 @@
                 }
             });
     }
+
+    // Erlaubt Seiten (z.B. Wochennavigation), gezielt einen frischen Cloud-Stand
+    // anzufordern, statt sich auf den einmaligen Pull beim Laden zu verlassen.
+    window.__refreshCloudPlan = function () {
+        if (!orgId) return Promise.resolve();
+        return pullFromCloud();
+    };
 
     // ---------- Cloud schreiben (nur Admins, über das Badge / manuell) ----------
     function pushToCloud() {

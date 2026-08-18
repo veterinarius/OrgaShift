@@ -18,6 +18,13 @@
             --color-nav-border: rgba(255,255,255,0.08);
             --radius: 14px;
             --shadow: 0 8px 40px rgba(0,0,0,0.5);
+            --day1-accent: #007AFF; --day1-tint: rgba(0,122,255,0.16);
+            --day2-accent: #34C759; --day2-tint: rgba(52,199,89,0.16);
+            --day3-accent: #FFD60A; --day3-tint: rgba(255,214,10,0.18);
+            --day4-accent: #FF9500; --day4-tint: rgba(255,149,0,0.16);
+            --day5-accent: #FF3B30; --day5-tint: rgba(255,59,48,0.16);
+            --day6-accent: #AF52DE; --day6-tint: rgba(175,82,222,0.16);
+            --day7-accent: #5AC8FA; --day7-tint: rgba(90,200,250,0.16);
         }
 
         /* ── LIGHT MODE ── */
@@ -39,7 +46,6 @@
         body.light .schedule-container { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
         body.light table th { background: rgba(0,0,0,0.04); color: var(--color-text); }
         body.light table td { color: var(--color-text); background: rgba(255,255,255,0.7); }
-        body.light table tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
         body.light .row-number { background: rgba(0,0,0,0.06) !important; color: var(--color-text-muted) !important; }
         body.light .remarks-textarea { background: rgba(0,0,0,0.04); color: var(--color-text); }
         body.light .date-info-bar { color: var(--color-text-muted); }
@@ -135,6 +141,76 @@
             padding-bottom: 40px;
         }
 
+        /* ── LAYOUT ROW (Sidebar + Content) ── */
+        .layout-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        .content-column {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        /* ── EMPLOYEE SIDEBAR ── */
+        .employee-sidebar {
+            flex: 0 0 190px;
+            width: 190px;
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            padding: 14px;
+            position: sticky;
+            top: 96px;
+            max-height: calc(100vh - 116px);
+            overflow-y: auto;
+        }
+        .employee-sidebar-title {
+            font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.04em; color: var(--color-text-muted);
+            margin-bottom: 10px;
+        }
+        .employee-chip-list {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .employee-chip {
+            display: flex; align-items: center; gap: 6px;
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            font-family: inherit; font-size: 0.85rem; font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+            word-break: break-word;
+        }
+        .employee-chip:hover { transform: translateY(-1px); }
+        .employee-chip.is-active {
+            border-color: var(--color-text);
+            box-shadow: 0 0 0 2px var(--color-surface);
+        }
+        .employee-chip-check {
+            display: none;
+            font-size: 0.8rem;
+        }
+        .employee-chip.is-active .employee-chip-check { display: inline; }
+        .employee-sidebar-empty {
+            font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.5;
+        }
+
+        /* ── HIGHLIGHT STATE (Plan-Zellen) ── */
+        .schedule-container table td.employee-cell-dimmed {
+            opacity: 0.32;
+        }
+        .schedule-container table td.employee-cell-match {
+            outline: 2px solid var(--employee-highlight-color, var(--color-accent));
+            outline-offset: -2px;
+            font-weight: 700;
+            opacity: 1;
+        }
+
         /* ── HEADER ── */
         .header { margin-bottom: 20px; padding-top: 12px; }
         .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
@@ -163,6 +239,22 @@
         }
         .date-info-bar strong { color: var(--color-text); }
 
+        /* ── WEEK NAVIGATION ── */
+        .date-selection {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            padding: 10px 16px;
+            background: var(--color-surface-glass);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(12px);
+            margin-bottom: 12px;
+        }
+        .kw-badge {
+            font-size: 0.85rem; font-weight: 700; color: var(--color-text);
+            background: var(--color-surface-glass); border: 1px solid var(--color-border);
+            padding: 6px 10px; border-radius: 8px; white-space: nowrap;
+        }
+
         /* ── SCHEDULE CONTAINER ── */
         .schedule-container {
             background: var(--color-surface);
@@ -183,30 +275,50 @@
         }
         .table-title:first-child { margin-top: 0; }
         .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 6px 8px; min-width: 400px; }
         table th {
-            padding: 10px 12px; font-size: 0.75rem; font-weight: 600;
+            padding: 10px 12px; font-size: 0.75rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.04em;
             color: var(--color-text-muted);
             background: rgba(255,255,255,0.04);
-            border-bottom: 1px solid var(--color-border);
+            border-radius: 8px;
             white-space: nowrap; text-align: center;
         }
-        table th:first-child { text-align: left; }
+        table th:first-child { text-align: left; white-space: normal; width: 85px; line-height: 1.25; }
         table td {
-            padding: 8px 10px; text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 10px 12px; text-align: center;
             color: var(--color-text); font-size: 0.88rem;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.18);
             white-space: pre-wrap; word-wrap: break-word;
         }
-        table tr:last-child td { border-bottom: none; }
+        /* Tages-Akzentfarben pro Spalte (.schedule-container-Scope erhöht die
+           Spezifität bewusst über die body.light-Basisregeln hinaus, damit die
+           Farbcodierung auch im Light-Mode erhalten bleibt). */
+        .schedule-container table th:nth-child(2) { background: var(--day1-tint); color: var(--day1-accent); }
+        .schedule-container table th:nth-child(3) { background: var(--day2-tint); color: var(--day2-accent); }
+        .schedule-container table th:nth-child(4) { background: var(--day3-tint); color: var(--day3-accent); }
+        .schedule-container table th:nth-child(5) { background: var(--day4-tint); color: var(--day4-accent); }
+        .schedule-container table th:nth-child(6) { background: var(--day5-tint); color: var(--day5-accent); }
+        .schedule-container table th:nth-child(7) { background: var(--day6-tint); color: var(--day6-accent); }
+        .schedule-container table th:nth-child(8) { background: var(--day7-tint); color: var(--day7-accent); }
+        .schedule-container table td:nth-child(2) { background: var(--day1-tint); }
+        .schedule-container table td:nth-child(3) { background: var(--day2-tint); }
+        .schedule-container table td:nth-child(4) { background: var(--day3-tint); }
+        .schedule-container table td:nth-child(5) { background: var(--day4-tint); }
+        .schedule-container table td:nth-child(6) { background: var(--day5-tint); }
+        .schedule-container table td:nth-child(7) { background: var(--day6-tint); }
+        .schedule-container table td:nth-child(8) { background: var(--day7-tint); }
         .row-number {
             text-align: left !important;
             font-size: 0.78rem !important;
             color: var(--color-text-muted) !important;
             background: rgba(255,255,255,0.03) !important;
             font-weight: 600;
-            min-width: 60px;
+            width: 85px;
+            padding-left: 8px !important;
+            padding-right: 4px !important;
+            border-radius: 10px;
         }
 
         /* ── REMARKS ── */
@@ -239,6 +351,11 @@
         }
         .btn-print:hover { background: rgba(255,255,255,0.12); }
         body.light .btn-print { background: rgba(0,0,0,0.06); color: var(--color-text); }
+        .btn-secondary {
+            background: var(--color-surface-glass); color: var(--color-text);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+        body.light .btn-secondary { background: rgba(0,0,0,0.06); color: var(--color-text); }
 
         /* ── EMPTY STATE ── */
         .empty-state {
@@ -252,8 +369,9 @@
         #print-header { display: none; }
         @media print {
             #beams-canvas, #beamsOverlay, nav, .header-actions, .date-info-bar,
-            .badge-readonly { display: none !important; }
+            .badge-readonly, .date-selection, .employee-sidebar { display: none !important; }
             .page-wrap { padding-top: 0; max-width: 100%; }
+            .layout-row { display: block; }
             body { background: white !important; color: #000 !important; }
             .schedule-container { box-shadow: none; border: 1px solid #ddd; background: white; }
             table th { background: #f5f5f7 !important; color: #000 !important; }
@@ -267,6 +385,18 @@
         /* ── RESPONSIVE ── */
         @media (max-width: 900px) {
             .nav-links { display: none; }
+            .layout-row { flex-direction: column; }
+            .employee-sidebar {
+                width: 100%;
+                flex: 0 0 auto;
+                position: static;
+                max-height: none;
+            }
+            .employee-chip-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .employee-chip { width: auto; }
         }
         @media (max-width: 600px) {
             .page-wrap { padding-left: 12px; padding-right: 12px; }
@@ -285,7 +415,6 @@
         <a href="dashboarduser.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
         <ul class="nav-links">
             <li><a href="dashboarduser.html">Dashboard</a></li>
-            <li><a href="monatsplanuser.html">Monatsplan</a></li>
             <li><a href="urlaubUSER.html">Mein Urlaub</a></li>
             <li><a href="#">Kontakt</a></li>
         </ul>
@@ -309,27 +438,46 @@
         </div>
     </div>
 
-    <!-- DATE INFO -->
-    <div class="date-info-bar" id="date-info-bar" style="display:none;">
-        <span><strong>Zeitraum:</strong> <span id="date-range-text"></span></span>
-        <span><strong>Dauer:</strong> <span id="date-duration-text"></span></span>
-    </div>
+    <div class="layout-row">
+        <!-- EMPLOYEE SIDEBAR -->
+        <aside class="employee-sidebar" id="employee-sidebar" aria-label="Mitarbeitende dieser Woche">
+            <h2 class="employee-sidebar-title">Mitarbeitende</h2>
+            <div class="employee-chip-list" id="employee-chip-list"></div>
+            <p class="employee-sidebar-empty" id="employee-sidebar-empty" style="display:none;">Für diese Woche sind noch keine Mitarbeitenden eingeplant.</p>
+        </aside>
 
-    <!-- PRINT HEADER -->
-    <div id="print-header"></div>
+        <div class="content-column">
+            <!-- WEEK NAVIGATION -->
+            <div class="date-selection">
+                <button type="button" class="btn btn-secondary" onclick="changeWeek(-1)" title="Vorherige Woche">◀</button>
+                <span id="kwDisplay" class="kw-badge"></span>
+                <button type="button" class="btn btn-secondary" onclick="changeWeek(1)" title="Nächste Woche">▶</button>
+                <button type="button" class="btn btn-secondary" onclick="goToCurrentWeek()" title="Zur aktuellen Woche">Heute</button>
+            </div>
 
-    <!-- SCHEDULE -->
-    <div class="schedule-container" id="schedule-container">
-        <div class="empty-state" id="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <p>Noch kein Dienstplan verfügbar. Der Administrator hat noch keinen Plan erstellt.</p>
+            <!-- DATE INFO -->
+            <div class="date-info-bar" id="date-info-bar" style="display:none;">
+                <span><strong>Zeitraum:</strong> <span id="date-range-text"></span></span>
+                <span><strong>Dauer:</strong> <span id="date-duration-text"></span></span>
+            </div>
+
+            <!-- PRINT HEADER -->
+            <div id="print-header"></div>
+
+            <!-- SCHEDULE -->
+            <div class="schedule-container" id="schedule-container">
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <p>Noch kein Dienstplan verfügbar. Der Administrator hat noch keinen Plan erstellt.</p>
+                </div>
+            </div>
+
+            <!-- REMARKS -->
+            <div class="remarks-container" id="remarks-container" style="display:none;">
+                <h2>Bemerkungen</h2>
+                <textarea id="remarks-display" class="remarks-textarea" readonly></textarea>
+            </div>
         </div>
-    </div>
-
-    <!-- REMARKS -->
-    <div class="remarks-container" id="remarks-container" style="display:none;">
-        <h2>Bemerkungen</h2>
-        <textarea id="remarks-display" class="remarks-textarea" readonly></textarea>
     </div>
 </div>
 
@@ -439,6 +587,112 @@
         singleColor: 'dienstplan_single_cell_color',
     };
 
+    // Rein lokaler Zeiger für die vom User zuletzt angesehene Woche. Bewusst
+    // NICHT mit 'dienstplan_' präfixiert: cloud-plans.js zieht beim Pull alle
+    // 'dienstplan_*'-Keys als ein Snapshot vom Server und entfernt lokale Keys,
+    // die im Snapshot fehlen - ein dienstplan_-Key würde also bei jedem Sync
+    // wieder gelöscht.
+    const VIEW_START_KEY = 'orgashift_wpuser_viewStart';
+    const VIEW_END_KEY   = 'orgashift_wpuser_viewEnd';
+
+    let startDate = null;
+    let endDate = null;
+    let highlightedEmployee = null;
+
+    // ─────────────────────────────────────────
+    //  WOCHEN-NAVIGATION
+    // ─────────────────────────────────────────
+    function getISOWeekInfo(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = (d.getUTCDay() + 6) % 7; // Mo=0..So=6
+        d.setUTCDate(d.getUTCDate() - dayNum + 3); // Donnerstag dieser ISO-Woche
+        const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+        const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+        firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+        const isoWeek = 1 + Math.round((d - firstThursday) / (7 * 86400000));
+        return { isoYear: d.getUTCFullYear(), isoWeek };
+    }
+
+    function getISOWeekKey(date) {
+        const { isoYear, isoWeek } = getISOWeekInfo(date);
+        return isoYear + '-W' + String(isoWeek).padStart(2, '0');
+    }
+
+    function weekScopedKey(base) {
+        return startDate ? base + '__' + getISOWeekKey(startDate) : base;
+    }
+
+    function updateKwDisplay() {
+        const el = document.getElementById('kwDisplay');
+        if (!el) return;
+        if (!startDate) { el.textContent = ''; return; }
+        const { isoWeek } = getISOWeekInfo(startDate);
+        const fmt = d => d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+        const endStr = endDate ? endDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+        el.textContent = `KW ${isoWeek} · ${fmt(startDate)}–${endStr}`;
+    }
+
+    function persistViewPointer() {
+        localStorage.setItem(VIEW_START_KEY, startDate ? startDate.toISOString() : '');
+        localStorage.setItem(VIEW_END_KEY, endDate ? endDate.toISOString() : '');
+    }
+
+    function initWeekDates() {
+        const savedStart = localStorage.getItem(VIEW_START_KEY);
+        const savedEnd = localStorage.getItem(VIEW_END_KEY);
+        if (savedStart && savedEnd) {
+            startDate = new Date(savedStart);
+            endDate = new Date(savedEnd);
+            return;
+        }
+        const flatStart = localStorage.getItem(KEYS.startDate);
+        const flatEnd = localStorage.getItem(KEYS.endDate);
+        if (flatStart && flatEnd) {
+            startDate = new Date(flatStart);
+            endDate = new Date(flatEnd);
+            return;
+        }
+        const now = new Date();
+        const todayISO = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const monday = new Date(todayISO + 'T12:00:00');
+        monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+        const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
+        startDate = monday; endDate = sunday;
+    }
+
+    // Fragt bei Cloud-Anbindung gezielt einen frischen Stand an, damit Wochen,
+    // die der einmalige Initial-Pull noch nicht erfasst hat (Race beim Laden,
+    // oder vom Admin erst nach dem Öffnen des Tabs veröffentlicht), ohne
+    // manuellen Refresh sichtbar werden.
+    function requestCloudRefresh() {
+        if (typeof window.__refreshCloudPlan === 'function') {
+            window.__refreshCloudPlan().then(loadSchedule);
+        }
+    }
+
+    function changeWeek(delta) {
+        if (!startDate || !endDate) { goToCurrentWeek(); return; }
+        const newStart = new Date(startDate); newStart.setDate(newStart.getDate() + delta * 7);
+        const newEnd = new Date(endDate); newEnd.setDate(newEnd.getDate() + delta * 7);
+        startDate = newStart; endDate = newEnd;
+        persistViewPointer();
+        loadSchedule();
+        requestCloudRefresh();
+    }
+
+    function goToCurrentWeek() {
+        const spanDays = (startDate && endDate) ? Math.round((endDate - startDate) / 86400000) : 6;
+        const now = new Date();
+        const todayISO = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const monday = new Date(todayISO + 'T12:00:00');
+        monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+        const newEnd = new Date(monday); newEnd.setDate(newEnd.getDate() + spanDays);
+        startDate = monday; endDate = newEnd;
+        persistViewPointer();
+        loadSchedule();
+        requestCloudRefresh();
+    }
+
     // ─────────────────────────────────────────
     //  LOAD & RENDER
     // ─────────────────────────────────────────
@@ -448,17 +702,13 @@
         document.getElementById('main-title').textContent = title;
 
         // Dates
-        const startRaw = localStorage.getItem(KEYS.startDate);
-        const endRaw   = localStorage.getItem(KEYS.endDate);
         const datumEl  = document.getElementById('wochenplan-datum');
         const barEl    = document.getElementById('date-info-bar');
-        if (startRaw && endRaw) {
-            const start = new Date(startRaw);
-            const end   = new Date(endRaw);
-            const startStr = start.toLocaleDateString('de-DE');
-            const endStr   = end.toLocaleDateString('de-DE');
+        if (startDate && endDate) {
+            const startStr = startDate.toLocaleDateString('de-DE');
+            const endStr   = endDate.toLocaleDateString('de-DE');
             datumEl.textContent = `Wochenplan vom ${startStr} bis ${endStr}`;
-            const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+            const diffDays = Math.ceil(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
             const weeks = Math.ceil(diffDays / 7);
             document.getElementById('date-range-text').textContent = `${startStr} – ${endStr}`;
             document.getElementById('date-duration-text').textContent = `${diffDays} Tage (${weeks} Wochen)`;
@@ -467,13 +717,18 @@
             datumEl.textContent = '';
             barEl.style.display = 'none';
         }
+        updateKwDisplay();
 
-        // Shift/day config
+        // Shift/day config (global, nicht wochen-gescoped)
         let shiftNames, dayNames;
         try { shiftNames = JSON.parse(localStorage.getItem(KEYS.shiftNames) || 'null'); } catch(e) { shiftNames = null; }
         try { dayNames   = JSON.parse(localStorage.getItem(KEYS.dayNames)   || 'null'); } catch(e) { dayNames = null; }
-        let tableData;
-        try { tableData  = JSON.parse(localStorage.getItem(KEYS.tableData)  || 'null'); } catch(e) { tableData = null; }
+
+        // Tabellendaten sind pro Woche gespeichert (siehe wochenplan.html weekScopedKey)
+        let tableData = null;
+        if (startDate) {
+            try { tableData = JSON.parse(localStorage.getItem(weekScopedKey(KEYS.tableData)) || 'null'); } catch(e) { tableData = null; }
+        }
 
         const container = document.getElementById('schedule-container');
         const emptyState = document.getElementById('empty-state');
@@ -482,6 +737,8 @@
             container.innerHTML = '';
             container.appendChild(emptyState);
             emptyState.style.display = '';
+            highlightedEmployee = null;
+            renderEmployeeSidebar(shiftNames || [], {});
             return;
         }
 
@@ -528,6 +785,12 @@
         // Cell colors
         applyCellColors(shiftNames, tableData);
 
+        // Mitarbeiter-Seitenleiste (Liste hängt von der aktuell angezeigten
+        // Woche ab, daher bei jedem loadSchedule() neu berechnen)
+        highlightedEmployee = null;
+        renderEmployeeSidebar(shiftNames, tableData);
+        applyEmployeeHighlight();
+
         // Remarks
         const remarks = localStorage.getItem(KEYS.remarks) || '';
         const remarksContainer = document.getElementById('remarks-container');
@@ -541,6 +804,128 @@
     }
 
     // ─────────────────────────────────────────
+    //  MITARBEITER-SEITENLEISTE (Highlight nach Name)
+    // ─────────────────────────────────────────
+    function getEmployeesInPlan(shiftNames, tableData) {
+        const names = new Set();
+        shiftNames.forEach(shift => {
+            const rows = tableData[shift] || [];
+            rows.forEach(rowArr => {
+                for (let cIdx = 1; cIdx < rowArr.length; cIdx++) {
+                    const raw = (rowArr[cIdx] || '').split('\n')[0].trim();
+                    if (raw) names.add(raw);
+                }
+            });
+        });
+        return Array.from(names).sort((a, b) => a.localeCompare(b, 'de'));
+    }
+
+    function nameToHue(name) {
+        // FNV-1a-artiger Hash: deterministisch, gleicher Name -> gleicher
+        // Hue, ohne dass irgendetwas gespeichert werden muss.
+        let hash = 2166136261;
+        for (let i = 0; i < name.length; i++) {
+            hash ^= name.charCodeAt(i);
+            hash = Math.imul(hash, 16777619);
+        }
+        return Math.abs(hash) % 360;
+    }
+
+    function nameToColor(name) {
+        return `hsl(${nameToHue(name)}, 60%, 50%)`;
+    }
+
+    function hslToRgb(h, s, l) {
+        s /= 100; l /= 100;
+        const k = n => (n + h / 30) % 12;
+        const a = s * Math.min(l, 1 - l);
+        const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+        return [255 * f(0), 255 * f(8), 255 * f(4)];
+    }
+
+    function readableTextColor(hue) {
+        // Kontrast-Check per relativer Luminanz (WCAG-Näherung) auf Basis
+        // von hsl(hue, 60%, 50%) - liefert dunklen oder hellen Text.
+        const [r, g, b] = hslToRgb(hue, 60, 50).map(c => {
+            const v = c / 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        return luminance > 0.42 ? '#1a1a2e' : '#ffffff';
+    }
+
+    function renderEmployeeSidebar(shiftNames, tableData) {
+        const listEl = document.getElementById('employee-chip-list');
+        const emptyEl = document.getElementById('employee-sidebar-empty');
+        const employees = getEmployeesInPlan(shiftNames, tableData);
+
+        listEl.innerHTML = '';
+
+        if (employees.length === 0) {
+            emptyEl.style.display = '';
+            return;
+        }
+        emptyEl.style.display = 'none';
+
+        employees.forEach(name => {
+            const hue = nameToHue(name);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'employee-chip';
+            btn.dataset.name = name;
+            btn.style.backgroundColor = `hsl(${hue}, 60%, 50%)`;
+            btn.style.color = readableTextColor(hue);
+
+            const check = document.createElement('span');
+            check.className = 'employee-chip-check';
+            check.textContent = '✓';
+            const label = document.createElement('span');
+            label.textContent = name;
+            btn.appendChild(check);
+            btn.appendChild(label);
+
+            btn.addEventListener('click', () => toggleEmployeeHighlight(name));
+            if (name === highlightedEmployee) btn.classList.add('is-active');
+            listEl.appendChild(btn);
+        });
+    }
+
+    function applyEmployeeHighlight() {
+        const cells = document.querySelectorAll('#schedule-container table td');
+        cells.forEach(cell => {
+            cell.classList.remove('employee-cell-dimmed', 'employee-cell-match');
+            cell.style.removeProperty('--employee-highlight-color');
+        });
+
+        if (!highlightedEmployee) return;
+
+        const color = nameToColor(highlightedEmployee);
+        cells.forEach(cell => {
+            if (cell.classList.contains('row-number')) {
+                cell.classList.add('employee-cell-dimmed');
+                return;
+            }
+            const firstLine = (cell.textContent || '').split('\n')[0].trim();
+            if (firstLine && firstLine === highlightedEmployee) {
+                cell.classList.add('employee-cell-match');
+                cell.style.setProperty('--employee-highlight-color', color);
+            } else {
+                cell.classList.add('employee-cell-dimmed');
+            }
+        });
+    }
+
+    function toggleEmployeeHighlight(name) {
+        highlightedEmployee = (highlightedEmployee === name) ? null : name;
+
+        document.querySelectorAll('.employee-chip').forEach(btn => {
+            btn.classList.toggle('is-active', btn.dataset.name === highlightedEmployee);
+        });
+
+        applyEmployeeHighlight();
+    }
+
+    // ─────────────────────────────────────────
     //  CELL COLORS
     // ─────────────────────────────────────────
     function getCellKey(tbodyId, rowIndex, colIndex) {
@@ -549,9 +934,9 @@
 
     function applyCellColors(shiftNames, tableData) {
         let employeeColors = {};
-        try { employeeColors = JSON.parse(localStorage.getItem(KEYS.cellColors) || '{}'); } catch(e) {}
+        try { employeeColors = JSON.parse(localStorage.getItem(weekScopedKey(KEYS.cellColors)) || '{}'); } catch(e) {}
         let singleCellColor = null;
-        try { singleCellColor = JSON.parse(localStorage.getItem(KEYS.singleColor) || 'null'); } catch(e) {}
+        try { singleCellColor = JSON.parse(localStorage.getItem(weekScopedKey(KEYS.singleColor)) || 'null'); } catch(e) {}
 
         shiftNames.forEach((shift, sIdx) => {
             const tbodyId = `shiftBody_${sIdx}`;
@@ -580,15 +965,16 @@
     //  LIVE UPDATE (cross-tab)
     // ─────────────────────────────────────────
     window.addEventListener('storage', function(e) {
-        const watchKeys = [
-            KEYS.tableData, KEYS.shiftNames, KEYS.dayNames,
-            KEYS.startDate, KEYS.endDate, KEYS.remarks,
-            KEYS.cellColors, KEYS.singleColor, KEYS.mainTitle,
-        ];
-        if (watchKeys.includes(e.key)) {
+        // Tabellendaten/Farben sind pro Woche gescoped (dienstplan_tableData__2026-W33 etc.),
+        // daher generisch auf den Präfix statt auf feste Keys prüfen.
+        if (e.key && e.key.indexOf('dienstplan_') === 0) {
             loadSchedule();
         }
     });
+
+    // cloud-plans.js meldet hierüber einen frisch angewendeten Cloud-Snapshot
+    // (statt eines harten Reloads), damit ohne F5 neu gerendert wird.
+    window.addEventListener('cloud-plans:updated', loadSchedule);
 
     // ─────────────────────────────────────────
     //  PRINT
@@ -607,7 +993,7 @@
     //  LOGOUT
     // ─────────────────────────────────────────
     function logout() {
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 
     // ─────────────────────────────────────────
@@ -630,7 +1016,10 @@
     // ─────────────────────────────────────────
     //  INIT
     // ─────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', loadSchedule);
+    document.addEventListener('DOMContentLoaded', function() {
+        initWeekDates();
+        loadSchedule();
+    });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>

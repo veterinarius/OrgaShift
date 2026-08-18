@@ -673,8 +673,8 @@
                         <input type="number" id="vacationDays" name="vacationDays" min="0" max="365" value="30">
                     </div>
                     <div class="form-group">
-                        <label for="weeklyHoursLimit">Wochenstunden-Limit (optional)</label>
-                        <input type="number" id="weeklyHoursLimit" name="weeklyHoursLimit" min="0" max="80" step="0.5" placeholder="z. B. für Minijob/Werkstudent">
+                        <label for="monthlyHoursLimit">Monatsstunden-Limit (optional)</label>
+                        <input type="number" id="monthlyHoursLimit" name="monthlyHoursLimit" min="0" max="300" step="0.5" placeholder="z. B. für Minijob/Werkstudent">
                     </div>
                 </div>
 
@@ -1161,7 +1161,9 @@
                 house_number:         fd.get('houseNumber') || null,
                 remarks:              fd.get('remarks') || null,
                 vacation_days_per_year: parseInt(fd.get('vacationDays'), 10) || 30,
-                weekly_hours_limit: fd.get('weeklyHoursLimit') ? parseFloat(fd.get('weeklyHoursLimit')) : null,
+                // DB-Spalte heißt weiterhin weekly_hours_limit (keine Migration), wird
+                // aber seitenweit als Monatsstunden-Limit gepflegt/angezeigt.
+                weekly_hours_limit: fd.get('monthlyHoursLimit') ? parseFloat(fd.get('monthlyHoursLimit')) : null,
                 must_change_password: true,
             }).select().single();
 
@@ -1280,8 +1282,8 @@
                     <input type="number" class="edit-input" id="edit-vacationDays-${id}" min="0" max="365" value="${emp.vacation_days_per_year ?? 30}">
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">Wochenstunden-Limit (optional)</div>
-                    <input type="number" class="edit-input" id="edit-weeklyHoursLimit-${id}" min="0" max="80" step="0.5" placeholder="z. B. für Minijob/Werkstudent" value="${emp.weekly_hours_limit ?? ''}">
+                    <div class="detail-label">Monatsstunden-Limit (optional)</div>
+                    <input type="number" class="edit-input" id="edit-monthlyHoursLimit-${id}" min="0" max="300" step="0.5" placeholder="z. B. für Minijob/Werkstudent" value="${emp.weekly_hours_limit ?? ''}">
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Straße</div>
@@ -1338,7 +1340,7 @@
                 birth_date:   document.getElementById(`edit-birthDate-${id}`).value || null,
                 start_date:   document.getElementById(`edit-startDate-${id}`).value || null,
                 vacation_days_per_year: parseInt(document.getElementById(`edit-vacationDays-${id}`).value, 10) || 30,
-                weekly_hours_limit: document.getElementById(`edit-weeklyHoursLimit-${id}`).value ? parseFloat(document.getElementById(`edit-weeklyHoursLimit-${id}`).value) : null,
+                weekly_hours_limit: document.getElementById(`edit-monthlyHoursLimit-${id}`).value ? parseFloat(document.getElementById(`edit-monthlyHoursLimit-${id}`).value) : null,
                 street:       document.getElementById(`edit-street-${id}`).value || null,
                 house_number: document.getElementById(`edit-houseNumber-${id}`).value || null,
                 postal_code:  document.getElementById(`edit-postalCode-${id}`).value || null,
@@ -1404,7 +1406,7 @@
                         ${emp.birth_date ? `<div class="detail-item"><div class="detail-label">Geburtsdatum</div><div class="detail-value">${formatDate(emp.birth_date)} (${calculateAge(emp.birth_date)} J.)</div></div>` : ''}
                         ${emp.start_date ? `<div class="detail-item"><div class="detail-label">Eintrittsdatum</div><div class="detail-value">${formatDate(emp.start_date)} (${calculateYearsOfService(emp.start_date)} J.)</div></div>` : ''}
                         <div class="detail-item"><div class="detail-label">Urlaubsanspruch</div><div class="detail-value">${emp.vacation_days_per_year ?? 30} Tage/Jahr</div></div>
-                        ${emp.weekly_hours_limit != null ? `<div class="detail-item"><div class="detail-label">Wochenstunden-Limit</div><div class="detail-value">${emp.weekly_hours_limit} Std./Woche</div></div>` : ''}
+                        ${emp.weekly_hours_limit != null ? `<div class="detail-item"><div class="detail-label">Monatsstunden-Limit</div><div class="detail-value">${emp.weekly_hours_limit} Std./Monat</div></div>` : ''}
                         ${(emp.street || emp.city) ? `<div class="detail-item"><div class="detail-label">Adresse</div><div class="detail-value">${emp.street || ''} ${emp.house_number || ''}<br>${emp.postal_code || ''} ${emp.city || ''}</div></div>` : ''}
                         ${emp.remarks    ? `<div class="detail-item"><div class="detail-label">Bemerkungen</div><div class="detail-value">${emp.remarks}</div></div>` : ''}
                     </div>

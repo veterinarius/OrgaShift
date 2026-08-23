@@ -626,7 +626,9 @@
         const header = document.getElementById('print-header');
         const title  = document.getElementById('main-title').textContent || 'Monatsplan';
         const datum  = document.getElementById('wochenplan-datum').textContent;
-        header.innerHTML = `<strong>${title}</strong>${datum ? '<br>' + datum : ''}`;
+        const logo = window.__orgBranding && window.__orgBranding.logoUrl
+            ? `<img src="${window.__orgBranding.logoUrl}" style="max-height:50px;display:block;margin:0 auto 6px;">` : '';
+        header.innerHTML = `${logo}<strong>${title}</strong>${datum ? '<br>' + datum : ''}`;
         header.style.display = 'block';
         window.print();
         setTimeout(() => { header.style.display = 'none'; }, 500);
@@ -664,5 +666,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/cloud-plans.js"></script>
+<script src="js/branding.js" defer></script>
 </body>
 </html>

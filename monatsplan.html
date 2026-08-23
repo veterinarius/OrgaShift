@@ -492,8 +492,7 @@
                        border-color: #ddd !important; padding: 1px 2px !important; }
             .table-title { background: #eef2ff !important; color: #000 !important;
                            font-size: 0.9rem !important; margin: 0.1rem 0 !important; }
-            #print-header { display: block !important; font-weight: bold; margin-bottom: 8px;
-                            text-align: center; font-size: 1rem; }
+            #print-header { display: none !important; }
             .date-selection, .header, .input-section { display: none !important; }
             .remarks-container { display: block !important; }
             @page { size: A4 landscape; margin: 0.2cm; }
@@ -1842,18 +1841,8 @@
     }
 
     function printSchedule() {
-        let start = '';
-        let end = '';
-        if (selectedMonth && selectedYear) start = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('de-DE');
-        if (selectedMonth && selectedYear) end = new Date(selectedYear, selectedMonth, 0).toLocaleDateString('de-DE');
-        const header = document.getElementById('print-header');
-        let mainTitle = document.getElementById('main-title').textContent || 'Monatsplan';
-        let dateLine = (start && end) ? `<div style='font-weight:bold;'>Wochenplan vom ${start} bis ${end}</div>` : '';
-        header.innerHTML = `${mainTitle}${dateLine ? '<br>' + dateLine : ''}`;
-        header.style.display = 'block';
         buildPrintSchedule();
         window.print();
-        setTimeout(() => { header.style.display = 'none'; }, 500);
     }
 
     function shareCustomHintOnWhatsApp() {
@@ -2207,5 +2196,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/cloud-plans.js"></script>
+<script src="js/branding.js" defer></script>
 </body>
 </html>

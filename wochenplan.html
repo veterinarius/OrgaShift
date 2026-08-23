@@ -207,6 +207,8 @@
         .header { margin-bottom: 16px; }
         .header h1 { font-size: 1.6rem; font-weight: 700; color: var(--color-text); }
         #wochenplan-datum { font-size: 0.9rem; color: var(--color-text-muted); margin: 4px 0; }
+        .print-brand-row { display: flex; align-items: center; gap: 8px; }
+        #print-logo { display: none; max-height: 28px; }
         .header p { color: var(--color-text-muted); font-size: 0.9rem; }
 
         /* ── DATE SELECTION ── */
@@ -507,7 +509,9 @@
             table th { background: #f5f5f7 !important; color: #000 !important; }
             table td { background: white !important; color: #000 !important; border-color: #ddd !important; }
             .table-title { background: #eef2ff !important; color: #000 !important; border-color: #4a6cf7 !important; }
-            #print-header { display: block; font-weight: bold; margin-bottom: 8px; }
+            #print-header { display: none !important; }
+            .header h1, .header p { display: none !important; }
+            .date-selection { display: none !important; }
         }
 
         /* ── RESPONSIVE ── */
@@ -580,7 +584,10 @@
             <div class="container">
                 <div class="header">
                     <h1 id="main-title">Dienstplan</h1>
-                    <div id="wochenplan-datum"></div>
+                    <div class="print-brand-row">
+                        <img id="print-logo" alt="Logo">
+                        <div id="wochenplan-datum"></div>
+                    </div>
                     <p>Erstellen Sie Ihren Dienstplan einfach und effizient</p>
                 </div>
                 <div id="print-header"></div>
@@ -1718,15 +1725,13 @@
     //  PRINT / SHARE
     // ─────────────────────────────────────────────
     function printSchedule() {
-        let start = startDate ? startDate.toLocaleDateString('de-DE') : '';
-        let end = endDate ? endDate.toLocaleDateString('de-DE') : '';
-        const header = document.getElementById('print-header');
-        let mainTitle = document.getElementById('main-title').textContent || 'Dienstplan';
-        let dateLine = (start && end) ? `<div>Wochenplan vom ${start} bis ${end}</div>` : '';
-        header.innerHTML = `${mainTitle}${dateLine ? '<br>' + dateLine : ''}`;
-        header.style.display = 'block';
+        const logo = document.getElementById('print-logo');
+        if (window.__orgBranding && window.__orgBranding.logoUrl) {
+            logo.src = window.__orgBranding.logoUrl;
+            logo.style.display = 'block';
+        }
         window.print();
-        setTimeout(() => { header.style.display = 'none'; }, 500);
+        setTimeout(() => { logo.style.display = 'none'; }, 500);
     }
 
     function shareCustomHintOnWhatsApp() {
@@ -2048,5 +2053,6 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/cloud-plans.js"></script>
+<script src="js/branding.js" defer></script>
 </body>
 </html>

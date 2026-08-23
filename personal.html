@@ -371,13 +371,13 @@
             grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
             gap: 12px;
         }
-        .detail-item { display: flex; flex-direction: column; }
+        .detail-item { display: flex; flex-direction: column; min-width: 0; }
         .detail-label {
             font-size: 11px; color: var(--color-text-muted);
             font-weight: 600; margin-bottom: 3px;
             text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .detail-value { font-size: 14px; color: var(--color-text); font-weight: 500; }
+        .detail-value { font-size: 14px; color: var(--color-text); font-weight: 500; overflow-wrap: break-word; word-break: break-word; }
 
         .no-employees {
             text-align: center; color: var(--color-text-muted);
@@ -1464,6 +1464,7 @@
         document.addEventListener('DOMContentLoaded', init);
 
     </script>
+    <script src="js/branding.js" defer></script>
 
 </body>
 </html>

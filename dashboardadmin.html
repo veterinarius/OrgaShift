@@ -204,6 +204,20 @@
         }
         .modal input[type="password"]:focus,
         .modal input[type="text"]:focus { border-color: var(--accent); }
+        .modal input[type="file"] {
+            width: 100%; padding: 8px 0; color: var(--text-sec); font-size: 0.85rem;
+        }
+        .modal input[type="color"] {
+            width: 52px; height: 38px; padding: 2px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--surface); cursor: pointer;
+        }
+        .branding-preview-logo {
+            max-height: 20px; max-width: 90px; vertical-align: middle; margin-right: 6px;
+        }
+        .branding-swatch {
+            display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+            border: 1px solid var(--border); vertical-align: middle; margin-right: 6px;
+        }
         .modal-msg {
             display: none; margin-top: 14px; padding: 10px 14px; border-radius: 8px;
             font-size: 0.84rem; line-height: 1.5;
@@ -211,7 +225,7 @@
         .modal-msg.error   { display: block; background: rgba(255,59,48,0.12);  border: 1px solid rgba(255,59,48,0.3);  color: #ff6b61; }
         .modal-msg.success { display: block; background: rgba(52,199,89,0.12);  border: 1px solid rgba(52,199,89,0.3);  color: #34c759; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-buttons .account-btn { flex: 1; }
+        .modal-buttons .account-btn { flex: 1; min-width: 0; }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -360,6 +374,7 @@
                     <div class="account-row"><span class="label">Rolle</span><span class="value" id="accRole">–</span></div>
                     <div class="account-row"><span class="label">Organisation</span><span class="value"><span id="accOrg">–</span><button type="button" class="org-edit-btn" id="orgEditBtn" onclick="openOrgModal()" title="Organisationsname ändern" aria-label="Organisationsname ändern">✎</button></span></div>
                     <div class="account-row"><span class="label">Tarif</span><span class="value"><span class="account-badge" id="accTier">–</span></span></div>
+                    <div class="account-row" id="brandingRow" style="display:none"><span class="label">Branding</span><span class="value" id="brandingValue">–</span></div>
                     <div class="account-row"><span class="label">Mitglied seit</span><span class="value" id="accSince">–</span></div>
                 </div>
                 <div class="account-actions">
@@ -403,6 +418,25 @@
             <div class="modal-buttons">
                 <button type="button" class="account-btn" onclick="closeOrgModal()">Abbrechen</button>
                 <button type="submit" class="account-btn primary" id="orgSubmit">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="brandingModal">
+    <div class="modal">
+        <h3>Eigenes Branding</h3>
+        <p class="modal-sub">Ersetzen Sie den OrgaShift-Schriftzug durch Ihr eigenes Logo und Ihre Akzentfarbe – sichtbar für Ihr Team in der App und auf gedruckten Dienstplänen.</p>
+        <form id="brandingForm" novalidate>
+            <label for="brandingLogoInput">Logo (PNG, JPEG oder WebP, max. 2&nbsp;MB)</label>
+            <input type="file" id="brandingLogoInput" accept="image/png,image/jpeg,image/webp">
+            <label for="brandingColorInput">Akzentfarbe</label>
+            <input type="color" id="brandingColorInput" value="#007AFF">
+            <div class="modal-msg" id="brandingMsg"></div>
+            <div class="modal-buttons">
+                <button type="button" class="account-btn" onclick="closeBrandingModal()">Abbrechen</button>
+                <button type="button" class="account-btn danger" onclick="resetBranding()">Zurücksetzen</button>
+                <button type="submit" class="account-btn primary" id="brandingSubmit">Speichern</button>
             </div>
         </form>
     </div>
@@ -569,13 +603,15 @@ async function loadAccountInfo(session) {
     let tier = profile.tier || 'free';
     if (profile.organization_id) {
         const { data: org } = await sbClient
-            .from('organizations').select('name, tier, created_by')
+            .from('organizations').select('name, tier, created_by, logo_url, brand_color')
             .eq('id', profile.organization_id).maybeSingle();
         if (org) {
             set('accOrg', org.name);
             tier = org.tier || tier;
             accOrgId   = profile.organization_id;
             accOrgName = org.name || '';
+            accOrgLogoUrl = org.logo_url || null;
+            accOrgBrandColor = org.brand_color || null;
             isOrgOwner = org.created_by === user.id;
             document.getElementById('orgEditBtn').style.display = 'inline-block';
         }
@@ -587,11 +623,14 @@ async function loadAccountInfo(session) {
     set('accTier', TIER_LABELS[tier] || tier);
     currentTier = tier;
     document.getElementById('cancelPlanBtn').style.display = (tier !== 'free' && isOrgOwner) ? '' : 'none';
+    renderBrandingRow();
 }
 
 /* ── ORGANISATIONSNAME-MODAL ── */
 let accOrgId   = null; // organizations.id – falls null, liegt der Name nur in user_metadata.company
 let accOrgName = '';
+let accOrgLogoUrl    = null;
+let accOrgBrandColor = null;
 
 const orgModal = document.getElementById('orgModal');
 const orgMsg   = document.getElementById('orgMsg');
@@ -643,6 +682,127 @@ document.getElementById('orgForm').addEventListener('submit', async function (e)
     closeOrgModal();
 });
 
+/* ── BRANDING (Logo + Akzentfarbe, nur Premium) ── */
+function renderBrandingRow() {
+    const row = document.getElementById('brandingRow');
+    const val = document.getElementById('brandingValue');
+    if (!accOrgId) { row.style.display = 'none'; return; }
+    row.style.display = '';
+    if (currentTier === 'premium') {
+        const logoPreview  = accOrgLogoUrl ? `<img src="${accOrgLogoUrl}" class="branding-preview-logo" alt="Logo">` : '';
+        const colorSwatch  = accOrgBrandColor ? `<span class="branding-swatch" style="background:${accOrgBrandColor}"></span>` : '';
+        const statusLabel  = (accOrgLogoUrl || accOrgBrandColor) ? 'Aktiv' : 'Nicht eingerichtet';
+        val.innerHTML = `${logoPreview}${colorSwatch}${statusLabel}<button type="button" class="org-edit-btn" style="display:inline-block" onclick="openBrandingModal()" title="Branding bearbeiten" aria-label="Branding bearbeiten">✎</button>`;
+    } else {
+        val.innerHTML = `<a href="pricing.html" style="color:var(--accent)">Mit Premium freischalten</a>`;
+    }
+}
+
+const brandingModal = document.getElementById('brandingModal');
+const brandingMsg    = document.getElementById('brandingMsg');
+
+function openBrandingModal() {
+    document.getElementById('brandingLogoInput').value = '';
+    document.getElementById('brandingColorInput').value = accOrgBrandColor || '#007AFF';
+    brandingMsg.className = 'modal-msg';
+    brandingModal.classList.add('open');
+}
+
+function closeBrandingModal() {
+    brandingModal.classList.remove('open');
+}
+
+brandingModal.addEventListener('click', (e) => { if (e.target === brandingModal) closeBrandingModal(); });
+
+function logoExtFromFile(file) {
+    return { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[file.type] || null;
+}
+
+document.getElementById('brandingForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!accOrgId) return;
+
+    const file  = document.getElementById('brandingLogoInput').files[0];
+    const color = document.getElementById('brandingColorInput').value;
+    const btn   = document.getElementById('brandingSubmit');
+
+    let newLogoUrl = accOrgLogoUrl;
+
+    if (file) {
+        const ext = logoExtFromFile(file);
+        if (!ext) {
+            brandingMsg.className   = 'modal-msg error';
+            brandingMsg.textContent = 'Bitte ein PNG-, JPEG- oder WebP-Bild wählen.';
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            brandingMsg.className   = 'modal-msg error';
+            brandingMsg.textContent = 'Die Logo-Datei darf höchstens 2 MB groß sein.';
+            return;
+        }
+
+        btn.disabled    = true;
+        btn.textContent = 'Wird hochgeladen…';
+
+        const path = `${accOrgId}/logo.${ext}`;
+        const { error: uploadError } = await sbClient.storage
+            .from('org-logos').upload(path, file, { upsert: true, contentType: file.type });
+
+        if (uploadError) {
+            btn.disabled    = false;
+            btn.textContent = 'Speichern';
+            brandingMsg.className   = 'modal-msg error';
+            brandingMsg.textContent = 'Fehler beim Hochladen: ' + uploadError.message;
+            return;
+        }
+
+        const { data: publicUrlData } = sbClient.storage.from('org-logos').getPublicUrl(path);
+        newLogoUrl = publicUrlData.publicUrl + '?v=' + Date.now();
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Wird gespeichert…';
+
+    const { error } = await sbClient.from('organizations')
+        .update({ logo_url: newLogoUrl, brand_color: color }).eq('id', accOrgId);
+
+    btn.disabled    = false;
+    btn.textContent = 'Speichern';
+
+    if (error) {
+        brandingMsg.className   = 'modal-msg error';
+        brandingMsg.textContent = 'Fehler beim Speichern: ' + error.message;
+        return;
+    }
+
+    accOrgLogoUrl    = newLogoUrl;
+    accOrgBrandColor = color;
+    renderBrandingRow();
+    closeBrandingModal();
+});
+
+async function resetBranding() {
+    if (!accOrgId) return;
+    const btn = document.getElementById('brandingSubmit');
+    btn.disabled = true;
+
+    const { error } = await sbClient.from('organizations')
+        .update({ logo_url: null, brand_color: null }).eq('id', accOrgId);
+
+    btn.disabled = false;
+
+    if (error) {
+        brandingMsg.className   = 'modal-msg error';
+        brandingMsg.textContent = 'Fehler beim Zurücksetzen: ' + error.message;
+        return;
+    }
+
+    accOrgLogoUrl    = null;
+    accOrgBrandColor = null;
+    renderBrandingRow();
+    closeBrandingModal();
+}
+
 /* ── PASSWORT-MODAL ── */
 const pwModal = document.getElementById('pwModal');
 const pwMsg   = document.getElementById('pwMsg');
@@ -665,9 +825,10 @@ function closePwModal() {
 
 pwModal.addEventListener('click', (e) => { if (e.target === pwModal) closePwModal(); });
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && pwModal.classList.contains('open'))     closePwModal();
-    if (e.key === 'Escape' && orgModal.classList.contains('open'))    closeOrgModal();
-    if (e.key === 'Escape' && cancelModal.classList.contains('open')) closeCancelModal();
+    if (e.key === 'Escape' && pwModal.classList.contains('open'))       closePwModal();
+    if (e.key === 'Escape' && orgModal.classList.contains('open'))      closeOrgModal();
+    if (e.key === 'Escape' && brandingModal.classList.contains('open')) closeBrandingModal();
+    if (e.key === 'Escape' && cancelModal.classList.contains('open'))   closeCancelModal();
 });
 
 /* ── ABO-KÜNDIGEN-MODAL ── */
@@ -772,5 +933,6 @@ document.getElementById('pwForm').addEventListener('submit', async function (e) 
     setTimeout(() => { closePwModal(); btn.disabled = false; }, 1500);
 });
 </script>
+<script src="js/branding.js" defer></script>
 </body>
 </html>

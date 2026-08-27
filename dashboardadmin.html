@@ -369,8 +369,8 @@
             <div class="card-body">
                 <h3>Mein Account</h3>
                 <div class="account-rows">
-                    <div class="account-row"><span class="label">Name</span><span class="value" id="accName">–</span></div>
-                    <div class="account-row"><span class="label">E-Mail</span><span class="value" id="accEmail">–</span></div>
+                    <div class="account-row"><span class="label">Name</span><span class="value"><span id="accName">–</span><button type="button" class="org-edit-btn" style="display:inline-block" onclick="openAccountModal()" title="Name ändern" aria-label="Name ändern">✎</button></span></div>
+                    <div class="account-row"><span class="label">E-Mail</span><span class="value"><span id="accEmail">–</span><button type="button" class="org-edit-btn" style="display:inline-block" onclick="openAccountModal()" title="E-Mail ändern" aria-label="E-Mail ändern">✎</button></span></div>
                     <div class="account-row"><span class="label">Rolle</span><span class="value" id="accRole">–</span></div>
                     <div class="account-row"><span class="label">Organisation</span><span class="value"><span id="accOrg">–</span><button type="button" class="org-edit-btn" id="orgEditBtn" onclick="openOrgModal()" title="Organisationsname ändern" aria-label="Organisationsname ändern">✎</button></span></div>
                     <div class="account-row"><span class="label">Tarif</span><span class="value"><span class="account-badge" id="accTier">–</span></span></div>
@@ -401,6 +401,25 @@
             <div class="modal-buttons">
                 <button type="button" class="account-btn" onclick="closePwModal()">Abbrechen</button>
                 <button type="submit" class="account-btn primary" id="pwSubmit">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="accountModal">
+    <div class="modal">
+        <h3>Kontodaten ändern</h3>
+        <p class="modal-sub">Ändern Sie Ihren Namen oder Ihre E-Mail-Adresse.</p>
+        <form id="accountForm" novalidate>
+            <label for="accNameNew">Name</label>
+            <input type="text" id="accNameNew" autocomplete="name" placeholder="Vor- und Nachname" required>
+            <label for="accEmailNew">E-Mail</label>
+            <input type="email" id="accEmailNew" autocomplete="email" placeholder="name@beispiel.de" required>
+            <p class="modal-sub" style="margin:6px 0 0;font-size:0.8rem">Bei einer Änderung der E-Mail-Adresse senden wir Ihnen einen Bestätigungslink an die neue Adresse. Erst nach dem Klick auf diesen Link wird die Änderung wirksam.</p>
+            <div class="modal-msg" id="accountMsg"></div>
+            <div class="modal-buttons">
+                <button type="button" class="account-btn" onclick="closeAccountModal()">Abbrechen</button>
+                <button type="submit" class="account-btn primary" id="accountSubmit">Speichern</button>
             </div>
         </form>
     </div>
@@ -577,6 +596,8 @@ sbClient.auth.getSession().then(async ({ data: { session } }) => {
 let currentUserId = null;
 let currentTier   = 'free';
 let isOrgOwner    = true; // ohne Organisation (Solo-Account) ist man immer "Inhaber" der eigenen Daten
+let accCurrentName  = '';
+let accCurrentEmail = '';
 
 async function loadAccountInfo(session) {
     const TIER_LABELS = { free: 'Free Trial', basic: 'Basic', premium: 'Premium' };
@@ -585,8 +606,10 @@ async function loadAccountInfo(session) {
 
     const user = session.user;
     currentUserId = user.id;
-    set('accName',  user.user_metadata?.full_name);
-    set('accEmail', user.email);
+    accCurrentName  = user.user_metadata?.full_name || '';
+    accCurrentEmail = user.email || '';
+    set('accName',  accCurrentName);
+    set('accEmail', accCurrentEmail);
     if (user.created_at) {
         set('accSince', new Date(user.created_at).toLocaleDateString('de-DE', {
             day: '2-digit', month: 'long', year: 'numeric'
@@ -594,9 +617,18 @@ async function loadAccountInfo(session) {
     }
 
     const { data: profile } = await sbClient
-        .from('profiles').select('role, tier, organization_id')
+        .from('profiles').select('role, tier, organization_id, full_name, email')
         .eq('id', user.id).maybeSingle();
     if (!profile) return;
+
+    // profiles.full_name/email werden nur beim Signup gesetzt (kein Sync-Trigger
+    // fuer spaetere auth.users-Aenderungen) – hier mit dem echten Auth-Stand abgleichen.
+    if (profile.full_name !== accCurrentName || profile.email !== accCurrentEmail) {
+        sbClient.from('profiles')
+            .update({ full_name: accCurrentName, email: accCurrentEmail })
+            .eq('id', user.id)
+            .then(({ error }) => { if (error) console.error('Profil-Sync fehlgeschlagen:', error.message); });
+    }
 
     set('accRole', ROLE_LABELS[profile.role] || profile.role);
 
@@ -625,6 +657,81 @@ async function loadAccountInfo(session) {
     document.getElementById('cancelPlanBtn').style.display = (tier !== 'free' && isOrgOwner) ? '' : 'none';
     renderBrandingRow();
 }
+
+/* ── KONTODATEN-MODAL (Name + E-Mail) ── */
+const accountModal = document.getElementById('accountModal');
+const accountMsg    = document.getElementById('accountMsg');
+
+function openAccountModal() {
+    document.getElementById('accNameNew').value  = accCurrentName;
+    document.getElementById('accEmailNew').value = accCurrentEmail;
+    accountMsg.className = 'modal-msg';
+    accountModal.classList.add('open');
+    document.getElementById('accNameNew').focus();
+}
+
+function closeAccountModal() {
+    accountModal.classList.remove('open');
+}
+
+accountModal.addEventListener('click', (e) => { if (e.target === accountModal) closeAccountModal(); });
+
+document.getElementById('accountForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const name  = document.getElementById('accNameNew').value.trim();
+    const email = document.getElementById('accEmailNew').value.trim();
+    const btn   = document.getElementById('accountSubmit');
+
+    if (!name) {
+        accountMsg.className   = 'modal-msg error';
+        accountMsg.textContent = 'Bitte geben Sie einen Namen ein.';
+        return;
+    }
+    if (!email) {
+        accountMsg.className   = 'modal-msg error';
+        accountMsg.textContent = 'Bitte geben Sie eine E-Mail-Adresse ein.';
+        return;
+    }
+
+    const nameChanged  = name !== accCurrentName;
+    const emailChanged = email !== accCurrentEmail;
+    if (!nameChanged && !emailChanged) { closeAccountModal(); return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Wird gespeichert…';
+
+    const update = {};
+    if (nameChanged)  update.data  = { full_name: name };
+    if (emailChanged) update.email = email;
+
+    const { error } = await sbClient.auth.updateUser(update);
+
+    btn.disabled    = false;
+    btn.textContent = 'Speichern';
+
+    if (error) {
+        accountMsg.className   = 'modal-msg error';
+        accountMsg.textContent = 'Fehler beim Speichern: ' + error.message;
+        return;
+    }
+
+    if (nameChanged) {
+        accCurrentName = name;
+        document.getElementById('accName').textContent = name;
+        sbClient.from('profiles').update({ full_name: name }).eq('id', currentUserId)
+            .then(({ error: profErr }) => { if (profErr) console.error('Profil-Sync fehlgeschlagen:', profErr.message); });
+    }
+
+    if (emailChanged) {
+        accountMsg.className   = 'modal-msg success';
+        accountMsg.textContent = 'Bestätigungslink wurde an ' + email + ' gesendet. Die Änderung wird erst nach Bestätigung wirksam.';
+    } else {
+        accountMsg.className   = 'modal-msg success';
+        accountMsg.textContent = 'Kontodaten erfolgreich geändert.';
+        setTimeout(() => { closeAccountModal(); }, 1500);
+    }
+});
 
 /* ── ORGANISATIONSNAME-MODAL ── */
 let accOrgId   = null; // organizations.id – falls null, liegt der Name nur in user_metadata.company
@@ -826,6 +933,7 @@ function closePwModal() {
 pwModal.addEventListener('click', (e) => { if (e.target === pwModal) closePwModal(); });
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && pwModal.classList.contains('open'))       closePwModal();
+    if (e.key === 'Escape' && accountModal.classList.contains('open'))  closeAccountModal();
     if (e.key === 'Escape' && orgModal.classList.contains('open'))      closeOrgModal();
     if (e.key === 'Escape' && brandingModal.classList.contains('open')) closeBrandingModal();
     if (e.key === 'Escape' && cancelModal.classList.contains('open'))   closeCancelModal();

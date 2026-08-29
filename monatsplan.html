@@ -1209,11 +1209,11 @@
                 </thead>
                 <tbody id="shiftBody_${sIdx}">
             `;
-            generatedSchedule[shift].forEach((rowArr, index) => {
+                generatedSchedule[shift].forEach((rowArr, index) => {
                 tableHTML += `
                     <tr>
                         <td class="row-number" contenteditable="true">${index + 1}</td>
-                        ${rowArr.map(employee => `<td contenteditable="true" style="white-space: pre-wrap; word-wrap: break-word;">${employee}</td>`).join('')}
+                    ${rowArr.map(employee => `<td contenteditable="true" style="white-space: pre-wrap; word-wrap: break-word;">${orgaEscapeHtml(employee)}</td>`).join('')}
                     </tr>
                 `;
             });
@@ -1350,10 +1350,10 @@
                             <div class="checkbox-item">
                                 <input type="checkbox"
                                        id="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day.replace(/[^a-zA-Z0-9]/g, '_')}-${shift.replace(/[^a-zA-Z0-9]/g, '_')}"
-                                       value="${shift}"
+                                       value="${orgaEscapeHtml(shift)}"
                                        ${currentPrefs.includes(shift) ? 'checked' : ''}
-                                       onchange="updatePreference('${employeeName}', '${day}', '${shift}', this.checked)">
-                                <label for="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day.replace(/[^a-zA-Z0-9]/g, '_')}-${shift.replace(/[^a-zA-Z0-9]/g, '_')}">${shift}</label>
+                                       onchange="updatePreference(decodeURIComponent('${orgaEncodeHandlerArg(employeeName)}'), decodeURIComponent('${orgaEncodeHandlerArg(day)}'), decodeURIComponent('${orgaEncodeHandlerArg(shift)}'), this.checked)">
+                                <label for="${employeeName.replace(/[^a-zA-Z0-9]/g, '_')}-${day.replace(/[^a-zA-Z0-9]/g, '_')}-${shift.replace(/[^a-zA-Z0-9]/g, '_')}">${orgaEscapeHtml(shift)}</label>
                             </div>
                         `).join('')}
                         </div>
@@ -1686,15 +1686,16 @@
             Object.values(prefs).forEach(dayPrefs => {
                 if (Array.isArray(dayPrefs) && dayPrefs.length > 0) prefCount += dayPrefs.length;
             });
-            const editButton = `<button onclick="editEmployeeName('${employee}')" title="Mitarbeitername bearbeiten">✏️</button>`;
+            const encodedEmployee = orgaEncodeHandlerArg(employee);
+            const editButton = `<button onclick="editEmployeeName(decodeURIComponent('${encodedEmployee}'))" title="Mitarbeitername bearbeiten">✏️</button>`;
             const prefButton = prefCount > 0
-                ? `<button onclick="showPreferences('${employee}')" title="Präferenzen bearbeiten">⚙️ (${prefCount})</button>`
-                : `<button onclick="showPreferences('${employee}')" title="Präferenzen bearbeiten">⚙️</button>`;
+                ? `<button onclick="showPreferences(decodeURIComponent('${encodedEmployee}'))" title="Präferenzen bearbeiten">⚙️ (${prefCount})</button>`
+                : `<button onclick="showPreferences(decodeURIComponent('${encodedEmployee}'))" title="Präferenzen bearbeiten">⚙️</button>`;
             tag.innerHTML = `
-                <span class="employee-name-span">${employee}</span>
+                <span class="employee-name-span">${orgaEscapeHtml(employee)}</span>
                 ${editButton}
                 ${prefButton}
-                <button onclick="removeEmployee('${employee}')" title="Mitarbeiter entfernen">✕</button>
+                <button onclick="removeEmployee(decodeURIComponent('${encodedEmployee}'))" title="Mitarbeiter entfernen">✕</button>
             `;
             tag.addEventListener('dragstart', handleDragStart);
             tag.addEventListener('dragend', handleDragEnd);
@@ -1952,7 +1953,7 @@
             const rowVal = Array.isArray(rowCounts) && rowCounts[i] ? rowCounts[i] : 7;
             const durVal = Array.isArray(shiftDurations) && shiftDurations[i] != null ? shiftDurations[i] : 8;
             container.innerHTML += `<div style='display:flex;align-items:center;margin-bottom:4px;gap:6px;'>
-                <input type='text' value='${name}' onchange='updateShiftName(${i}, this.value)' style='flex:1;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
+                <input type='text' value='${orgaEscapeHtml(name)}' onchange='updateShiftName(${i}, this.value)' style='flex:1;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
                 <span style='color:var(--color-text-muted);font-size:0.85rem;'>Zeilen:</span>
                 <input type='number' min='1' max='50' value='${rowVal}' onchange='updateRowCount(${i}, this.value)' style='width:60px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
                 <span style='color:var(--color-text-muted);font-size:0.85rem;'>Dauer (Std.):</span>
@@ -1974,7 +1975,7 @@
         container.innerHTML = '';
         dayNames.forEach((name, i) => {
             container.innerHTML += `<div style='display:flex;align-items:center;margin-bottom:4px;gap:6px;'>
-                <input type='text' value='${name}' onchange='updateDayName(${i}, this.value)' style='flex:1;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
+                <input type='text' value='${orgaEscapeHtml(name)}' onchange='updateDayName(${i}, this.value)' style='flex:1;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:var(--color-text);'>
                 <button type='button' onclick='removeDayInput(${i})' style='color:#ff453a;background:none;border:none;font-size:1.2em;cursor:pointer;'>✕</button>
             </div>`;
         });
@@ -2196,6 +2197,8 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/security.js"></script>
 <script src="js/cloud-plans.js"></script>
 <script src="js/branding.js" defer></script>
 </body>

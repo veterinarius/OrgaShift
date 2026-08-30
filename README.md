@@ -4,13 +4,14 @@ Frameworkfreie Webanwendung für Dienstplanung, Urlaub, Personal, Standorte und 
 
 ## Datenbank-Migration
 
-Vor dem Einsatz der Standort- und neuen Tariflogik muss
-`supabase/migrations/202608300001_pricing_locations_departments.sql` einmal im
-Supabase-SQL-Editor oder über die Supabase CLI ausgeführt werden. Die Migration
-legt für bestehende Organisationen den Standort „Hauptstandort“ und die
-Abteilung „Allgemein“ an und ordnet vorhandene Daten zu.
+`supabase/migrations/20260830153440_pricing_locations_departments.sql` bringt die
+Standort-/Abteilungstabellen sowie die neue Tariflogik. Die Migration ist auf dem
+verknüpften Projekt bereits eingespielt; für weitere Umgebungen genügt
+`supabase db push` bzw. das Ausführen im Supabase-SQL-Editor. Sie ist idempotent,
+legt für bestehende Organisationen den Standort „Hauptstandort“ und die Abteilung
+„Allgemein“ an und ordnet vorhandene Daten zu.
 
-Die Browseroberfläche läuft bis dahin im Legacy-Modus weiter.
+Ohne eingespielte Migration läuft die Browseroberfläche im Legacy-Modus weiter.
 
 ## Tarifwahl
 

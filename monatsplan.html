@@ -1307,6 +1307,7 @@
         }
 
         employees.push(name);
+        if (window.orgaEmployeeModel) window.orgaEmployeeModel.ensureNames([name]);
         preferences[name] = {};
         input.value = '';
         updateEmployeeList();
@@ -1316,6 +1317,7 @@
 
     function removeEmployee(employeeName) {
         employees = employees.filter(emp => emp !== employeeName);
+        if (window.orgaEmployeeModel) window.orgaEmployeeModel.removeByName(employeeName);
         delete preferences[employeeName];
         updateEmployeeList();
         displaySchedule();
@@ -1532,12 +1534,12 @@
     }
 
     function saveDataToLocalStorage() {
-        localStorage.setItem('monatsplan_employees', JSON.stringify(employees));
-        localStorage.setItem('monatsplan_constraints', JSON.stringify(constraints));
-        localStorage.setItem('monatsplan_schedule', JSON.stringify(schedule));
-        localStorage.setItem('monatsplan_preferences', JSON.stringify(preferences));
-        localStorage.setItem('monatsplan_startDate', selectedMonth ? new Date(selectedYear, selectedMonth - 1, 1).toISOString() : '');
-        localStorage.setItem('monatsplan_endDate', selectedMonth ? new Date(selectedYear, selectedMonth, 0).toISOString() : '');
+        orgaScheduleStorage.writeJson('monatsplan_employees', employees);
+        orgaScheduleStorage.writeJson('monatsplan_constraints', constraints);
+        orgaScheduleStorage.writeJson('monatsplan_schedule', schedule);
+        orgaScheduleStorage.writeJson('monatsplan_preferences', preferences);
+        orgaScheduleStorage.write('monatsplan_startDate', selectedMonth ? new Date(selectedYear, selectedMonth - 1, 1).toISOString() : '');
+        orgaScheduleStorage.write('monatsplan_endDate', selectedMonth ? new Date(selectedYear, selectedMonth, 0).toISOString() : '');
         const tableData = {};
         shiftNames.forEach((shift, sIdx) => {
             const tbody = document.getElementById(`shiftBody_${sIdx}`);
@@ -1552,7 +1554,7 @@
                 });
             }
         });
-        localStorage.setItem('monatsplan_tableData', JSON.stringify(tableData));
+        orgaScheduleStorage.writeJson('monatsplan_tableData', tableData);
     }
 
     function saveRemarks() {
@@ -1561,19 +1563,20 @@
     }
 
     function loadDataFromLocalStorage() {
-        const savedEmployees = localStorage.getItem('monatsplan_employees');
-        if (savedEmployees) employees = JSON.parse(savedEmployees);
-        const savedPreferences = localStorage.getItem('monatsplan_preferences');
-        if (savedPreferences) preferences = JSON.parse(savedPreferences);
-        const savedSchedule = localStorage.getItem('monatsplan_schedule');
-        if (savedSchedule) schedule = JSON.parse(savedSchedule);
-        const savedStartDate = localStorage.getItem('monatsplan_startDate');
+        const savedEmployees = orgaScheduleStorage.readJson('monatsplan_employees', null);
+        if (savedEmployees) employees = savedEmployees;
+        if (window.orgaEmployeeModel) window.orgaEmployeeModel.ensureNames(employees);
+        const savedPreferences = orgaScheduleStorage.readJson('monatsplan_preferences', null);
+        if (savedPreferences) preferences = savedPreferences;
+        const savedSchedule = orgaScheduleStorage.readJson('monatsplan_schedule', null);
+        if (savedSchedule) schedule = savedSchedule;
+        const savedStartDate = orgaScheduleStorage.read('monatsplan_startDate', null);
         if (savedStartDate) {
             selectedMonth = new Date(savedStartDate).getMonth() + 1;
             selectedYear = new Date(savedStartDate).getFullYear();
             document.getElementById('monthSelect').value = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`;
         }
-        const savedEndDate = localStorage.getItem('monatsplan_endDate');
+        const savedEndDate = orgaScheduleStorage.read('monatsplan_endDate', null);
         if (savedEndDate) {
             selectedMonth = new Date(savedEndDate).getMonth() + 1;
             selectedYear = new Date(savedEndDate).getFullYear();
@@ -1586,9 +1589,9 @@
     }
 
     function loadTableData() {
-        const savedTableData = localStorage.getItem('monatsplan_tableData');
+        const savedTableData = orgaScheduleStorage.readJson('monatsplan_tableData', null);
         if (savedTableData) {
-            const tableData = JSON.parse(savedTableData);
+            const tableData = savedTableData;
             Object.keys(tableData).forEach((shift, sIdx) => {
                 const tbody = document.getElementById(`shiftBody_${sIdx}`);
                 if (tbody) {
@@ -1731,6 +1734,7 @@
             const idx = employees.indexOf(oldName);
             if (idx !== -1) employees[idx] = newName;
             if (preferences[oldName]) { preferences[newName] = preferences[oldName]; delete preferences[oldName]; }
+            if (window.orgaEmployeeModel) window.orgaEmployeeModel.rename(oldName, newName);
             document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
                 if (cell.textContent.trim() === oldName) cell.textContent = newName;
             });
@@ -2199,6 +2203,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth-guard.js"></script>
 <script src="js/security.js"></script>
+<script src="js/employee-model.js"></script>
+<script src="js/schedule-storage.js"></script>
 <script src="js/cloud-plans.js"></script>
 <script src="js/branding.js" defer></script>
 </body>

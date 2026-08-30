@@ -711,6 +711,8 @@
 </div>
 
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="js/employee-model.js"></script>
+<script src="js/schedule-storage.js"></script>
 <script src="js/employees.js"></script>
 <script>
     // ─────────────────────────────────────────────
@@ -1275,6 +1277,7 @@
         }
 
         employees.push(name);
+        if (window.orgaEmployeeModel) window.orgaEmployeeModel.ensureNames([name]);
         preferences[name] = { dayShiftPrefs: {}, rowPrefs: {} };
         input.value = '';
         updateEmployeeList();
@@ -1284,6 +1287,7 @@
 
     function removeEmployee(employeeName) {
         employees = employees.filter(emp => emp !== employeeName);
+        if (window.orgaEmployeeModel) window.orgaEmployeeModel.removeByName(employeeName);
         delete preferences[employeeName];
         updateEmployeeList();
         displaySchedule();
@@ -1511,14 +1515,14 @@
     //  LOCALSTORAGE
     // ─────────────────────────────────────────────
     function saveDataToLocalStorage() {
-        localStorage.setItem('dienstplan_employees', JSON.stringify(employees));
-        localStorage.setItem('dienstplan_constraints', JSON.stringify(constraints));
-        localStorage.setItem('dienstplan_preferences', JSON.stringify(preferences));
-        localStorage.setItem('dienstplan_startDate', startDate ? startDate.toISOString() : '');
-        localStorage.setItem('dienstplan_endDate', endDate ? endDate.toISOString() : '');
+        orgaScheduleStorage.writeJson('dienstplan_employees', employees);
+        orgaScheduleStorage.writeJson('dienstplan_constraints', constraints);
+        orgaScheduleStorage.writeJson('dienstplan_preferences', preferences);
+        orgaScheduleStorage.write('dienstplan_startDate', startDate ? startDate.toISOString() : '');
+        orgaScheduleStorage.write('dienstplan_endDate', endDate ? endDate.toISOString() : '');
         const scheduleJSON = JSON.stringify(schedule);
-        localStorage.setItem(weekScopedKey('dienstplan_schedule'), scheduleJSON);
-        localStorage.setItem('dienstplan_schedule', scheduleJSON);
+        orgaScheduleStorage.write(weekScopedKey('dienstplan_schedule'), scheduleJSON);
+        orgaScheduleStorage.write('dienstplan_schedule', scheduleJSON);
         const tableData = {};
         shiftNames.forEach((shift, sIdx) => {
             const tbody = document.getElementById(`shiftBody_${sIdx}`);
@@ -1532,8 +1536,8 @@
             }
         });
         const tableDataJSON = JSON.stringify(tableData);
-        localStorage.setItem(weekScopedKey('dienstplan_tableData'), tableDataJSON);
-        localStorage.setItem('dienstplan_tableData', tableDataJSON);
+        orgaScheduleStorage.write(weekScopedKey('dienstplan_tableData'), tableDataJSON);
+        orgaScheduleStorage.write('dienstplan_tableData', tableDataJSON);
     }
 
     function saveRemarks() {
@@ -1542,18 +1546,18 @@
     }
 
     function loadDataFromLocalStorage() {
-        const savedEmployees = localStorage.getItem('dienstplan_employees');
-        if (savedEmployees) employees = JSON.parse(savedEmployees);
+        const savedEmployees = orgaScheduleStorage.readJson('dienstplan_employees', null);
+        if (savedEmployees) employees = savedEmployees;
+        if (window.orgaEmployeeModel) window.orgaEmployeeModel.ensureNames(employees);
         try {
-            const savedPreferences = localStorage.getItem('dienstplan_preferences');
-            preferences = savedPreferences ? JSON.parse(savedPreferences) : {};
+            preferences = orgaScheduleStorage.readJson('dienstplan_preferences', {});
         } catch(e) { preferences = {}; }
-        const savedStartDate = localStorage.getItem('dienstplan_startDate');
+        const savedStartDate = orgaScheduleStorage.read('dienstplan_startDate', null);
         if (savedStartDate) { startDate = new Date(savedStartDate); document.getElementById('startDate').value = startDate.toISOString().split('T')[0]; }
-        const savedEndDate = localStorage.getItem('dienstplan_endDate');
+        const savedEndDate = orgaScheduleStorage.read('dienstplan_endDate', null);
         if (savedEndDate) { endDate = new Date(savedEndDate); document.getElementById('endDate').value = endDate.toISOString().split('T')[0]; }
-        const savedSchedule = localStorage.getItem(weekScopedKey('dienstplan_schedule'));
-        if (savedSchedule) schedule = JSON.parse(savedSchedule);
+        const savedSchedule = orgaScheduleStorage.readJson(weekScopedKey('dienstplan_schedule'), null);
+        if (savedSchedule) schedule = savedSchedule;
         const savedRemarks = localStorage.getItem('dienstplan_remarks');
         const remarksInput = document.getElementById('remarks-input');
         if (savedRemarks && remarksInput) remarksInput.value = savedRemarks;
@@ -1561,9 +1565,9 @@
     }
 
     function loadTableData() {
-        const savedTableData = localStorage.getItem(weekScopedKey('dienstplan_tableData'));
+        const savedTableData = orgaScheduleStorage.readJson(weekScopedKey('dienstplan_tableData'), null);
         if (!savedTableData) return;
-        const tableData = JSON.parse(savedTableData);
+        const tableData = savedTableData;
         Object.keys(tableData).forEach((shift, sIdx) => {
             const tbody = document.getElementById(`shiftBody_${sIdx}`);
             if (tbody) {
@@ -1690,6 +1694,7 @@
             const idx = employees.indexOf(oldName);
             if (idx !== -1) employees[idx] = newName;
             if (preferences[oldName]) { preferences[newName] = preferences[oldName]; delete preferences[oldName]; }
+            if (window.orgaEmployeeModel) window.orgaEmployeeModel.rename(oldName, newName);
             document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
                 const lines = cell.textContent.split('\n');
                 if (lines[0].trim() === oldName) {

@@ -409,7 +409,7 @@
                 <p class="plan-desc">Für kleinere Betriebe, die mit einem festen Organisationspreis wachsen möchten.</p>
             </div>
             <div class="card-content">
-                <a href="kontakt.html?plan=starter" data-plan="starter" class="plan-btn plan-btn-default">Starter anfragen</a>
+                <a href="register.html?plan=starter" data-plan="starter" class="plan-btn plan-btn-default">Starter wählen</a>
                 <div class="feature-divider">
                     <p class="feature-group-label">Alles aus Free, plus:</p>
                     <ul class="feature-list">
@@ -439,7 +439,7 @@
                 <p class="plan-desc">Für wachsende Teams mit mehreren Standorten und gemeinsamer Verwaltung.</p>
             </div>
             <div class="card-content">
-                <a href="kontakt.html?plan=team" data-plan="team" class="plan-btn plan-btn-popular">Team anfragen</a>
+                <a href="register.html?plan=team" data-plan="team" class="plan-btn plan-btn-popular">Team wählen</a>
                 <div class="feature-divider">
                     <p class="feature-group-label">Alles aus Starter, plus:</p>
                     <ul class="feature-list">
@@ -468,7 +468,7 @@
                 <p class="plan-desc">Für größere Organisationen mit mehr Teams, Standorten und Verantwortlichen.</p>
             </div>
             <div class="card-content">
-                <a href="kontakt.html?plan=business" data-plan="business" class="plan-btn plan-btn-default">Business anfragen</a>
+                <a href="register.html?plan=business" data-plan="business" class="plan-btn plan-btn-default">Business wählen</a>
                 <div class="feature-divider">
                     <p class="feature-group-label">Alles aus Team, plus:</p>
                     <ul class="feature-list">
@@ -487,7 +487,7 @@
 
     <!-- FAQ note -->
     <div class="faq-strip">
-        <p>Festpreis pro Organisation, nicht pro Mitarbeitenden. Alle Preise zzgl. MwSt. Jährliche Zahlung spart rund 17&nbsp;%. Bezahlte Tarife werden bis zur späteren Zahlungsintegration manuell aktiviert. <a href="kontakt.html">Schreiben Sie uns.</a></p>
+        <p>Festpreis pro Organisation, nicht pro Mitarbeitenden. Alle Preise zzgl. MwSt. Jährliche Zahlung spart rund 17&nbsp;%. Der Tarifwechsel ist als Kontoinhaber jederzeit direkt möglich. <a href="kontakt.html">Schreiben Sie uns.</a></p>
     </div>
 
 </section>
@@ -679,35 +679,93 @@ setTimeout(() => {
     });
 }());
 
-// ── AKTUELLEN PLAN FÜR EINGELOGGTE ADMINS MARKIEREN ──────────────────────
-// Bezahlte Tarife werden bis zur Stripe-Anbindung bewusst nicht im Browser
-// freigeschaltet. Die Buttons führen stattdessen zur Kontaktanfrage.
+// ── TARIFWAHL FÜR EINGELOGGTE ADMINS ────────────────────────────────────
+// Der Kontoinhaber wählt den Tarif direkt: ein Klick setzt ihn ohne
+// Zwischenschritt über die RPC set_org_tier für die Organisation. Nicht
+// eingeloggte Besucher folgen dem Link zur Registrierung (?plan=…).
 (async function() {
-    const btns = document.querySelectorAll('.plan-btn[data-plan]');
+    const btns = [...document.querySelectorAll('.plan-btn[data-plan]')];
+    const normalize = t => (t === 'basic' ? 'team' : t === 'premium' ? 'business' : (t || 'free'));
+    const labelOf = plan => (document.querySelector(`.plan-btn[data-plan="${plan}"]`)
+        ?.closest('.pricing-card')?.querySelector('.plan-name')?.textContent || plan).trim();
+
+    let toastEl = null, toastTimer = null;
+    function toast(msg, isError) {
+        if (!toastEl) {
+            toastEl = document.createElement('div');
+            toastEl.className = 'plan-toast';
+            document.body.appendChild(toastEl);
+        }
+        toastEl.textContent = msg;
+        toastEl.classList.toggle('error', !!isError);
+        requestAnimationFrame(() => toastEl.classList.add('show'));
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4200);
+    }
 
     const { data: { session } } = await sbClient.auth.getSession();
-    if (!session) return;
+    if (!session) return; // Besucher: Buttons bleiben Registrierungs-Links.
 
     const { data: profile } = await sbClient
         .from('profiles').select('role, tier, organization_id')
         .eq('id', session.user.id).single();
     if (!profile || profile.role !== 'admin') return;
 
-    let orgTier = profile.tier || 'free';
+    let orgTier = normalize(profile.tier);
+    let isOwner = false;
     if (profile.organization_id) {
         const { data: org } = await sbClient
-            .from('organizations').select('tier')
+            .from('organizations').select('tier, created_by')
             .eq('id', profile.organization_id).single();
-        if (org) orgTier = org.tier || orgTier;
-    }
-    if (orgTier === 'basic') orgTier = 'team';
-    if (orgTier === 'premium') orgTier = 'business';
-    btns.forEach(btn => {
-        if (btn.dataset.plan === orgTier) {
-            btn.classList.add('current');
-            btn.textContent = 'Aktueller Plan ✓';
+        if (org) {
+            orgTier = normalize(org.tier || profile.tier);
+            isOwner = org.created_by === session.user.id;
         }
-    });
+    }
+
+    function paint(currentTier) {
+        btns.forEach(btn => {
+            const plan = btn.dataset.plan;
+            btn.classList.remove('current', 'locked');
+            btn.removeAttribute('aria-disabled');
+            if (plan === currentTier) {
+                btn.classList.add('current');
+                btn.textContent = 'Aktueller Plan ✓';
+            } else if (!isOwner) {
+                btn.classList.add('locked');
+                btn.textContent = 'Nur der Kontoinhaber';
+                btn.setAttribute('aria-disabled', 'true');
+            } else {
+                btn.textContent = labelOf(plan) + ' wählen';
+            }
+        });
+    }
+    paint(orgTier);
+
+    if (!isOwner) {
+        btns.forEach(btn => btn.addEventListener('click', e => e.preventDefault()));
+        return;
+    }
+
+    btns.forEach(btn => btn.addEventListener('click', async e => {
+        e.preventDefault();
+        const plan = btn.dataset.plan;
+        if (plan === orgTier || btn.classList.contains('busy')) return;
+
+        btn.classList.add('busy');
+        btn.textContent = 'Wird übernommen…';
+        const { data, error } = await sbClient.rpc('set_org_tier', { p_tier: plan });
+        btn.classList.remove('busy');
+
+        if (error) {
+            toast(error.message || 'Tarifwechsel fehlgeschlagen.', true);
+            paint(orgTier);
+            return;
+        }
+        orgTier = normalize(typeof data === 'string' ? data : plan);
+        paint(orgTier);
+        toast('Tarif „' + labelOf(orgTier) + '“ ist jetzt aktiv.');
+    }));
 }());
 </script>
 </body>

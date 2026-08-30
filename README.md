@@ -12,10 +12,21 @@ Abteilung „Allgemein“ an und ordnet vorhandene Daten zu.
 
 Die Browseroberfläche läuft bis dahin im Legacy-Modus weiter.
 
-## Manuelle Tarifaktivierung
+## Tarifwahl
 
-Bis zur späteren Stripe-Integration werden bezahlte Tarife ausschließlich im
-Supabase-SQL-Editor beziehungsweise mit der `service_role` aktiviert:
+Eine Zahlungsabwicklung ist vorerst nicht angebunden. Der Kontoinhaber wählt den
+Basistarif direkt auf `pricing.html`; er wird über `public.set_org_tier(text)`
+sofort für die Organisation gesetzt. Erlaubte Tarife: `free`, `starter`, `team`,
+`business`. Die Funktion ist auf den Kontoinhaber beschränkt und prüft
+serverseitig, dass die im Tarif enthaltenen Mengen (Mitarbeitende, Admins,
+Standorte) die vorhandenen Daten fassen (Downgrade-Schutz). Neu registrierte
+Admins übernehmen den auf der Pricing-Seite gewählten Tarif per
+`?plan=…`-Parameter.
+
+### Kostenpflichtige Zusatzpakete (extra_*)
+
+Über den Basistarif hinausgehende Zusatzmengen werden weiterhin ausschließlich im
+Supabase-SQL-Editor bzw. mit der `service_role` gesetzt:
 
 ```sql
 select public.set_org_subscription(
@@ -26,7 +37,3 @@ select public.set_org_subscription(
   1  -- zusätzlicher Standort
 );
 ```
-
-Erlaubte Tarife: `free`, `starter`, `team`, `business`. Die Funktion prüft
-Tarifmaxima und vorhandene Daten serverseitig. Öffentliche Browserkonten können
-keine bezahlten Tarife oder Zusatzpakete selbst aktivieren.

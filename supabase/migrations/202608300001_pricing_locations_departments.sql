@@ -509,8 +509,11 @@ create trigger protect_organization_billing_fields_trigger
 before update on public.organizations
 for each row execute function public.protect_organization_billing_fields();
 
--- Kontoinhaber duerfen weiterhin auf Free kuendigen. Bezahlte Aktivierungen
--- erfolgen bis zur spaeteren Stripe-Anbindung manuell mit service_role/SQL.
+-- Der Kontoinhaber waehlt den Basistarif (free/starter/team/business) selbst auf
+-- der Pricing-Seite; er wird sofort fuer die Organisation gesetzt. Kostenpflichtige
+-- Zusatzpakete (extra_*) bleiben dem manuellen Abrechnungs-Backend vorbehalten
+-- (public.set_org_subscription, service_role). Eine Zahlungsabwicklung findet
+-- vorerst nicht statt.
 create or replace function public.set_org_tier(p_tier text)
 returns text
 language plpgsql
@@ -521,6 +524,7 @@ declare
     v_org_id uuid;
     v_owner uuid;
     v_target text;
+    v_limits public.tier_limits%rowtype;
     v_employee_count integer;
     v_admin_count integer;
     v_location_count integer;
@@ -534,26 +538,36 @@ begin
     from public.profiles p join public.organizations o on o.id = p.organization_id
     where p.id = auth.uid();
 
-    if v_org_id is null or v_owner <> auth.uid() then
-        raise exception 'Nur der Kontoinhaber darf den Tarif kuendigen.';
+    if v_org_id is null then
+        raise exception 'Diesem Konto ist keine Organisation zugeordnet.';
     end if;
-    if v_target <> 'free' then
-        raise exception 'Bezahlte Tarife werden derzeit manuell aktiviert. Bitte kontaktieren Sie OrgaShift.';
+    if v_owner is distinct from auth.uid() then
+        raise exception 'Nur der Kontoinhaber darf den Tarif aendern.';
     end if;
 
+    select * into v_limits from public.tier_limits where tier = v_target;
+    if v_limits.tier is null then
+        raise exception 'Fuer den Tarif % sind keine Limits hinterlegt.', v_target;
+    end if;
+
+    -- Downgrade-Schutz: die im Zieltarif enthaltenen Mengen (ohne kostenpflichtige
+    -- Zusatzpakete) muessen die vorhandenen Daten fassen.
     select count(*) into v_employee_count from public.employees where organization_id = v_org_id;
     select count(*) into v_admin_count from public.profiles where organization_id = v_org_id and role = 'admin';
     select count(*) into v_location_count from public.locations where organization_id = v_org_id and is_active;
-    if v_employee_count > 3 or v_admin_count > 1 or v_location_count > 1 then
-        raise exception 'Vor der Rueckstufung muessen die Free-Limits (3 Mitarbeitende, 1 Admin, 1 Standort) eingehalten werden.';
+    if v_employee_count > v_limits.included_employees
+       or v_admin_count > v_limits.included_admins
+       or v_location_count > v_limits.included_locations then
+        raise exception 'Der Tarif % umfasst % Mitarbeitende, % Admins und % Standorte. Bitte reduzieren Sie zunaechst die vorhandenen Daten.',
+            v_limits.label, v_limits.included_employees, v_limits.included_admins, v_limits.included_locations;
     end if;
 
     perform set_config('orgashift.allow_tier_change', 'on', true);
     update public.organizations
-    set tier = 'free', extra_employees = 0, extra_admins = 0, extra_locations = 0
+    set tier = v_target, extra_employees = 0, extra_admins = 0, extra_locations = 0
     where id = v_org_id;
-    update public.profiles set tier = 'free' where organization_id = v_org_id;
-    return 'free';
+    update public.profiles set tier = v_target where organization_id = v_org_id;
+    return v_target;
 end;
 $$;
 

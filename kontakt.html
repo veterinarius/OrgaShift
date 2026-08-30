@@ -498,6 +498,13 @@ window.addEventListener('scroll', updateNavBg, { passive: true });
 }());
 
 // ── CONTACT FORM → MAILTO ───────────────────────────────────────────────
+const requestedPlan = new URLSearchParams(location.search).get('plan');
+const requestedPlanLabels = { starter: 'Starter', team: 'Team', business: 'Business' };
+if (requestedPlanLabels[requestedPlan]) {
+    document.getElementById('cf-subject').value = 'Preise & Pläne';
+    document.getElementById('cf-message').value =
+        `Ich interessiere mich für den ${requestedPlanLabels[requestedPlan]}-Tarif. Bitte senden Sie mir Informationen zur manuellen Aktivierung.`;
+}
 document.getElementById('contact-form').addEventListener('submit', function (e) {
     e.preventDefault();
     const name = document.getElementById('cf-name').value.trim();

@@ -396,12 +396,34 @@
             return;
         }
 
+        const locationState = window.OrgaShiftLocation ? await OrgaShiftLocation.ready : null;
+        const locationId = locationState && locationState.locationId;
+        let weeklyQuery = sbClient.from('plans').select('data, updated_at')
+            .eq('organization_id', orgId).eq('plan_type', 'wochenplan');
+        let monthlyQuery = sbClient.from('plans').select('data, updated_at')
+            .eq('organization_id', orgId).eq('plan_type', 'monatsplan');
+        if (locationId) {
+            weeklyQuery = weeklyQuery.eq('location_id', locationId);
+            monthlyQuery = monthlyQuery.eq('location_id', locationId);
+        }
+
+        let employeeQuery;
+        if (locationId) {
+            const { data: links, error: linkError } = await sbClient.from('employee_locations')
+                .select('employee_id').eq('organization_id', orgId).eq('location_id', locationId);
+            if (linkError) { showState('<p>Fehler beim Laden der Standortzuordnungen: ' + esc(linkError.message) + '</p>'); return; }
+            const employeeIds = (links || []).map(link => link.employee_id);
+            employeeQuery = employeeIds.length
+                ? sbClient.from('employees').select('name, weekly_hours_limit').in('id', employeeIds)
+                : Promise.resolve({ data: [], error: null });
+        } else {
+            employeeQuery = sbClient.from('employees').select('name, weekly_hours_limit').eq('organization_id', orgId);
+        }
+
         const [{ data: weeklyRow }, { data: monthlyRow }, { data: employees, error: empError }] = await Promise.all([
-            sbClient.from('plans').select('data, updated_at')
-                .eq('organization_id', orgId).eq('plan_type', 'wochenplan').maybeSingle(),
-            sbClient.from('plans').select('data, updated_at')
-                .eq('organization_id', orgId).eq('plan_type', 'monatsplan').maybeSingle(),
-            sbClient.from('employees').select('name, weekly_hours_limit').eq('organization_id', orgId)
+            weeklyQuery.maybeSingle(),
+            monthlyQuery.maybeSingle(),
+            employeeQuery
         ]);
 
         if (empError) { showState('<p>Fehler beim Laden der Mitarbeiterdaten: ' + esc(empError.message) + '</p>'); return; }

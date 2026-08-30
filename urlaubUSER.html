@@ -11,6 +11,7 @@
         const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
 </script>
 <script src="js/auth-guard.js"></script>
+<script src="js/location-context.js"></script>
     <style>
         /* ── DESIGN TOKENS ── */
         :root {
@@ -515,6 +516,7 @@
     // ─────────────────────────────────────────
     let myEmployee = null; // { id, name, vacation_days_per_year } – die eigene employees-Zeile
     let vacations  = [];   // eigene Anträge
+    let locationId = null;
 
     function countDays(from, to) {
         const f = new Date(from), t = new Date(to);
@@ -622,6 +624,7 @@
         }
         const result = await window.checkVacationConflicts(sbClient, {
             orgId: myEmployee.organization_id,
+            locationId,
             employeeId: myEmployee.id,
             employeeName: myEmployee.name,
             fromDate: from,
@@ -687,6 +690,8 @@
 
         const { data: profile } = await sbClient
             .from('profiles').select('organization_id').eq('id', session.user.id).single();
+        const locationState = window.OrgaShiftLocation ? await OrgaShiftLocation.ready : null;
+        locationId = locationState?.locationId || null;
 
         myEmployee = await loadMyEmployee(session.user.id);
         if (!myEmployee) {

@@ -2,5 +2,11 @@
 OrgaShift_Benutzer.xlsx
 *.xlsx
 
+# Supabase CLI state
+supabase/.temp/
+
+# Local database backups may contain personal data
+backups/
+
 # macOS
 .DS_Store

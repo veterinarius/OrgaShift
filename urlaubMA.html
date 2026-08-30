@@ -11,6 +11,7 @@
         const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
 </script>
 <script src="js/auth-guard.js"></script>
+<script src="js/location-context.js"></script>
     <style>
         /* ── DESIGN TOKENS ── */
         :root {
@@ -318,7 +319,7 @@
             <li><a href="monatsplan.html">Monatsplan</a></li>
             <li><a href="urlaubALLE.html">Urlaub Übersicht</a></li>
             <li><a href="personal.html">Personal</a></li>
-            
+            <li><a href="standorte.html">Standorte</a></li>
         </ul>
         <div class="nav-right">
             <button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button>
@@ -482,6 +483,7 @@
     //  URLAUB FUNKTIONALITÄT (Supabase, organisationsweit)
     // ─────────────────────────────────────────
     let orgId = null;
+    let locationId = null;
     let currentUserId = null;
     let employees = [];   // [{id, name, vacation_days_per_year}] – aus public.employees
     let vacations = [];   // Anträge des aktuell ausgewählten Mitarbeiters
@@ -505,10 +507,17 @@
     function currentEmployee(empId) { return employees.find(e => e.id === empId); }
 
     async function loadEmployees() {
-        const { data, error } = await sbClient
-            .from('employees')
-            .select('id, name, vacation_days_per_year')
-            .order('name');
+        let employeeIds = null;
+        if (locationId) {
+            const links = await sbClient.from('employee_locations').select('employee_id').eq('location_id', locationId);
+            if (!links.error) employeeIds = (links.data || []).map(link => link.employee_id);
+        }
+        let query = sbClient.from('employees').select('id, name, vacation_days_per_year').order('name');
+        if (employeeIds) {
+            if (!employeeIds.length) { employees = []; return; }
+            query = query.in('id', employeeIds);
+        }
+        const { data, error } = await query;
         if (error) { console.error('[urlaub] Mitarbeiter laden fehlgeschlagen:', error.message); employees = []; return; }
         employees = data || [];
     }
@@ -605,7 +614,7 @@
         if (vac && window.checkVacationConflicts) {
             const emp = currentEmployee(empId);
             const result = await window.checkVacationConflicts(sbClient, {
-                orgId, employeeId: empId, employeeName: emp ? emp.name : null,
+                orgId, locationId, employeeId: empId, employeeName: emp ? emp.name : null,
                 fromDate: vac.from, toDate: vac.to, employees
             });
             const message = window.formatVacationConflictMessage(result);
@@ -657,6 +666,8 @@
         const { data: profile } = await sbClient
             .from('profiles').select('organization_id').eq('id', currentUserId).single();
         orgId = profile?.organization_id || null;
+        const locationState = window.OrgaShiftLocation ? await OrgaShiftLocation.ready : null;
+        locationId = locationState?.locationId || null;
 
         await loadEmployees();
         populateSelect();

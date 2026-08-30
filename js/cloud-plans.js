@@ -1,7 +1,7 @@
 // js/cloud-plans.js - Cloud-Speicherung der Pläne in Supabase
 // ===================================================================
 // Speichert den Wochen-/Monatsplan als JSONB-Snapshot in der Tabelle
-// "plans" (eine Zeile pro Organisation und Plantyp), sodass alle
+// "plans" (eine Zeile pro Organisation, Standort und Plantyp), sodass alle
 // Admins einer Organisation auf dieselben Pläne zugreifen UND Mitarbeiter
 // (Rolle "user") ihn lesend abrufen können – in jedem Tarif, denn ohne
 // das könnten Mitarbeiter den vom Admin erstellten Plan nie sehen.
@@ -47,10 +47,22 @@
     var sb = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
     window.sbClient = sb; // anderen Skripten auf der Seite (z.B. Tarif-Limit-Prüfung) zugänglich machen
     var orgId = null;
+    var locationId = null;
     var userId = null;
     var isAdmin = false; // steuert Schreibrechte (Badge/Speichern/Verlassen-Warnung)
     var saving = false;
     var badge = null;
+
+    function setStorageScope() {
+        var suffix = locationId ? '_' + locationId : '';
+        MARKER_KEY = 'cloud_' + PLAN_TYPE + suffix + '_synced_at';
+        DIRTY_KEY = 'cloud_' + PLAN_TYPE + suffix + '_dirty';
+        RELOAD_GUARD = 'cloud_' + PLAN_TYPE + suffix + '_reloaded';
+    }
+
+    function withLocation(query) {
+        return locationId ? query.eq('location_id', locationId) : query;
+    }
 
     // ---------- Ungespeicherte Änderungen (nur relevant für Admins) ----------
     function isDirty() { return localStorage.getItem(DIRTY_KEY) === '1'; }
@@ -110,11 +122,11 @@
 
     // ---------- Cloud lesen (automatisch beim Öffnen, für Admins UND Mitarbeiter) ----------
     function pullFromCloud() {
-        return sb.from('plans')
+        var query = sb.from('plans')
             .select('data, updated_at')
             .eq('organization_id', orgId)
-            .eq('plan_type', PLAN_TYPE)
-            .maybeSingle()
+            .eq('plan_type', PLAN_TYPE);
+        return withLocation(query).maybeSingle()
             .then(function (res) {
                 if (res.error) { console.warn('[cloud-plans] Laden fehlgeschlagen:', res.error.message); return; }
 
@@ -187,13 +199,15 @@
         saving = true;
         showBadge('☁ Speichert…', { muted: true });
 
-        sb.from('plans')
-            .upsert({
+        var row = {
                 organization_id: orgId,
                 plan_type: PLAN_TYPE,
                 data: collectSnapshot(),
                 updated_by: userId
-            }, { onConflict: 'organization_id,plan_type' })
+            };
+        if (locationId) row.location_id = locationId;
+        sb.from('plans')
+            .upsert(row, { onConflict: locationId ? 'organization_id,location_id,plan_type' : 'organization_id,plan_type' })
             .select('updated_at')
             .single()
             .then(function (res) {
@@ -249,8 +263,15 @@
                 orgId = p.data.organization_id;
                 isAdmin = p.data.role === 'admin';
 
-                if (isAdmin) hookSave();
-                return pullFromCloud();
+                var contextReady = window.OrgaShiftLocation
+                    ? window.OrgaShiftLocation.ready
+                    : Promise.resolve(null);
+                return contextReady.then(function (context) {
+                    locationId = context && context.locationId ? context.locationId : null;
+                    setStorageScope();
+                    if (isAdmin) hookSave();
+                    return pullFromCloud();
+                });
             });
     }).catch(function (e) {
         console.warn('[cloud-plans] Initialisierung fehlgeschlagen:', e);

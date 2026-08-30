@@ -11,6 +11,7 @@
         const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
 </script>
 <script src="js/auth-guard.js"></script>
+<script src="js/location-context.js"></script>
     <style>
         /* ── DESIGN TOKENS ── */
         :root {
@@ -436,6 +437,7 @@
             <li><a href="wochenplan.html">Wochenplan</a></li>
             <li><a href="monatsplan.html">Monatsplan</a></li>
             <li><a href="personal.html">Personal</a></li>
+            <li><a href="standorte.html">Standorte</a></li>
             <li><a href="urlaubMA.html">Urlaubsanträge</a></li>
         </ul>
         <div class="nav-right">
@@ -603,6 +605,7 @@
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth(); // 0-basiert
     let orgId = null;
+    let locationId = null;
     let currentUserId = null;
     let employees = [];      // [{id, name}] – aus public.employees
     let entries = {};        // { [employeeId]: [{id, start, end, type}] } – aus vacations + sick_leave (ganzes Jahr)
@@ -635,7 +638,17 @@
     }
 
     async function loadEmployees() {
-        const { data, error } = await sbClient.from('employees').select('id, name').order('name');
+        let employeeIds = null;
+        if (locationId) {
+            const links = await sbClient.from('employee_locations').select('employee_id').eq('location_id', locationId);
+            if (!links.error) employeeIds = (links.data || []).map(link => link.employee_id);
+        }
+        let query = sbClient.from('employees').select('id, name').order('name');
+        if (employeeIds) {
+            if (!employeeIds.length) { employees = []; return; }
+            query = query.in('id', employeeIds);
+        }
+        const { data, error } = await query;
         if (error) { console.error('[urlaubsuebersicht] Mitarbeiter laden fehlgeschlagen:', error.message); employees = []; return; }
         employees = data || [];
     }
@@ -671,8 +684,10 @@
     async function loadDayNotes(year) {
         const yearStart = `${year}-01-01`;
         const yearEnd = `${year}-12-31`;
-        const { data, error } = await sbClient.from('day_notes').select('id, note_date, note')
-            .gte('note_date', yearStart).lte('note_date', yearEnd);
+        let query = sbClient.from('day_notes').select('id, note_date, note')
+            .eq('organization_id', orgId).gte('note_date', yearStart).lte('note_date', yearEnd);
+        if (locationId) query = query.eq('location_id', locationId);
+        const { data, error } = await query;
         if (error) { console.error('[urlaubsuebersicht] Notizen laden fehlgeschlagen:', error.message); dayNotes = {}; return; }
         dayNotes = {};
         (data || []).forEach(n => { dayNotes[n.note_date] = { id: n.id, note: n.note }; });
@@ -718,7 +733,7 @@
         if (type === 'vacation' && window.checkVacationConflicts) {
             const emp = employees.find(e => e.id === employeeId);
             const result = await window.checkVacationConflicts(sbClient, {
-                orgId, employeeId, employeeName: emp ? emp.name : null,
+                orgId, locationId, employeeId, employeeName: emp ? emp.name : null,
                 fromDate: startDate, toDate: endDate, employees
             });
             const message = window.formatVacationConflictMessage(result);
@@ -983,7 +998,8 @@
         }
 
         const { error } = await sbClient.from('day_notes')
-            .upsert({ organization_id: orgId, note_date: dateStr, note: text, created_by: currentUserId }, { onConflict: 'organization_id,note_date' });
+            .upsert(Object.assign({ organization_id: orgId, note_date: dateStr, note: text, created_by: currentUserId }, locationId ? { location_id: locationId } : {}),
+                { onConflict: locationId ? 'organization_id,location_id,note_date' : 'organization_id,note_date' });
         if (error) { alert('Speichern fehlgeschlagen: ' + error.message); return; }
 
         await loadDayNotes(currentYear);
@@ -1017,6 +1033,8 @@
         const { data: profile } = await sbClient
             .from('profiles').select('organization_id').eq('id', currentUserId).single();
         orgId = profile?.organization_id || null;
+        const locationState = window.OrgaShiftLocation ? await OrgaShiftLocation.ready : null;
+        locationId = locationState?.locationId || null;
 
         await loadEmployees();
         updateEmployeeSelect();

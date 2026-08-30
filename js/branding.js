@@ -1,7 +1,7 @@
-// js/branding.js - Eigenes Branding (Premium) auf eingeloggte Seiten anwenden
+// js/branding.js - Eigenes Branding (ab Team) auf eingeloggte Seiten anwenden
 // ===================================================================
 // Lädt Tarif + Logo/Akzentfarbe der Organisation des eingeloggten Nutzers
-// und ersetzt bei Premium-Organisationen den "OrgaShift"-Schriftzug im
+// und ersetzt bei Team-/Business-Organisationen den "OrgaShift"-Schriftzug im
 // Nav-Header durch das eigene Logo sowie die Akzentfarbe (--accent bzw.
 // --color-accent, je nach Seite unterschiedlich benannt).
 // Das Ergebnis wird zusätzlich unter window.__orgBranding abgelegt, damit
@@ -57,7 +57,9 @@
                 if (org) tier = org.tier || tier;
             }
 
-            if (tier !== 'premium' || !org) return;
+            if (tier === 'basic') tier = 'team';
+            if (tier === 'premium') tier = 'business';
+            if ((tier !== 'team' && tier !== 'business') || !org) return;
 
             if (org.logo_url) {
                 applyLogo(org.logo_url, org.name);

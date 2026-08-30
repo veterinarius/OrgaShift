@@ -179,8 +179,8 @@
         /* ── CARDS GRID ────────────────────────────── */
         .cards-grid {
             position: relative; z-index: 10;
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            max-width: 1000px; margin: 0 auto; padding: 0 20px;
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            max-width: 1280px; margin: 0 auto; padding: 0 20px;
             gap: 16px;
         }
         .pricing-card {
@@ -307,10 +307,11 @@
         .footer-bottom p { color: var(--text-muted); font-size: 0.82rem; }
 
         /* ── RESPONSIVE ────────────────────────────── */
-        @media (max-width: 900px) {
-            .cards-grid { grid-template-columns: 1fr; max-width: 420px; }
+        @media (max-width: 1100px) {
+            .cards-grid { grid-template-columns: repeat(2, 1fr); max-width: 850px; }
             .pricing-card.popular { box-shadow: 0px 0px 80px 0px rgba(9,0,255,0.4); }
         }
+        @media (max-width: 700px) { .cards-grid { grid-template-columns: 1fr; max-width: 440px; } }
         @media (max-width: 768px) { .nav-links { display: none; } }
     </style>
 </head>
@@ -365,90 +366,118 @@
     <!-- CARDS -->
     <div class="cards-grid" id="cardsGrid">
 
-        <!-- Starter -->
+        <!-- Free -->
         <div class="pricing-card" id="card0">
             <div class="card-header">
-                <h3 class="plan-name">Free Trial</h3>
+                <h3 class="plan-name">Free</h3>
                 <div class="price-row">
-                    <span class="price-currency">0 /</span>
+                    <span class="price-currency">€</span>
                     <span class="price-num-wrap">
-                        <span class="price-num" id="price0" data-monthly="0" data-yearly="0">€</span>
+                        <span class="price-num" id="price0" data-monthly="0" data-yearly="0">0</span>
                     </span>
                     <span class="price-period" id="period0">/Monat</span>
                 </div>
-                <p class="plan-desc">Perfekt für kleine Betriebe und Einzelhandel mit bis zu 3 Mitarbeitenden.</p>
+                <p class="plan-desc">Dauerhaft kostenlos für kleine Teams – ohne Kreditkarte und ohne zeitliche Begrenzung.</p>
             </div>
             <div class="card-content">
-                <a href="register.html?plan=free" data-plan="free" class="plan-btn plan-btn-default">Kostenlos testen</a>
+                <a href="register.html?plan=free" data-plan="free" class="plan-btn plan-btn-default">Kostenlos starten</a>
                 <div class="feature-divider">
-                    <p class="feature-group-label">Im Free Trial enthalten:</p>
+                    <p class="feature-group-label">Im Free-Tarif enthalten:</p>
                     <ul class="feature-list">
                         <li><span class="feature-dot"></span>Bis zu 3 Mitarbeitende</li>
                         <li><span class="feature-dot"></span>1 Admin-Konto</li>
+                        <li><span class="feature-dot"></span>1 Standort</li>
                         <li><span class="feature-dot"></span>Wochen- &amp; Monatsplan</li>
                         <li><span class="feature-dot"></span>Urlaubsverwaltung</li>
                         <li><span class="feature-dot"></span>Dienstplan als PDF</li>
-                        <li><span class="feature-dot"></span>Dark Mode</li>
-                        <li><span class="feature-dot"></span>E-Mail-Support</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Business (Popular) -->
-        <div class="pricing-card popular" id="card1">
-            <div class="popular-badge">Beliebt</div>
+        <!-- Starter -->
+        <div class="pricing-card" id="card1">
             <div class="card-header">
-                <h3 class="plan-name">Basic</h3>
+                <h3 class="plan-name">Starter</h3>
                 <div class="price-row">
-                    <span class="price-currency">19 /</span>
+                    <span class="price-currency">€</span>
                     <span class="price-num-wrap">
-                        <span class="price-num" id="price1" data-monthly="19" data-yearly="159">€</span>
+                        <span class="price-num" id="price1" data-monthly="9,90" data-yearly="99">9,90</span>
                     </span>
                     <span class="price-period" id="period1">/Monat</span>
                 </div>
-                <p class="plan-desc">Das beste Preis-Leistungs-Verhältnis für wachsende Teams bis 15 Personen.</p>
+                <p class="plan-desc">Für kleinere Betriebe, die mit einem festen Organisationspreis wachsen möchten.</p>
             </div>
             <div class="card-content">
-                <a href="register.html?plan=basic" data-plan="basic" class="plan-btn plan-btn-popular">Jetzt starten</a>
+                <a href="kontakt.html?plan=starter" data-plan="starter" class="plan-btn plan-btn-default">Starter anfragen</a>
                 <div class="feature-divider">
-                    <p class="feature-group-label">Alles aus Free Trial, plus:</p>
+                    <p class="feature-group-label">Alles aus Free, plus:</p>
                     <ul class="feature-list">
-                        <li><span class="feature-dot"></span>Bis zu 15 Mitarbeitende</li>
-                        <li><span class="feature-dot"></span>1 zusätzlicher Admin</li>
+                        <li><span class="feature-dot"></span>10 Mitarbeitende inklusive</li>
+                        <li><span class="feature-dot"></span>2 Admin-Konten inklusive</li>
+                        <li><span class="feature-dot"></span>1 Standort</li>
+                        <li><span class="feature-dot"></span>Weitere Mitarbeitende: 1,00&nbsp;€/Monat</li>
+                        <li><span class="feature-dot"></span>Maximal 15 Mitarbeitende</li>
                         <li><span class="feature-dot"></span>Automatische Konflikterkennung</li>
-                        <li><span class="feature-dot"></span>E-Mail-Benachrichtigungen</li>
-                        <li><span class="feature-dot"></span>Prioritäts-Support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team (Popular) -->
+        <div class="pricing-card popular" id="card2">
+            <div class="popular-badge">Beliebt</div>
+            <div class="card-header">
+                <h3 class="plan-name">Team</h3>
+                <div class="price-row">
+                    <span class="price-currency">€</span>
+                    <span class="price-num-wrap">
+                        <span class="price-num" id="price2" data-monthly="19,90" data-yearly="199">19,90</span>
+                    </span>
+                    <span class="price-period" id="period2">/Monat</span>
+                </div>
+                <p class="plan-desc">Für wachsende Teams mit mehreren Standorten und gemeinsamer Verwaltung.</p>
+            </div>
+            <div class="card-content">
+                <a href="kontakt.html?plan=team" data-plan="team" class="plan-btn plan-btn-popular">Team anfragen</a>
+                <div class="feature-divider">
+                    <p class="feature-group-label">Alles aus Starter, plus:</p>
+                    <ul class="feature-list">
+                        <li><span class="feature-dot"></span>25 Mitarbeitende inklusive</li>
+                        <li><span class="feature-dot"></span>3 Admin-Konten inklusive</li>
+                        <li><span class="feature-dot"></span>2 Standorte inklusive</li>
+                        <li><span class="feature-dot"></span>Unbegrenzte Abteilungen</li>
+                        <li><span class="feature-dot"></span>Zusätze: 0,80&nbsp;€/Mitarbeitende:r, 2,90&nbsp;€/Admin, 4,90&nbsp;€/Standort</li>
+                        <li><span class="feature-dot"></span>Maximal 40 Mitarbeitende, 6 Admins und 5 Standorte</li>
+                        <li><span class="feature-dot"></span>Eigenes Branding</li>
                         <li><span class="feature-dot"></span>Analytics</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Enterprise -->
-        <div class="pricing-card" id="card2">
+        <!-- Business -->
+        <div class="pricing-card" id="card3">
             <div class="card-header">
-                <h3 class="plan-name">Premium</h3>
+                <h3 class="plan-name">Business</h3>
                 <div class="price-row">
-                    <span class="price-currency">39 /</span>
-                    <span class="price-num-wrap">
-                        <span class="price-num" id="price2" data-monthly="39" data-yearly="329">€</span>
-                    </span>
-                    <span class="price-period" id="period2">/Monat</span>
+                    <span class="price-currency">€</span>
+                    <span class="price-num-wrap"><span class="price-num" id="price3" data-monthly="34,90" data-yearly="349">34,90</span></span>
+                    <span class="price-period" id="period3">/Monat</span>
                 </div>
-                <p class="plan-desc">Maximale Flexibilität für große Teams und Unternehmen bis 30 Personen.</p>
+                <p class="plan-desc">Für größere Organisationen mit mehr Teams, Standorten und Verantwortlichen.</p>
             </div>
             <div class="card-content">
-                <a href="register.html?plan=premium" data-plan="premium" class="plan-btn plan-btn-default">Jetzt starten</a>
+                <a href="kontakt.html?plan=business" data-plan="business" class="plan-btn plan-btn-default">Business anfragen</a>
                 <div class="feature-divider">
-                    <p class="feature-group-label">Alles aus Basic, plus:</p>
+                    <p class="feature-group-label">Alles aus Team, plus:</p>
                     <ul class="feature-list">
-                        <li><span class="feature-dot"></span>Bis zu 30 Mitarbeitende</li>
-                        <li><span class="feature-dot"></span>Bis zu 3 zusätzliche Admins</li>
-                        <li><span class="feature-dot"></span>Mehrere Standorte</li>
-                        <li><span class="feature-dot"></span>Eigenes Branding</li>
-                        <li><span class="feature-dot"></span>Dedizierter Support</li>
-                        <li><span class="feature-dot"></span>SLA-Garantie (99,5&nbsp;% Uptime, 4h Reaktionszeit)</li>
+                        <li><span class="feature-dot"></span>50 Mitarbeitende inklusive</li>
+                        <li><span class="feature-dot"></span>5 Admin-Konten inklusive</li>
+                        <li><span class="feature-dot"></span>4 Standorte inklusive</li>
+                        <li><span class="feature-dot"></span>Unbegrenzte Abteilungen</li>
+                        <li><span class="feature-dot"></span>Zusätze: 0,60&nbsp;€/Mitarbeitende:r, 2,90&nbsp;€/Admin, 3,90&nbsp;€/Standort</li>
+                        <li><span class="feature-dot"></span>Maximal 100 Mitarbeitende, 15 Admins und 20 Standorte</li>
                     </ul>
                 </div>
             </div>
@@ -458,7 +487,7 @@
 
     <!-- FAQ note -->
     <div class="faq-strip">
-        <p>Alle Preise zzgl. MwSt. Jährliche Zahlung spart bis zu 17&nbsp;%. Fragen? <a href="kontakt.html">Schreiben Sie uns.</a></p>
+        <p>Festpreis pro Organisation, nicht pro Mitarbeitenden. Alle Preise zzgl. MwSt. Jährliche Zahlung spart rund 17&nbsp;%. Bezahlte Tarife werden bis zur späteren Zahlungsintegration manuell aktiviert. <a href="kontakt.html">Schreiben Sie uns.</a></p>
     </div>
 
 </section>
@@ -586,7 +615,7 @@
 
 // ── CARDS STAGGER ────────────────────────────────────────────────────────
 setTimeout(() => {
-    [0, 1, 2].forEach((i) => {
+    [0, 1, 2, 3].forEach((i) => {
         const card = document.getElementById('card' + i);
         if (card) setTimeout(() => card.classList.add('visible'), 700 + i * 140);
     });
@@ -610,7 +639,7 @@ setTimeout(() => {
     window.addEventListener('resize', () => positionPill(isYearly ? btnY : btnM));
 
     function updatePrices() {
-        [0, 1, 2].forEach(i => {
+        [0, 1, 2, 3].forEach(i => {
             const el = document.getElementById('price' + i);
             const per = document.getElementById('period' + i);
             if (!el) return;
@@ -650,25 +679,11 @@ setTimeout(() => {
     });
 }());
 
-// ── PLANWECHSEL FÜR EINGELOGGTE ADMINS ───────────────────────────────────
-// Nicht eingeloggt: Buttons führen mit ?plan=… zur Registrierung.
-// Das Tier gehört der Organisation; wechseln darf nur deren Owner
-// (RPC set_org_tier). Zusatz-Admins sehen den Plan nur lesend.
+// ── AKTUELLEN PLAN FÜR EINGELOGGTE ADMINS MARKIEREN ──────────────────────
+// Bezahlte Tarife werden bis zur Stripe-Anbindung bewusst nicht im Browser
+// freigeschaltet. Die Buttons führen stattdessen zur Kontaktanfrage.
 (async function() {
-    const PLAN_LABELS = { free: 'Free Trial', basic: 'Basic', premium: 'Premium' };
     const btns = document.querySelectorAll('.plan-btn[data-plan]');
-
-    const toast = document.createElement('div');
-    toast.className = 'plan-toast';
-    document.body.appendChild(toast);
-    let toastTimer = null;
-    function showToast(msg, isError) {
-        toast.textContent = msg;
-        toast.classList.toggle('error', !!isError);
-        toast.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
-    }
 
     const { data: { session } } = await sbClient.auth.getSession();
     if (!session) return;
@@ -679,52 +694,19 @@ setTimeout(() => {
     if (!profile || profile.role !== 'admin') return;
 
     let orgTier = profile.tier || 'free';
-    let isOwner = false;
     if (profile.organization_id) {
         const { data: org } = await sbClient
-            .from('organizations').select('tier, created_by')
+            .from('organizations').select('tier')
             .eq('id', profile.organization_id).single();
-        if (org) {
-            orgTier = org.tier || orgTier;
-            isOwner = org.created_by === session.user.id;
-        }
+        if (org) orgTier = org.tier || orgTier;
     }
-
-    function render(currentTier) {
-        btns.forEach(btn => {
-            const isCurrent = btn.dataset.plan === currentTier;
-            btn.classList.toggle('current', isCurrent);
-            btn.classList.toggle('locked', !isCurrent && !isOwner);
-            btn.textContent = isCurrent ? 'Aktueller Plan ✓'
-                            : isOwner   ? 'Zu diesem Plan wechseln'
-                                        : 'Nur der Kontoinhaber kann wechseln';
-        });
-    }
-    render(orgTier);
-
-    if (!isOwner) return;
-
+    if (orgTier === 'basic') orgTier = 'team';
+    if (orgTier === 'premium') orgTier = 'business';
     btns.forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const plan = btn.dataset.plan;
-            if (btn.classList.contains('current') || btn.classList.contains('busy')) return;
-
-            btn.classList.add('busy');
-            const orig = btn.textContent;
-            btn.textContent = 'Wird umgestellt…';
-
-            const { data, error } = await sbClient.rpc('set_org_tier', { p_tier: plan });
-            btn.classList.remove('busy');
-
-            if (error) {
-                btn.textContent = orig;
-                showToast('Planwechsel fehlgeschlagen: ' + error.message, true);
-                return;
-            }
-            render(data);
-            showToast('Der Plan Ihrer Organisation wurde auf „' + PLAN_LABELS[plan] + '“ umgestellt.');
-        });
+        if (btn.dataset.plan === orgTier) {
+            btn.classList.add('current');
+            btn.textContent = 'Aktueller Plan ✓';
+        }
     });
 }());
 </script>

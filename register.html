@@ -964,11 +964,10 @@
             const orgName = document.getElementById('orgName').value.trim();
             if (orgName) metadata.company = orgName;
         }
-        // Auf der Pricing-Seite gewählter Plan (?plan=…) – Tier setzt der Server-Trigger
-        const chosenPlan = new URLSearchParams(location.search).get('plan');
-        if (selectedRole === 'admin' && ['free', 'basic', 'premium'].includes(chosenPlan)) {
-            metadata.plan = chosenPlan;
-        }
+        // Neue Organisationen starten dauerhaft im Free-Tarif. Bezahlte Tarife
+        // werden bis zur spaeteren Stripe-Anbindung nur manuell aktiviert; ein
+        // manipulierter ?plan-Parameter darf deshalb kein Upgrade ausloesen.
+        if (selectedRole === 'admin' && !matchedAdminInvite) metadata.plan = 'free';
 
         const { data, error } = await sbClient.auth.signUp({
             email,

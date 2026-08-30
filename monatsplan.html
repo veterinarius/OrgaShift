@@ -527,7 +527,7 @@
             <li><a href="wochenplan.html">Wochenplan</a></li>
             <li><a href="urlaubALLE.html">Urlaub Übersicht</a></li>
             <li><a href="personal.html">Personal</a></li>
-            
+            <li><a href="standorte.html">Standorte</a></li>
         </ul>
         <div class="nav-right">
             <button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button>
@@ -845,11 +845,13 @@
                     const { data: profile } = await window.sbClient
                         .from('profiles').select('organization_id').eq('id', session.user.id).single();
                     if (profile && profile.organization_id) {
-                        const { data: planRow } = await window.sbClient
+                        let planQuery = window.sbClient
                             .from('plans').select('data')
                             .eq('organization_id', profile.organization_id)
-                            .eq('plan_type', 'wochenplan')
-                            .maybeSingle();
+                            .eq('plan_type', 'wochenplan');
+                        const locationState = window.OrgaShiftLocation ? await OrgaShiftLocation.ready : null;
+                        if (locationState?.locationId) planQuery = planQuery.eq('location_id', locationState.locationId);
+                        const { data: planRow } = await planQuery.maybeSingle();
                         if (planRow && planRow.data) {
                             const snap = planRow.data;
                             return {
@@ -1233,17 +1235,13 @@
             const { data: { session } } = await window.sbClient.auth.getSession();
             if (!session) return null;
 
-            const { data: profile } = await window.sbClient
-                .from('profiles').select('organization_id, tier').eq('id', session.user.id).single();
-            if (!profile || !profile.organization_id) return null;
-
-            const { data: limitRow } = await window.sbClient
-                .from('tier_limits').select('max_employees').eq('tier', profile.tier || 'free').single();
-            const limit = limitRow ? limitRow.max_employees : null;
+            const entitlement = await OrgaShiftEntitlements.load(window.sbClient, session.user.id);
+            if (!entitlement.organizationId) return null;
+            const limit = entitlement.employeeLimit;
             if (limit == null) return null;
 
             const { data: realEmployees } = await window.sbClient
-                .from('employees').select('name').eq('organization_id', profile.organization_id);
+                .from('employees').select('name').eq('organization_id', entitlement.organizationId);
             const names = new Set((realEmployees || []).map(e => e.name));
             employees.forEach(n => names.add(n));
 
@@ -2205,6 +2203,9 @@
 <script src="js/security.js"></script>
 <script src="js/employee-model.js"></script>
 <script src="js/schedule-storage.js"></script>
+<script src="js/entitlements.js"></script>
+<script src="js/location-context.js"></script>
+<script src="js/location-employees.js"></script>
 <script src="js/cloud-plans.js"></script>
 <script src="js/branding.js" defer></script>
 </body>

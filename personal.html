@@ -12,6 +12,8 @@
 </script>
 <script src="js/auth-guard.js"></script>
 <script src="js/employee-model.js"></script>
+<script src="js/entitlements.js"></script>
+<script src="js/security.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -569,6 +571,7 @@
                 <li><a href="wochenplan.html">Wochenplan</a></li>
                 <li><a href="monatsplan.html">Monatsplan</a></li>
                 <li><a href="urlaubALLE.html">Urlaub Übersicht</a></li>
+                <li><a href="standorte.html">Standorte</a></li>
             </ul>
             <!--<div class="nav-buttons">
                 <a href="login.html" class="login-btn">Login</a>
@@ -599,7 +602,7 @@
 
             <!-- Plan usage bar -->
             <div class="plan-usage-bar" id="planUsageBar">
-                <span class="plan-label" id="planUsageLabel">Free Trial</span>
+                <span class="plan-label" id="planUsageLabel">Free</span>
                 <div class="plan-bar-track">
                     <div class="plan-bar-fill" id="planBarFill" style="width:0%"></div>
                 </div>
@@ -638,6 +641,14 @@
                     <div class="form-group">
                         <label for="role">Position / Rolle *</label>
                         <input type="text" id="role" name="role" required placeholder="z.B. Servicekraft">
+                    </div>
+                    <div class="form-group" id="locationField" style="display:none">
+                        <label for="employeeLocation">Standort *</label>
+                        <select id="employeeLocation" name="employeeLocation"></select>
+                    </div>
+                    <div class="form-group" id="departmentField" style="display:none">
+                        <label for="employeeDepartment">Abteilung</label>
+                        <select id="employeeDepartment" name="employeeDepartment"></select>
                     </div>
                     <div class="form-group">
                         <label for="email">E-Mail *</label>
@@ -712,8 +723,8 @@
                     Jeder Code ist einmalig verwendbar.
                 </div>
                 <div class="code-hint" style="margin-top:6px;">
-                    Zusätzliche Admins sind kostenpflichtig (Basic: +4&nbsp;€/Monat, Premium: +2&nbsp;€/Monat je Admin)
-                    und werden über den Kontoinhaber abgerechnet. Im Free Trial sind keine zusätzlichen Admins möglich.
+                    Im Starter-Tarif sind 2 Admins enthalten. Ab Team können weitere Admins für 2,90&nbsp;€/Monat
+                    über den Kontoinhaber hinzugebucht werden. Im Free-Tarif ist kein zusätzlicher Admin möglich.
                 </div>
             </div>
             <div id="adminInviteList"></div>
@@ -864,9 +875,12 @@
         let adminId   = null;
         let orgId     = null;
         let planLimit = 3;
-        let planLabel = 'Free Trial';
+        let planLabel = 'Free';
+        let adminLimit = 1;
+        let currentEntitlement = null;
+        let availableLocations = [];
 
-        const TIER_LABELS = { free: 'Free Trial', basic: 'Basic', premium: 'Premium' };
+        const TIER_LABELS = { free: 'Free', starter: 'Starter', team: 'Team', business: 'Business', basic: 'Team', premium: 'Business' };
 
         const employeeForm  = document.getElementById('employeeForm');
         const employeeGrid  = document.getElementById('employeeGrid');
@@ -968,12 +982,13 @@
             ];
             for (const { planType, prefix } of jobs) {
                 try {
-                    const { data: row, error } = await sbClient
-                        .from('plans').select('data')
+                    const { data: rows, error } = await sbClient
+                        .from('plans').select('id,data,location_id')
                         .eq('organization_id', orgId).eq('plan_type', planType)
-                        .maybeSingle();
-                    if (error || !row || !row.data) continue;
+                    if (error || !rows) continue;
 
+                    for (const row of rows) {
+                    if (!row.data) continue;
                     const snap = row.data;
                     let changed = false;
 
@@ -1009,13 +1024,12 @@
 
                     if (!changed) continue;
 
-                    const { error: upsertError } = await sbClient.from('plans').upsert({
-                        organization_id: orgId,
-                        plan_type: planType,
+                    const { error: upsertError } = await sbClient.from('plans').update({
                         data: snap,
                         updated_by: adminId
-                    }, { onConflict: 'organization_id,plan_type' });
+                    }).eq('id', row.id);
                     if (upsertError) console.warn('[removeFromCloudPlans]', planType, upsertError.message);
+                    }
                 } catch (err) {
                     console.warn('[removeFromCloudPlans]', planType, err);
                 }
@@ -1029,17 +1043,14 @@
             adminId = session.user.id;
 
             try {
-                const { data: profile } = await sbClient
-                    .from('profiles').select('tier, organization_id').eq('id', adminId).single();
-                orgId = profile?.organization_id || null;
-                const tier = profile?.tier || 'free';
-                planLabel  = TIER_LABELS[tier] || tier;
-
-                const { data: limits } = await sbClient
-                    .from('tier_limits').select('max_employees').eq('tier', tier).single();
-                planLimit = limits?.max_employees ?? 3;
+                currentEntitlement = await OrgaShiftEntitlements.load(sbClient, adminId);
+                orgId = currentEntitlement.organizationId;
+                planLabel = currentEntitlement.label;
+                planLimit = currentEntitlement.employeeLimit;
+                adminLimit = currentEntitlement.adminLimit;
             } catch (_) {}
 
+            await loadLocationOptions();
             await loadEmployees();
             await loadOrganization();
             await loadAdminInvites();
@@ -1047,6 +1058,29 @@
 
         // ── Organisationsname (wird eingeladenen Admins angezeigt) ──
         let orgName = '';
+
+        async function loadLocationOptions() {
+            if (!orgId) return;
+            const { data, error } = await sbClient.from('locations')
+                .select('id,name,departments(id,name,is_active)').eq('organization_id', orgId)
+                .eq('is_active', true).order('name');
+            if (error || !data?.length) return; // Migration noch nicht aktiv: alte Funktion bleibt erhalten.
+            availableLocations = data;
+            document.getElementById('locationField').style.display = '';
+            document.getElementById('departmentField').style.display = '';
+            const select = document.getElementById('employeeLocation');
+            const stored = localStorage.getItem('orgashift_active_location:' + orgId);
+            select.innerHTML = data.map(location => `<option value="${location.id}" ${location.id === stored ? 'selected' : ''}>${orgaEscapeHtml(location.name)}</option>`).join('');
+            select.addEventListener('change', updateDepartmentOptions);
+            updateDepartmentOptions();
+        }
+
+        function updateDepartmentOptions() {
+            const location = availableLocations.find(item => item.id === document.getElementById('employeeLocation').value);
+            const departments = (location?.departments || []).filter(item => item.is_active !== false);
+            document.getElementById('employeeDepartment').innerHTML = '<option value="">Keine Zuordnung</option>' +
+                departments.map(item => `<option value="${item.id}">${orgaEscapeHtml(item.name)}</option>`).join('');
+        }
 
         async function loadOrganization() {
             if (!orgId) return;
@@ -1095,6 +1129,15 @@
 
         async function createAdminInvite() {
             if (!orgId) { alert('Ihr Konto ist noch keiner Organisation zugeordnet.'); return; }
+
+            const [{ count: adminCount }, { data: pendingInvites }] = await Promise.all([
+                sbClient.from('profiles').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('role', 'admin'),
+                sbClient.from('admin_invites').select('id').eq('organization_id', orgId).is('used_by', null)
+            ]);
+            if ((adminCount || 0) + (pendingInvites?.length || 0) >= adminLimit) {
+                alert(`Ihr ${planLabel}-Tarif erlaubt derzeit ${adminLimit} Admin-Konto${adminLimit === 1 ? '' : 'en'}.`);
+                return;
+            }
 
             // Organisationsname muss vor dem Einladen bewusst vergeben werden
             const nameInput = document.getElementById('orgNameInput');
@@ -1173,6 +1216,21 @@
             }).select().single();
 
             if (error) { alert('Fehler beim Speichern: ' + error.message); return; }
+
+            const locationId = fd.get('employeeLocation');
+            const departmentId = fd.get('employeeDepartment');
+            if (locationId) {
+                const { error: locationError } = await sbClient.from('employee_locations').insert({
+                    employee_id: data.id, location_id: locationId, organization_id: orgId, is_primary: true
+                });
+                if (locationError) console.warn('Standortzuordnung fehlgeschlagen:', locationError.message);
+            }
+            if (departmentId) {
+                const { error: departmentError } = await sbClient.from('employee_departments').insert({
+                    employee_id: data.id, department_id: departmentId, organization_id: orgId
+                });
+                if (departmentError) console.warn('Abteilungszuordnung fehlgeschlagen:', departmentError.message);
+            }
 
             employees.push(data);
             employeeForm.reset();

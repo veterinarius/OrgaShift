@@ -8,8 +8,8 @@
     'use strict';
     
     // Gemeinsamer Schlüssel für synchronisierte Mitarbeiter
-    const SHARED_EMPLOYEES_KEY = 'shared_employees';
-    const SHARED_PREFERENCES_KEY = 'shared_preferences';
+    let SHARED_EMPLOYEES_KEY = 'shared_employees';
+    let SHARED_PREFERENCES_KEY = 'shared_preferences';
     
     // Erkenne, ob wir im Wochenplan oder Monatsplan sind
     const isWochenplan = window.location.pathname.includes('wochenplan');
@@ -180,7 +180,14 @@
     /**
      * Initialisierung der Synchronisierung
      */
-    function initSync() {
+    async function initSync() {
+        if (window.OrgaShiftLocation) {
+            const context = await window.OrgaShiftLocation.ready;
+            if (context && context.locationId) {
+                SHARED_EMPLOYEES_KEY += '_' + context.locationId;
+                SHARED_PREFERENCES_KEY += '_' + context.locationId;
+            }
+        }
         console.log('=== Mitarbeiter-Synchronisierung wird initialisiert ===');
         console.log('Plan-Typ:', isWochenplan ? 'Wochenplan' : (isMonatsplan ? 'Monatsplan' : 'Unbekannt'));
         

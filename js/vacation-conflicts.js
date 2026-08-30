@@ -38,9 +38,10 @@
         return `${year}-${String(month).padStart(2, '0')}-${day}`;
     }
 
-    async function findDirectShiftConflicts(sb, orgId, employeeName, fromDate, toDate) {
-        const { data: row, error } = await sb.from('plans')
-            .select('data').eq('organization_id', orgId).eq('plan_type', 'monatsplan').maybeSingle();
+    async function findDirectShiftConflicts(sb, orgId, locationId, employeeName, fromDate, toDate) {
+        let query = sb.from('plans').select('data').eq('organization_id', orgId).eq('plan_type', 'monatsplan');
+        if (locationId) query = query.eq('location_id', locationId);
+        const { data: row, error } = await query.maybeSingle();
         if (error) { console.warn('[vacation-conflicts] Monatsplan laden fehlgeschlagen:', error.message); return []; }
         if (!row || !row.data) return [];
 
@@ -98,7 +99,7 @@
     // Abwesenheiten mit Namen statt anonym anzuzeigen (Admin-Seiten haben
     // diese Liste bereits, urlaubUSER.html nicht).
     window.checkVacationConflicts = async function checkVacationConflicts(sb, opts) {
-        const { orgId, employeeId, employeeName, fromDate, toDate, employees } = opts || {};
+        const { orgId, locationId, employeeId, employeeName, fromDate, toDate, employees } = opts || {};
         const result = {
             directConflictDays: [],
             overlapCount: 0,
@@ -110,7 +111,7 @@
 
         try {
             const [directConflicts, overlaps, totalEmployees] = await Promise.all([
-                employeeName ? findDirectShiftConflicts(sb, orgId, employeeName, fromDate, toDate) : Promise.resolve([]),
+                employeeName ? findDirectShiftConflicts(sb, orgId, locationId, employeeName, fromDate, toDate) : Promise.resolve([]),
                 findAbsenceOverlaps(sb, employeeId, fromDate, toDate),
                 countOrgEmployees(sb)
             ]);

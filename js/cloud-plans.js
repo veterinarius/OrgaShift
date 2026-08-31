@@ -34,6 +34,7 @@
 
     var isWochenplan = window.location.pathname.includes('wochenplan');
     var PLAN_TYPE = isWochenplan ? 'wochenplan' : 'monatsplan';
+    var PLAN_LABEL = isWochenplan ? 'Wochenplan' : 'Monatsplan';
     var KEY_PREFIX = isWochenplan ? 'dienstplan_' : 'monatsplan_';
     var MARKER_KEY = 'cloud_' + PLAN_TYPE + '_synced_at';
     var DIRTY_KEY = 'cloud_' + PLAN_TYPE + '_dirty';
@@ -120,6 +121,32 @@
         });
     }
 
+    // Enthält der Snapshot echten Planinhalt (befüllte Tabelle/Schichten)?
+    function snapshotHasContent(snap) {
+        return Object.keys(snap || {}).some(function (k) {
+            if (!/(_tableData|_schedule)$/.test(k)) return false;
+            var v = snap[k];
+            return v && v !== '{}' && v !== '[]' && v !== 'null' && v !== '""';
+        });
+    }
+
+    // Wert-für-Wert-Vergleich zweier Snapshots (Reihenfolge egal).
+    function sameSnapshot(a, b) {
+        a = a || {}; b = b || {};
+        var ka = Object.keys(a), kb = Object.keys(b);
+        if (ka.length !== kb.length) return false;
+        return ka.every(function (k) { return b[k] === a[k]; });
+    }
+
+    // Sichert den aktuellen lokalen Plan, bevor er durch Cloud-Daten ersetzt wird.
+    function backupLocalPlan(reason) {
+        if (!isAdmin) return null;
+        if (window.orgaPlanBackups && typeof window.orgaPlanBackups.save === 'function') {
+            return window.orgaPlanBackups.save([KEY_PREFIX], { reason: reason, locationId: locationId, planType: PLAN_TYPE });
+        }
+        return null;
+    }
+
     // ---------- Cloud lesen (automatisch beim Öffnen, für Admins UND Mitarbeiter) ----------
     function pullFromCloud() {
         var query = sb.from('plans')
@@ -146,23 +173,37 @@
                     return;
                 }
 
-                // Cloud ist neuer. Bei lokalen ungespeicherten Änderungen (nur Admins
-                // können welche haben) nachfragen.
-                if (isAdmin && isDirty() && localStorage.getItem(MARKER_KEY)) {
+                // Cloud unterscheidet sich vom zuletzt übernommenen Stand.
+                var cloudData = res.data.data || {};
+                var localSnap = collectSnapshot();
+                var localHasContent = snapshotHasContent(localSnap);
+                var neverSynced = !localStorage.getItem(MARKER_KEY);
+                var contentDiffers = !sameSnapshot(localSnap, cloudData);
+
+                // Würde lokaler Planinhalt überschrieben, wird er zuerst als
+                // Backup gesichert – auch wenn (z.B. nach der Standort-Migration)
+                // noch nie synchronisiert wurde und daher der Marker fehlt.
+                if (isAdmin && localHasContent && contentDiffers) {
+                    backupLocalPlan(neverSynced ? 'erste-cloud-sync' : 'cloud-abweichung');
+                }
+
+                // Nachfragen, bevor echter lokaler Planinhalt verworfen wird.
+                if (isAdmin && localHasContent && contentDiffers && (isDirty() || neverSynced)) {
                     var takeCloud = window.confirm(
-                        'In der Cloud liegt eine neuere Version dieses Plans ' +
-                        '(von einem anderen Admin oder Gerät gespeichert).\n\n' +
-                        'OK = Cloud-Version laden (Ihre lokalen, nicht gespeicherten Änderungen gehen verloren)\n' +
-                        'Abbrechen = lokale Version behalten (mit „Änderungen speichern" überschreiben Sie die Cloud-Version)'
+                        'Für „' + PLAN_LABEL + '" gibt es in der Cloud eine andere Version als lokal auf diesem Gerät.\n\n' +
+                        'OK = Cloud-Version laden. Ihr lokaler Stand wurde als Backup gesichert – Wiederherstellen mit\n' +
+                        '        window.orgaPlanBackups.list()  bzw.  window.orgaPlanBackups.restore("<key>")\n' +
+                        'Abbrechen = lokale Version behalten und mit „☁ Änderungen speichern" in die Cloud übernehmen.'
                     );
                     if (!takeCloud) {
+                        setDirty(true);
                         sessionStorage.removeItem(RELOAD_GUARD);
                         updateBadge();
                         return;
                     }
                 }
 
-                applySnapshot(res.data.data || {});
+                applySnapshot(cloudData);
                 localStorage.setItem(MARKER_KEY, res.data.updated_at);
                 setDirty(false);
 

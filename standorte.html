@@ -15,31 +15,36 @@
     <script src="js/security.js"></script>
     <script src="js/entitlements.js"></script>
     <style>
-        :root { --bg:#08080d; --panel:#15151d; --text:#f5f5f7; --muted:#a0a0aa; --border:rgba(255,255,255,.1); --accent:#007aff; --danger:#ff453a; }
+        :root { --bg:#08080d; --panel:#15151d; --text:#f5f5f7; --muted:#a0a0aa; --border:rgba(255,255,255,.1); --accent:#007aff; --danger:#ff453a; --field:#0d0d14; --field-alt:#24242e; --nav-bg:rgba(8,8,13,.82); --glow:#182348; }
+        body.light { --bg:#e8edf5; --panel:#ffffff; --text:#1a1a2e; --muted:#5a6376; --border:rgba(0,0,0,.12); --danger:#ff3b30; --field:#f4f6fa; --field-alt:#eceef3; --nav-bg:rgba(255,255,255,.82); --glow:#c9d6f0; }
         * { box-sizing:border-box; }
-        body { margin:0; min-height:100vh; font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(circle at 50% -20%,#182348 0,transparent 40%),var(--bg); color:var(--text); }
-        nav { border-bottom:1px solid var(--border); background:rgba(8,8,13,.82); backdrop-filter:blur(16px); }
+        body { margin:0; min-height:100vh; font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(circle at 50% -20%,var(--glow) 0,transparent 40%),var(--bg); color:var(--text); }
+        nav { border-bottom:1px solid var(--border); background:var(--nav-bg); backdrop-filter:blur(16px); }
+        .theme-toggle { background:transparent; border:1px solid var(--border); color:var(--text); font-size:16px; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s; flex-shrink:0; }
+        .theme-toggle:hover { background:var(--field-alt); }
+        .nav-right { display:flex; gap:10px; align-items:center; }
         .nav-container { max-width:1100px; margin:auto; min-height:64px; padding:0 24px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
         .logo { color:var(--text); text-decoration:none; font-size:21px; font-weight:700; }.logo span{color:var(--accent)}
         .nav-links { display:flex; gap:18px; list-style:none; margin:0; padding:0; }.nav-links a{color:var(--muted);text-decoration:none}.nav-links a:hover{color:var(--text)}
         main { max-width:960px; margin:0 auto; padding:54px 24px 80px; }
         h1 { font-size:clamp(30px,5vw,48px); margin:0 0 8px; } .lead{color:var(--muted);margin:0 0 32px}
-        .summary,.location-card { border:1px solid var(--border); border-radius:16px; background:rgba(21,21,29,.88); }
+        .summary,.location-card { border:1px solid var(--border); border-radius:16px; background:var(--panel); }
         .summary { padding:18px 20px; display:flex; justify-content:space-between; gap:16px; align-items:center; margin-bottom:18px; }
         .summary strong{display:block}.summary span{color:var(--muted)}
         form { display:flex; gap:10px; flex-wrap:wrap; }.add-form{margin:20px 0 26px}
-        input { min-width:180px; flex:1; color:var(--text); background:#0d0d14; border:1px solid var(--border); border-radius:10px; padding:11px 13px; font:inherit; }
-        button { border:0; border-radius:10px; padding:10px 15px; color:#fff; background:var(--accent); font:inherit; font-weight:600; cursor:pointer; }button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#30303a}.danger{background:transparent;color:var(--danger);border:1px solid rgba(255,69,58,.35)}
+        input { min-width:180px; flex:1; color:var(--text); background:var(--field); border:1px solid var(--border); border-radius:10px; padding:11px 13px; font:inherit; }
+        select { color:var(--text); background:var(--field); }
+        button { border:0; border-radius:10px; padding:10px 15px; color:#fff; background:var(--accent); font:inherit; font-weight:600; cursor:pointer; }button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:var(--field-alt);color:var(--text)}.danger{background:transparent;color:var(--danger);border:1px solid rgba(255,69,58,.35)}
         .location-card { padding:22px; margin-bottom:16px; }.location-head{display:flex;gap:12px;justify-content:space-between;align-items:flex-start}.location-head h2{margin:0;font-size:21px}.address{color:var(--muted);font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap}
         .departments,.staff { border-top:1px solid var(--border); margin-top:18px; padding-top:16px; }.departments h3,.staff h3{font-size:14px;margin:0 0 10px;color:var(--muted)}
-        .chips { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px }.chip{display:inline-flex;align-items:center;gap:7px;background:#24242e;border-radius:999px;padding:6px 10px}.chip button{padding:0;background:none;color:var(--muted)}
+        .chips { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px }.chip{display:inline-flex;align-items:center;gap:7px;background:var(--field-alt);border-radius:999px;padding:6px 10px}.chip button{padding:0;background:none;color:var(--muted)}
         .message{display:none;padding:12px 15px;border-radius:10px;margin-bottom:16px}.message.show{display:block}.message.error{background:rgba(255,69,58,.12);color:#ff8a83}.message.success{background:rgba(48,209,88,.12);color:#5ee47e}
-        .empty{color:var(--muted);text-align:center;padding:30px}.inactive{opacity:.58}.badge{font-size:11px;border-radius:999px;padding:3px 8px;background:#30303a;color:var(--muted)}
+        .empty{color:var(--muted);text-align:center;padding:30px}.inactive{opacity:.58}.badge{font-size:11px;border-radius:999px;padding:3px 8px;background:var(--field-alt);color:var(--muted)}
         @media(max-width:700px){.nav-links{display:none}.summary,.location-head{align-items:stretch;flex-direction:column}.actions button{flex:1}}
     </style>
 </head>
 <body>
-<nav><div class="nav-container"><a href="dashboardadmin.html" class="logo">Orga<span>Shift</span></a><ul class="nav-links"><li><a href="dashboardadmin.html">Dashboard</a></li><li><a href="wochenplan.html">Wochenplan</a></li><li><a href="monatsplan.html">Monatsplan</a></li><li><a href="urlaubALLE.html">Urlaub Übersicht</a></li><li><a href="personal.html">Personal</a></li><li><a href="pricing.html">Tarife</a></li></ul><button class="secondary" onclick="logout()">Abmelden</button></div></nav>
+<nav><div class="nav-container"><a href="dashboardadmin.html" class="logo">Orga<span>Shift</span></a><ul class="nav-links"><li><a href="dashboardadmin.html">Dashboard</a></li><li><a href="wochenplan.html">Wochenplan</a></li><li><a href="monatsplan.html">Monatsplan</a></li><li><a href="urlaubALLE.html">Urlaub Übersicht</a></li><li><a href="personal.html">Personal</a></li><li><a href="pricing.html">Tarife</a></li></ul><div class="nav-right"><button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button><button class="secondary" onclick="logout()">Abmelden</button></div></div></nav>
 <main>
     <h1>Standorte &amp; Abteilungen</h1>
     <p class="lead">Standorte gehören zu einer Organisation und damit zu einem gemeinsamen Abonnement. Abteilungen sind nicht gesondert begrenzt.</p>
@@ -62,6 +67,19 @@
         box.textContent = text; box.className = 'message show ' + (error ? 'error' : 'success');
     }
     async function logout(){ await sbClient.auth.signOut(); location.href='login.html?logout=1'; }
+
+    (function () {
+        const btn = document.getElementById('themeToggleBtn');
+        const body = document.body;
+        if (localStorage.getItem('orgashift_theme') === 'light') body.classList.add('light');
+        btn.textContent = body.classList.contains('light') ? '☀️' : '🌙';
+        btn.addEventListener('click', function () {
+            body.classList.toggle('light');
+            const isLight = body.classList.contains('light');
+            localStorage.setItem('orgashift_theme', isLight ? 'light' : 'dark');
+            btn.textContent = isLight ? '☀️' : '🌙';
+        });
+    })();
 
     function updateSummary() {
         const active = locations.filter(l => l.is_active).length;
@@ -88,7 +106,7 @@
                     const departmentLink = employeeDepartmentLinks.find(link => link.employee_id === employee.id && (location.departments || []).some(department => department.id === link.department_id));
                     return `<div class="chip" style="margin:0 8px 8px 0"><span>${esc(employee.name)}</span><select aria-label="Abteilung" onchange="setEmployeeDepartment('${employee.id}','${location.id}',this.value)" style="background:transparent;color:inherit;border:0"><option value="">Keine Abteilung</option>${(location.departments || []).map(department => `<option value="${department.id}" ${department.id === departmentLink?.department_id ? 'selected' : ''}>${esc(department.name)}</option>`).join('')}</select><button aria-label="Standortzuordnung entfernen" onclick="removeEmployeeFromLocation('${employee.id}','${location.id}')">×</button></div>`;
                 }).join('') || '<p class="address">Noch keine Mitarbeitenden zugeordnet.</p>'}</div>
-                ${location.is_active && unassigned.length ? `<form onsubmit="assignEmployee(event,'${location.id}')"><select required style="min-width:220px;padding:11px;border-radius:10px;background:#0d0d14;color:inherit;border:1px solid var(--border)"><option value="">Mitarbeitende auswählen…</option>${unassigned.map(employee => `<option value="${employee.id}">${esc(employee.name)}</option>`).join('')}</select><button type="submit">Zuordnen</button></form>` : ''}</div>
+                ${location.is_active && unassigned.length ? `<form onsubmit="assignEmployee(event,'${location.id}')"><select required style="min-width:220px;padding:11px;border-radius:10px;background:var(--field);color:inherit;border:1px solid var(--border)"><option value="">Mitarbeitende auswählen…</option>${unassigned.map(employee => `<option value="${employee.id}">${esc(employee.name)}</option>`).join('')}</select><button type="submit">Zuordnen</button></form>` : ''}</div>
             </article>`;
         }).join('');
     }

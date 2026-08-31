@@ -211,6 +211,18 @@
         #print-logo { display: none; max-height: 28px; }
         .header p { color: var(--color-text-muted); font-size: 0.9rem; }
 
+        /* ── STANDORT / ABTEILUNG: KONTEXT-HINWEIS ── */
+        .plan-context-bar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            margin: 2px 0 14px; padding: 8px 14px;
+            background: var(--color-surface, rgba(255,255,255,0.05));
+            border: 1px solid var(--color-border); border-radius: 10px;
+            font-size: 0.9rem; color: var(--color-text);
+        }
+        .plan-context-bar[hidden] { display: none; }
+        .plan-context-bar .pcb-sep { opacity: 0.45; }
+        .plan-context-bar strong { font-weight: 600; }
+
         /* ── DATE SELECTION ── */
         .date-selection {
             display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
@@ -512,6 +524,12 @@
             #print-header { display: none !important; }
             .header h1, .header p { display: none !important; }
             .date-selection { display: none !important; }
+            #planContextBar:not([hidden]) {
+                display: flex !important;
+                background: #fff !important; color: #000 !important;
+                border: 1px solid #bbb !important; margin: 0 0 10px !important;
+            }
+            #planContextBar:not([hidden]) strong { color: #000 !important; }
         }
 
         /* ── RESPONSIVE ── */
@@ -591,6 +609,13 @@
                     </div>
                     <p>Erstellen Sie Ihren Dienstplan einfach und effizient</p>
                 </div>
+
+                <div id="planContextBar" class="plan-context-bar" hidden>
+                    <span class="pcb-item">Standort: <strong id="pcbLocation">–</strong></span>
+                    <span class="pcb-sep" aria-hidden="true">·</span>
+                    <span class="pcb-item">Abteilung: <strong id="pcbDepartment">Alle Abteilungen</strong></span>
+                </div>
+
                 <div id="print-header"></div>
 
                 <div class="date-selection">
@@ -1082,7 +1107,17 @@
         if (!startDate || !endDate) { showCustomAlert('Bitte wählen Sie Start- und Enddatum aus.'); return; }
         if (employees.length === 0) { showCustomAlert('Bitte fügen Sie mindestens einen Mitarbeiter hinzu.'); return; }
 
-        const sortedEmployees = [...employees].sort((a, b) => {
+        // Abteilungsfilter (nur Ansicht): wenn eine Abteilung gewählt ist, werden
+        // beim Generieren nur deren Mitarbeitende platziert. Frei eingetippte
+        // Namen bleiben erhalten. Gespeicherte Plandaten werden nicht verändert.
+        const orgaDeptNames = (window.OrgaShiftDeptFilter && window.OrgaShiftDeptFilter.names) || null;
+        const orgaKnownNames = window.OrgaShiftLocation
+            ? new Set((window.OrgaShiftLocation.getState().allEmployeeNames) || []) : null;
+        const orgaBaseEmployees = orgaDeptNames
+            ? employees.filter(n => orgaDeptNames.has(n) || (orgaKnownNames && !orgaKnownNames.has(n)))
+            : employees;
+
+        const sortedEmployees = [...orgaBaseEmployees].sort((a, b) => {
             const aDr = a.toLowerCase().includes('dr.');
             const bDr = b.toLowerCase().includes('dr.');
             if (aDr && !bDr) return -1;
@@ -2063,5 +2098,35 @@
 <script src="js/location-employees.js"></script>
 <script src="js/cloud-plans.js"></script>
 <script src="js/branding.js" defer></script>
+<script>
+// Abteilungsfilter – nur Ansicht: blendet in der Seitenleiste Mitarbeitende aus,
+// die nicht zur aktiven Abteilung gehören. Ändert keine gespeicherten Plandaten;
+// frei eingetippte Namen bleiben immer sichtbar.
+(function () {
+    function apply() {
+        var list = document.getElementById('employeeList');
+        if (!list) return;
+        var filter = window.OrgaShiftDeptFilter && window.OrgaShiftDeptFilter.names;
+        var known = list._orgaKnownNames;
+        Array.prototype.forEach.call(list.querySelectorAll('.employee-tag'), function (tag) {
+            var name = tag.dataset.employee;
+            var isRealEmployee = known ? known.has(name) : true;
+            var hide = !!filter && isRealEmployee && !filter.has(name);
+            tag.style.display = hide ? 'none' : '';
+        });
+    }
+    function boot() {
+        var list = document.getElementById('employeeList');
+        if (!list || !window.OrgaShiftLocation) return;
+        window.OrgaShiftLocation.ready.then(function (state) {
+            list._orgaKnownNames = new Set((state && state.allEmployeeNames) || []);
+            apply();
+            new MutationObserver(apply).observe(list, { childList: true });
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+}());
+</script>
 </body>
 </html>

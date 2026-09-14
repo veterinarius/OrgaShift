@@ -224,7 +224,21 @@
         }
         .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #34C759; }
         #wochenplan-datum { font-size: 0.9rem; color: var(--color-text-muted); margin-top: 4px; }
+        .print-brand-row { display: flex; align-items: center; gap: 8px; }
+        #print-logo { display: none; max-height: 28px; }
         .header-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+        /* ── STANDORT / ABTEILUNG: KONTEXT-HINWEIS ── */
+        .plan-context-bar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            margin: 2px 0 14px; padding: 8px 14px;
+            background: var(--color-surface, rgba(255,255,255,0.05));
+            border: 1px solid var(--color-border); border-radius: 10px;
+            font-size: 0.9rem; color: var(--color-text);
+        }
+        .plan-context-bar[hidden] { display: none; }
+        .plan-context-bar .pcb-sep { opacity: 0.45; }
+        .plan-context-bar strong { font-weight: 600; }
 
         /* ── DATE INFO BAR ── */
         .date-info-bar {
@@ -366,12 +380,13 @@
         .empty-state p { max-width: 340px; margin: 0 auto; line-height: 1.6; }
 
         /* ── PRINT ── */
-        #print-header { display: none; }
         @media print {
             #beams-canvas, #beamsOverlay, nav, .header-actions, .date-info-bar,
-            .badge-readonly, .date-selection, .employee-sidebar { display: none !important; }
-            .page-wrap { padding-top: 0; max-width: 100%; }
+            .badge-readonly, .date-selection, .employee-sidebar,
+            #themeToggleBtn { display: none !important; }
             .layout-row { display: block; }
+            .content-column { width: 100%; }
+            .page-wrap { padding-top: 0; }
             body { background: white !important; color: #000 !important; }
             .schedule-container { box-shadow: none; border: 1px solid #ddd; background: white; }
             table th { background: #f5f5f7 !important; color: #000 !important; }
@@ -379,7 +394,13 @@
             .table-title { background: #eef2ff !important; color: #000 !important; border-color: #4a6cf7 !important; }
             .remarks-container { background: white; border-color: #ddd; }
             .remarks-textarea { background: white !important; color: #000 !important; border-color: #ddd !important; }
-            #print-header { display: block; font-weight: bold; margin-bottom: 8px; }
+            .header-top { display: none !important; }
+            #planContextBar:not([hidden]) {
+                display: flex !important;
+                background: #fff !important; color: #000 !important;
+                border: 1px solid #bbb !important; margin: 0 0 10px !important;
+            }
+            #planContextBar:not([hidden]) strong { color: #000 !important; }
         }
 
         /* ── RESPONSIVE ── */
@@ -432,10 +453,19 @@
             <h1 id="main-title">Dienstplan</h1>
             <span class="badge-readonly"><span class="badge-dot"></span>Nur-Lese-Ansicht</span>
         </div>
-        <div id="wochenplan-datum"></div>
+        <div class="print-brand-row">
+            <img id="print-logo" alt="Logo">
+            <div id="wochenplan-datum"></div>
+        </div>
         <div class="header-actions">
             <button class="btn btn-print" onclick="printSchedule()">🖨️ Drucken</button>
         </div>
+    </div>
+
+    <div id="planContextBar" class="plan-context-bar" hidden>
+        <span class="pcb-item">Standort: <strong id="pcbLocation">–</strong></span>
+        <span class="pcb-sep" aria-hidden="true">·</span>
+        <span class="pcb-item">Abteilung: <strong id="pcbDepartment">Alle Abteilungen</strong></span>
     </div>
 
     <div class="layout-row">
@@ -460,9 +490,6 @@
                 <span><strong>Zeitraum:</strong> <span id="date-range-text"></span></span>
                 <span><strong>Dauer:</strong> <span id="date-duration-text"></span></span>
             </div>
-
-            <!-- PRINT HEADER -->
-            <div id="print-header"></div>
 
             <!-- SCHEDULE -->
             <div class="schedule-container" id="schedule-container">
@@ -980,22 +1007,43 @@
     //  PRINT
     // ─────────────────────────────────────────
     function printSchedule() {
-        const header = document.getElementById('print-header');
-        const title  = document.getElementById('main-title').textContent || 'Dienstplan';
-        const datum  = document.getElementById('wochenplan-datum').textContent;
-        const logo = window.__orgBranding && window.__orgBranding.logoUrl
-            ? `<img src="${window.__orgBranding.logoUrl}" style="max-height:50px;display:block;margin:0 auto 6px;">` : '';
-        header.innerHTML = `${logo}<strong>${title}</strong>${datum ? '<br>' + datum : ''}`;
-        header.style.display = 'block';
+        const logo = document.getElementById('print-logo');
+        if (window.__orgBranding && window.__orgBranding.logoUrl) {
+            logo.src = window.__orgBranding.logoUrl;
+            logo.style.display = 'block';
+        }
         window.print();
-        setTimeout(() => { header.style.display = 'none'; }, 500);
+        setTimeout(() => { logo.style.display = 'none'; }, 500);
     }
 
     // ─────────────────────────────────────────
     //  LOGOUT
     // ─────────────────────────────────────────
-    function logout() {
-        window.location.href = 'login.html';
+    async function logout() {
+        try {
+            if (!window.sbClient) throw new Error('Auth client unavailable');
+            const { error } = await window.sbClient.auth.signOut();
+            if (error) throw error;
+        } catch (error) {
+            alert('Abmelden fehlgeschlagen. Bitte versuchen Sie es erneut.');
+            return;
+        }
+
+        // Aktive Plan-/Personalcaches entfernen; Design und lokale Backups behalten.
+        try {
+            const prefixes = ['dienstplan_', 'monatsplan_', 'shared_', 'cloud_'];
+            const keys = ['jahresplaner_data', 'orgashift_employees', 'orgashift_active_user'];
+            for (const storage of [localStorage, sessionStorage]) {
+                Object.keys(storage).forEach(key => {
+                    if (keys.includes(key) || prefixes.some(prefix => key.startsWith(prefix))) {
+                        storage.removeItem(key);
+                    }
+                });
+            }
+        } catch (error) {
+            alert('Sie sind abgemeldet. Lokale Plandaten konnten nicht vollständig entfernt werden. Bitte löschen Sie die Websitedaten in Ihrem Browser.');
+        }
+        window.location.replace('login.html?logout=1');
     }
 
     // ─────────────────────────────────────────

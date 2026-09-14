@@ -237,6 +237,48 @@
     </div>
 
     <div class="help-section">
+        <h2>Standorte &amp; Abteilungen</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Wie lege ich einen neuen Standort an?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Öffne <a href="standorte.html">Standorte &amp; Abteilungen</a> (im <a href="dashboardadmin.html">Dashboard</a> die Kachel „Standorte &amp; Abteilungen“ oder im Menü „Standorte“ – nur für Admins sichtbar). Trage oben unter „Name des neuen Standorts“ die Bezeichnung ein, optional eine Adresse, und klicke auf <code>Standort hinzufügen</code>. Beim Anlegen wird automatisch die Abteilung „Allgemein“ mit erstellt.<br><br>
+                    Die Zeile „X von Y gebuchten Standorten aktiv“ zeigt dein Kontingent. Free und Solo enthalten 1 Standort, Team 2 (max. 5), Business 4 (max. 20); zusätzliche Standorte sind kostenpflichtig und werden über <a href="pricing.html">Tarif verwalten</a> gebucht. Ist das Limit erreicht, ist der Button deaktiviert.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie lege ich Abteilungen an und ordne Mitarbeitende zu?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Jeder Standort hat auf <a href="standorte.html">Standorte &amp; Abteilungen</a> eine eigene Karte. Im Abschnitt „Abteilungen“ das Feld „Neue Abteilung“ ausfüllen und auf <code>Hinzufügen</code> klicken; über das <code>×</code> an einer Abteilung wird sie wieder entfernt. Mindestens eine Abteilung je Standort muss bestehen bleiben, die Anzahl ist ansonsten nicht begrenzt.<br><br>
+                    Im Abschnitt „Mitarbeitende“ derselben Karte über die Auswahl „Mitarbeitende auswählen…“ + <code>Zuordnen</code> Personen an den Standort hängen. Pro zugeordneter Person legst du im kleinen Dropdown die Abteilung fest („Keine Abteilung“ oder eine der Abteilungen dieses Standorts). Das <code>×</code> hebt die Standortzuordnung auf. Eine Person kann mehreren Standorten angehören, muss aber immer mindestens einem zugeordnet bleiben; die erste Zuordnung gilt als Hauptstandort.<br><br>
+                    Alternativ direkt beim Neuanlegen: Unter <a href="personal.html">Personal</a> gibt es im Formular „Neuen Mitarbeitenden hinzufügen“ die Felder „Standort“ und „Abteilung“.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie archiviere ich einen Standort?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Auf der Standort-Karte über <code>Archivieren</code>. Zugeordnete Daten und Pläne bleiben erhalten, der Standort zählt aber nicht mehr gegen dein Kontingent und verschwindet aus den Auswahllisten. Voraussetzung: Es muss mindestens ein aktiver Standort übrig bleiben, und jede dort zugeordnete Person muss zusätzlich einem anderen aktiven Standort angehören. Über <code>Reaktivieren</code> wird er – im Rahmen des Tariflimits – wieder aktiv.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie wähle ich im Wochen- und Monatsplan den Standort?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Sobald deine Organisation mindestens zwei aktive Standorte hat, erscheint oben rechts in der Navigationsleiste von <a href="wochenplan.html">Wochenplan</a> und <a href="monatsplan.html">Monatsplan</a> ein Dropdown „📍 Standortname“. Die Leiste „Standort: … · Abteilung: …“ über der Tabelle zeigt den aktiven Kontext an.<br><br>
+                    <strong>Jeder Standort hat einen komplett eigenen Wochen- und Monatsplan.</strong> Nach dem Umschalten lädt die Seite neu und zeigt nur noch die Mitarbeitenden dieses Standorts; die Seitenleiste wird automatisch mit den Standort-Zuordnungen abgeglichen (frei eingetippte Namen bleiben stehen). Die Auswahl wird pro Browser und Organisation gespeichert.<br><br>
+                    Gibt es für den aktuellen Standort noch nicht in die Cloud gespeicherte Planänderungen, erscheint vor dem Wechsel eine Warnung. Die lokalen Änderungen werden dann als Backup gesichert (Wiederherstellung über <code>window.orgaPlanBackups.list()</code> in der Browser-Konsole), aber nicht automatisch übernommen – speichere sie also vorher über „☁ Änderungen speichern“.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Wie wirkt der Abteilungsfilter im Wochen- und Monatsplan?<span class="toggle-icon">▾</span></div>
+                <div class="faq-answer">
+                    Hat der aktive Standort mindestens zwei Abteilungen, erscheint in der Navigationsleiste von <a href="wochenplan.html">Wochenplan</a> und <a href="monatsplan.html">Monatsplan</a> zusätzlich das Dropdown „🗂️ Alle Abteilungen / 🗂️ Abteilungsname“. Die Auswahl wird pro Browser, Organisation und Standort gespeichert; beim Umschalten lädt die Seite neu.<br><br>
+                    Der Filter wirkt <strong>rein visuell</strong>: Bei gewählter Abteilung werden in der Seitenleiste nur deren Mitarbeitende angezeigt, und beim automatischen „🗓 Dienstplan generieren“ werden auch nur diese Personen eingeplant. Bereits gespeicherte Zellen, Uhrzeiten und Zuweisungen werden dadurch nicht verändert oder gelöscht, und frei eingetippte Namen werden nie ausgeblendet. Mit „🗂️ Alle Abteilungen“ siehst du wieder den kompletten Standort.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-section">
         <h2>Dienstplanung</h2>
         <div class="faq-list">
             <div class="faq-item">

@@ -291,6 +291,10 @@
         .approve-btn { border-color: rgba(52,199,89,0.3); color: var(--color-success); }
         .approve-btn:hover { background: rgba(52,199,89,0.1); border-color: var(--color-success); }
         .empty-list { text-align: center; padding: 32px; color: var(--color-text-muted); font-size: 0.9rem; }
+        #pendingList .vacation-item { cursor: pointer; }
+        #pendingList .vacation-item:hover { background: rgba(255,255,255,0.06); }
+        body.light #pendingList .vacation-item:hover { background: rgba(0,0,0,0.04); }
+        .pending-emp-name { font-weight: 700; color: var(--color-text); }
 
         /* ── NO EMP MSG ── */
         #noEmpMsg { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.65); }
@@ -340,6 +344,14 @@
                 <option value="">-- Auswählen --</option>
             </select>
         </div>
+    </div>
+
+    <div id="pendingOverview" class="card" style="display:none; margin-bottom:24px;">
+        <h2 class="card-title">
+            <span aria-hidden="true">🔔</span>
+            <span id="pendingHeadline">Offene Urlaubsanträge</span>
+        </h2>
+        <div class="vacation-list" id="pendingList"></div>
     </div>
 
     <div class="stats-row" id="statsRow" style="display:none">
@@ -487,6 +499,8 @@
     let currentUserId = null;
     let employees = [];   // [{id, name, vacation_days_per_year}] – aus public.employees
     let vacations = [];   // Anträge des aktuell ausgewählten Mitarbeiters
+    let locationEmployeeIds = null;  // Mitarbeiter-IDs des aktiven Standorts (null = alle)
+    let pendingRequests = [];        // offene Anträge aller Mitarbeiter (Sammelübersicht)
 
     function countDays(from, to) {
         const f = new Date(from), t = new Date(to);
@@ -512,6 +526,7 @@
             const links = await sbClient.from('employee_locations').select('employee_id').eq('location_id', locationId);
             if (!links.error) employeeIds = (links.data || []).map(link => link.employee_id);
         }
+        locationEmployeeIds = employeeIds;
         let query = sbClient.from('employees').select('id, name, vacation_days_per_year').order('name');
         if (employeeIds) {
             if (!employeeIds.length) { employees = []; return; }
@@ -530,6 +545,63 @@
             .order('from_date', { ascending: false });
         if (error) { console.error('[urlaub] Anträge laden fehlgeschlagen:', error.message); vacations = []; return; }
         vacations = (data || []).map(v => ({ id: v.id, from: v.from_date, to: v.to_date, note: v.note, status: v.status }));
+    }
+
+    // Offene Anträge aller (standortbezogenen) Mitarbeiter – rein informativ.
+    // RLS beschränkt die Auswahl automatisch auf die eigene Organisation.
+    async function loadPendingOverview() {
+        let query = sbClient.from('vacations')
+            .select('id, employee_id, from_date, to_date, note, status')
+            .eq('status', 'pending')
+            .order('from_date', { ascending: true });
+        if (locationEmployeeIds) {
+            if (!locationEmployeeIds.length) { pendingRequests = []; return; }
+            query = query.in('employee_id', locationEmployeeIds);
+        }
+        const { data, error } = await query;
+        if (error) { console.error('[urlaub] Offene Anträge laden fehlgeschlagen:', error.message); pendingRequests = []; return; }
+        pendingRequests = data || [];
+    }
+
+    function renderPendingOverview() {
+        const box  = document.getElementById('pendingOverview');
+        const list = document.getElementById('pendingList');
+        const head = document.getElementById('pendingHeadline');
+        if (!pendingRequests.length) { box.style.display = 'none'; list.innerHTML = ''; return; }
+
+        box.style.display = 'block';
+        head.textContent = pendingRequests.length === 1
+            ? '1 offener Urlaubsantrag'
+            : `${pendingRequests.length} offene Urlaubsanträge`;
+
+        list.innerHTML = pendingRequests.map(v => {
+            const emp  = currentEmployee(v.employee_id);
+            const name = emp ? (emp.name || '(ohne Namen)') : '(unbekannt)';
+            const days = countDays(v.from_date, v.to_date);
+            return `<div class="vacation-item" data-emp="${v.employee_id}" role="button" tabindex="0">
+                <div class="status-dot status-pending" title="Ausstehend"></div>
+                <div class="vacation-info">
+                    <div class="pending-emp-name">${escHtml(name)}</div>
+                    <div class="vacation-dates">${formatDE(v.from_date)} – ${formatDE(v.to_date)}</div>
+                    <div class="vacation-days">${days} Arbeitstag${days !== 1 ? 'e' : ''}</div>
+                    ${v.note ? `<div class="vacation-note">${escHtml(v.note)}</div>` : ''}
+                    <span class="badge badge-pending">Ausstehend</span>
+                </div>
+            </div>`;
+        }).join('');
+
+        list.querySelectorAll('.vacation-item').forEach(item => {
+            const jump = () => {
+                const sel = document.getElementById('empSelect');
+                sel.value = item.dataset.emp;
+                sel.dispatchEvent(new Event('change'));
+                document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            item.addEventListener('click', jump);
+            item.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(); }
+            });
+        });
     }
 
     function updateStats(empId) {
@@ -625,6 +697,7 @@
         if (error) { alert('Genehmigen fehlgeschlagen: ' + error.message); return; }
         await loadVacations(empId);
         updateStats(empId); renderList();
+        await loadPendingOverview(); renderPendingOverview();
     }
 
     async function deleteVac(id) {
@@ -634,6 +707,7 @@
         const empId = getSelectedEmpId();
         await loadVacations(empId);
         updateStats(empId); renderList();
+        await loadPendingOverview(); renderPendingOverview();
     }
 
     function populateSelect() {
@@ -671,6 +745,8 @@
 
         await loadEmployees();
         populateSelect();
+        await loadPendingOverview();
+        renderPendingOverview();
         if (employees.length === 1) {
             document.getElementById('empSelect').value = employees[0].id;
             document.getElementById('empSelect').dispatchEvent(new Event('change'));

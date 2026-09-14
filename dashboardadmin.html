@@ -147,6 +147,14 @@
         .card:hover .card-arrow { color: var(--text-sec); }
         .card-arrow svg { transition: transform 0.2s; }
         .card:hover .card-arrow svg { transform: translateX(3px); }
+        .card-badge {
+            position: absolute; top: 14px; right: 14px;
+            min-width: 22px; height: 22px; padding: 0 6px;
+            border-radius: 11px; background: #FF9500; color: #fff;
+            font-size: 0.78rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(255,149,0,0.4);
+        }
 
         /* ACCOUNT CARD */
         .account-rows { display: flex; flex-direction: column; margin-top: 8px; }
@@ -325,6 +333,7 @@
         </a>
 
         <a href="urlaubMA.html" class="card">
+            <span id="pendingVacBadge" class="card-badge" hidden></span>
             <div class="card-icon" style="background:linear-gradient(135deg,rgba(52,199,89,.2),rgba(56,249,215,.14))">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
             </div>
@@ -635,6 +644,15 @@ async function loadAccountInfo(session) {
         .from('profiles').select('role, tier, organization_id, full_name, email')
         .eq('id', user.id).maybeSingle();
     if (!profile) return;
+
+    // Offene Urlaubsanträge als Badge auf der Kachel "Urlaubsanträge" anzeigen.
+    // RLS beschränkt die Zählung automatisch auf die eigene Organisation.
+    sbClient.from('vacations').select('id', { count: 'exact', head: true }).eq('status', 'pending')
+        .then(({ count, error }) => {
+            if (error) { console.error('Offene Urlaubsanträge laden fehlgeschlagen:', error.message); return; }
+            const badge = document.getElementById('pendingVacBadge');
+            if (badge && count > 0) { badge.textContent = count > 99 ? '99+' : count; badge.hidden = false; }
+        });
 
     // profiles.full_name/email werden nur beim Signup gesetzt (kein Sync-Trigger
     // fuer spaetere auth.users-Aenderungen) – hier mit dem echten Auth-Stand abgleichen.

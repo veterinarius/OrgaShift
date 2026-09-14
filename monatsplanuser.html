@@ -637,8 +637,31 @@
     // ─────────────────────────────────────────
     //  LOGOUT
     // ─────────────────────────────────────────
-    function logout() {
-        window.location.href = 'login.html';
+    async function logout() {
+        try {
+            if (!window.sbClient) throw new Error('Auth client unavailable');
+            const { error } = await window.sbClient.auth.signOut();
+            if (error) throw error;
+        } catch (error) {
+            alert('Abmelden fehlgeschlagen. Bitte versuchen Sie es erneut.');
+            return;
+        }
+
+        // Aktive Plan-/Personalcaches entfernen; Design und lokale Backups behalten.
+        try {
+            const prefixes = ['dienstplan_', 'monatsplan_', 'shared_', 'cloud_'];
+            const keys = ['jahresplaner_data', 'orgashift_employees', 'orgashift_active_user'];
+            for (const storage of [localStorage, sessionStorage]) {
+                Object.keys(storage).forEach(key => {
+                    if (keys.includes(key) || prefixes.some(prefix => key.startsWith(prefix))) {
+                        storage.removeItem(key);
+                    }
+                });
+            }
+        } catch (error) {
+            alert('Sie sind abgemeldet. Lokale Plandaten konnten nicht vollständig entfernt werden. Bitte löschen Sie die Websitedaten in Ihrem Browser.');
+        }
+        window.location.replace('login.html?logout=1');
     }
 
     // ─────────────────────────────────────────

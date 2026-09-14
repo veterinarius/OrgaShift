@@ -1,0 +1,106 @@
+.os-mobile-menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    font: inherit;
+    font-size: 1.45rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.os-mobile-menu-toggle:focus-visible {
+    outline: 3px solid #ff9500;
+    outline-offset: 2px;
+}
+
+.os-mobile-menu-actions {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    nav .nav-container {
+        position: relative;
+    }
+
+    nav .os-mobile-menu-toggle {
+        display: inline-flex;
+        margin-left: auto;
+    }
+
+    nav .nav-container > .nav-right,
+    nav .nav-container > .nav-buttons {
+        display: none !important;
+    }
+
+    nav .nav-container > .nav-links {
+        display: none !important;
+        position: absolute;
+        z-index: 1000;
+        top: calc(100% + 10px);
+        right: 16px;
+        left: 16px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        margin: 0;
+        padding: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 16px;
+        background: #151515;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    nav .nav-container.os-mobile-menu-open > .nav-links {
+        display: flex !important;
+    }
+
+    nav .nav-container > .nav-links li,
+    nav .nav-container > .nav-links a {
+        width: 100%;
+    }
+
+    nav .nav-container > .nav-links a {
+        display: block;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border-radius: 10px;
+    }
+
+    nav .nav-container > .nav-links a:hover,
+    nav .nav-container > .nav-links a:focus-visible {
+        background: rgba(255, 149, 0, 0.14);
+    }
+
+    nav .os-mobile-menu-actions {
+        display: block;
+        margin-top: 6px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    nav .os-mobile-menu-actions > div {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    nav .os-mobile-menu-actions a,
+    nav .os-mobile-menu-actions button {
+        width: auto;
+        min-height: 42px;
+    }
+
+    nav .os-mobile-menu-actions .signup-btn {
+        color: #111 !important;
+        text-align: center;
+    }
+}

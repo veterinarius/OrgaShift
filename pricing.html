@@ -8,7 +8,8 @@
     <script>
         const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
-        const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+        const sbClient = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
+        window.sbClient = sbClient;
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -521,8 +522,8 @@
         <div class="footer-section">
             <h4>Rechtliches</h4>
             <ul>
-                <li><a href="#"></a></li>
-                <li><a href="#">AGB</a></li>
+                <li><a href="datenschutz.html">Datenschutz</a></li>
+                <li><a href="agb.html">AGB</a></li>
                 <li><a href="impressum.html">Impressum</a></li>
             </ul>
         </div>

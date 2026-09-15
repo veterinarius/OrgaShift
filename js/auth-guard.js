@@ -8,6 +8,7 @@
     var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
     var client = window.sbClient || (window.supabase && window.supabase.createClient(SUPA_URL, SUPA_KEY));
     if (!client) return;
+    window.sbClient = client;
 
     var path = window.location.pathname.toLowerCase();
     var adminPage = /(?:dashboardadmin|analytics|personal|wochenplan|monatsplan|urlauballe|urlaubma|hilfeadmin)\.html$/.test(path);

@@ -438,8 +438,11 @@
         <a href="dashboarduser.html" class="logo">Orga<span class="logo-dot">Shift</span></a>
         <ul class="nav-links">
             <li><a href="dashboarduser.html">Dashboard</a></li>
+            <li><a href="wochenplanuser.html">Wochenplan</a></li>
+            <li><a href="monatsplanuser.html">Monatsplan</a></li>
             <li><a href="urlaubUSER.html">Mein Urlaub</a></li>
-            <li><a href="#">Kontakt</a></li>
+            <li><a href="hilfeuser.html">Hilfe</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
         </ul>
         <div class="nav-right">
             <button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button>
@@ -790,7 +793,13 @@
 
             // Head
             const thead = document.createElement('thead');
-            thead.innerHTML = `<tr><th>lfd. Nr. / Zeit</th>${dayNames.map(d => `<th>${d}</th>`).join('')}</tr>`;
+            const headingRow = document.createElement('tr');
+            ['lfd. Nr. / Zeit', ...dayNames].forEach(label => {
+                const th = document.createElement('th');
+                th.textContent = label;
+                headingRow.appendChild(th);
+            });
+            thead.appendChild(headingRow);
             table.appendChild(thead);
 
             // Body

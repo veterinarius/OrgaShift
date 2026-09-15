@@ -8,7 +8,8 @@
     <script>
         const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
-        const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+        const sbClient = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
+        window.sbClient = sbClient;
     </script>
     <style>
         :root {
@@ -613,8 +614,8 @@
                 <div class="checkbox-row">
                     <input type="checkbox" id="termsConsent" name="termsConsent" required>
                     <label for="termsConsent">
-                        Ich stimme den <a href="#" target="_blank">Nutzungsbedingungen</a>
-                        und der <a href="#" target="_blank">Datenschutzrichtlinie</a> zu *
+                        Ich stimme den <a href="agb.html" target="_blank" rel="noopener">Nutzungsbedingungen</a>
+                        und der <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzrichtlinie</a> zu *
                     </label>
                 </div>
                 <div class="error-text" id="termsConsentError"></div>

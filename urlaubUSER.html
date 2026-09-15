@@ -8,7 +8,8 @@
     <script>
         const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
-        const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+        const sbClient = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
+        window.sbClient = sbClient;
 </script>
 <script src="js/auth-guard.js"></script>
 <script src="js/location-context.js"></script>
@@ -133,6 +134,13 @@
             transition: all 0.2s; flex-shrink: 0;
         }
         .theme-toggle:hover { background: rgba(255,255,255,0.12); }
+        .btn-logout {
+            background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.25);
+            color: #ff3b30; padding: 7px 14px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,59,48,0.22); border-color: rgba(255,59,48,0.4); }
 
         /* ── PAGE WRAP ── */
         .page-wrap {
@@ -322,9 +330,14 @@
         <ul class="nav-links">
             <li><a href="dashboarduser.html">Dashboard</a></li>
             <li><a href="wochenplanuser.html">Wochenplan</a></li>
+            <li><a href="monatsplanuser.html">Monatsplan</a></li>
+            <li><a href="urlaubUSER.html">Mein Urlaub</a></li>
+            <li><a href="hilfeuser.html">Hilfe</a></li>
+            <li><a href="kontakt.html">Kontakt</a></li>
         </ul>
         <div class="nav-right">
             <button class="theme-toggle" id="themeToggleBtn" title="Design wechseln">🌙</button>
+            <button class="btn-logout" onclick="logout()">Abmelden</button>
         </div>
     </div>
 </nav>
@@ -414,6 +427,15 @@
 
 <script src="js/vacation-conflicts.js"></script>
 <script>
+    async function logout() {
+        const { error } = await sbClient.auth.signOut();
+        if (error) {
+            alert('Abmelden fehlgeschlagen. Bitte versuchen Sie es erneut.');
+            return;
+        }
+        window.location.replace('login.html?logout=1');
+    }
+
     // ─────────────────────────────────────────
     //  BEAMS BACKGROUND
     // ─────────────────────────────────────────

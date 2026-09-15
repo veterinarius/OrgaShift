@@ -407,6 +407,7 @@
             .back-link { top: 24px; left: 24px; }
         }
     </style>
+    <script src="js/login-redirect.js"></script>
 </head>
 <body>
     <canvas id="beamsCanvas" aria-hidden="true"></canvas>
@@ -698,6 +699,8 @@
                 return;
             }
 
+            const postLoginDestination = OrgaShiftRedirect.fromSearch(profile.role, window.location.search);
+
             if (profile.role !== 'admin') {
                 const { data: emp } = await sbClient
                     .from('employees')
@@ -706,13 +709,13 @@
                     .maybeSingle();
 
                 if (emp && emp.must_change_password) {
-                    sessionStorage.setItem('orgashift_post_pw_redirect', 'dashboarduser.html');
+                    sessionStorage.setItem('orgashift_post_pw_redirect', postLoginDestination);
                     window.location.href = 'set-password.html';
                     return;
                 }
             }
 
-            window.location.href = profile.role === 'admin' ? 'dashboardadmin.html' : 'dashboarduser.html';
+            window.location.href = postLoginDestination;
         }
     });
 
@@ -750,7 +753,8 @@
   <script>
   const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
-  const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+  const sbClient = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
+  window.sbClient = sbClient;
 
   const isLogout = new URLSearchParams(window.location.search).get('logout');
   if (!isLogout) {
@@ -763,7 +767,7 @@
           .eq('id', session.user.id)
           .single();
         const role = profile?.role ?? 'user';
-        window.location.href = role === 'admin' ? 'dashboardadmin.html' : 'dashboarduser.html';
+        window.location.href = OrgaShiftRedirect.fromSearch(role, window.location.search);
       }
     });
   }

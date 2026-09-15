@@ -8,7 +8,8 @@
     <script>
         const SUPA_URL = 'https://porfotcajsrjlilliwnx.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvcmZvdGNhanNyamxpbGxpd254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzkyMDQsImV4cCI6MjA5Njc1NTIwNH0.XdzS6sfUAzk4BK89QNhgyW3dLDdWrJyxCzcod514fCo';
-        const sbClient = supabase.createClient(SUPA_URL, SUPA_KEY);
+        const sbClient = window.sbClient || supabase.createClient(SUPA_URL, SUPA_KEY);
+        window.sbClient = sbClient;
 </script>
 <script src="js/auth-guard.js"></script>
 <script src="js/employee-model.js"></script>
@@ -556,6 +557,8 @@
             font-size: 11px; font-weight: 600;
         }
     </style>
+    <link rel="stylesheet" href="css/admin-nav.css">
+    <script src="js/admin-nav.js" defer></script>
     <link rel="stylesheet" href="css/mobile-nav.css">
     <script src="js/mobile-nav.js" defer></script>
 </head>

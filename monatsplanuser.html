@@ -291,7 +291,9 @@
         <ul class="nav-links">
             <li><a href="dashboarduser.html">Dashboard</a></li>
             <li><a href="wochenplanuser.html">Wochenplan</a></li>
+            <li><a href="monatsplanuser.html">Monatsplan</a></li>
             <li><a href="urlaubUSER.html">Mein Urlaub</a></li>
+            <li><a href="hilfeuser.html">Hilfe</a></li>
             <li><a href="kontakt.html">Kontakt</a></li>
         </ul>
         <div class="nav-right">
@@ -525,23 +527,28 @@
             const table = document.createElement('table');
             const rows  = tableData[shift] || [];
 
-            // Month header row
+            const tHead = document.createElement('thead');
+            // Build all headings as text; cloud plan labels are untrusted.
             if (selectMonth) {
                 const [year, month] = selectMonth.split('-').map(Number);
                 const date = new Date(year, month - 1, 1);
                 const monthName = date.toLocaleString('de-DE', { month: 'long', year: 'numeric' });
-                const monthNameCap = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                const tHead = document.createElement('thead');
-                tHead.innerHTML = `
-                    <tr><th colspan="${dayNames.length + 1}" style="font-size:1em;font-weight:bold;text-align:center;background:rgba(0,122,255,0.1);color:var(--color-text);">${monthNameCap}</th></tr>
-                    <tr><th>lfd. Nr. / Datum</th>${dayNames.map(d => `<th>${d}</th>`).join('')}</tr>
-                `;
-                table.appendChild(tHead);
-            } else {
-                const tHead = document.createElement('thead');
-                tHead.innerHTML = `<tr><th>lfd. Nr. / Datum</th>${dayNames.map(d => `<th>${d}</th>`).join('')}</tr>`;
-                table.appendChild(tHead);
+                const monthRow = document.createElement('tr');
+                const monthCell = document.createElement('th');
+                monthCell.colSpan = dayNames.length + 1;
+                monthCell.style.cssText = 'font-size:1em;font-weight:bold;text-align:center;background:rgba(0,122,255,0.1);color:var(--color-text);';
+                monthCell.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                monthRow.appendChild(monthCell);
+                tHead.appendChild(monthRow);
             }
+            const headingRow = document.createElement('tr');
+            ['lfd. Nr. / Datum', ...dayNames].forEach(label => {
+                const th = document.createElement('th');
+                th.textContent = label;
+                headingRow.appendChild(th);
+            });
+            tHead.appendChild(headingRow);
+            table.appendChild(tHead);
 
             // Body
             const tbody = document.createElement('tbody');
@@ -628,9 +635,27 @@
         const header = document.getElementById('print-header');
         const title  = document.getElementById('main-title').textContent || 'Monatsplan';
         const datum  = document.getElementById('wochenplan-datum').textContent;
-        const logo = window.__orgBranding && window.__orgBranding.logoUrl
-            ? `<img src="${window.__orgBranding.logoUrl}" style="max-height:50px;display:block;margin:0 auto 6px;">` : '';
-        header.innerHTML = `${logo}<strong>${title}</strong>${datum ? '<br>' + datum : ''}`;
+        header.replaceChildren();
+        const logoUrl = window.__orgBranding?.logoUrl;
+        if (logoUrl) {
+            try {
+                const url = new URL(logoUrl, window.location.href);
+                if (url.protocol === 'https:' || url.protocol === 'http:') {
+                    const logo = document.createElement('img');
+                    logo.src = url.href;
+                    logo.alt = 'Organisationslogo';
+                    logo.style.cssText = 'max-height:50px;display:block;margin:0 auto 6px;';
+                    header.appendChild(logo);
+                }
+            } catch (_) { /* Invalid logo URLs are omitted. */ }
+        }
+        const titleElement = document.createElement('strong');
+        titleElement.textContent = title;
+        header.appendChild(titleElement);
+        if (datum) {
+            header.appendChild(document.createElement('br'));
+            header.appendChild(document.createTextNode(datum));
+        }
         header.style.display = 'block';
         window.print();
         setTimeout(() => { header.style.display = 'none'; }, 500);
